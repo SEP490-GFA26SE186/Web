@@ -1,4 +1,6 @@
 import { Clock, Headphones, Play } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ROUTES } from "../../../constants/routes";
 import StoryCover from "../StoryCover";
 import TopicTag from "./TopicTag";
 
@@ -64,11 +66,12 @@ function ContinueReadingItem({ story, accent = "primary" }) {
             <span className="flex items-center gap-1 text-xs text-navy/60">
               <Clock size={13} /> Còn {story.minutesLeft} phút
             </span>
-            <button
+            <Link
+              to={ROUTES.KID.story(story.id)}
               className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-bold text-white shadow-low transition hover:-translate-y-0.5 hover:shadow-mid ${a.button}`}
             >
               Đọc tiếp <Play size={14} className="fill-white" />
-            </button>
+            </Link>
           </div>
         </div>
       </div>

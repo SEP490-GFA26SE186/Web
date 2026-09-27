@@ -1,4 +1,6 @@
 import { BookOpen, Clock, Handshake, Headphones } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ROUTES } from "../../constants/routes";
 import StoryCover from "./StoryCover";
 
 function ContinueReadingCard({ story }) {
@@ -56,9 +58,9 @@ function ContinueReadingCard({ story }) {
           </div>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            <button className="btn-primary text-lg">
+            <Link to={ROUTES.KID.story(story.storyId)} className="btn-primary text-lg">
               <BookOpen size={20} /> Đọc tiếp cùng bé
-            </button>
+            </Link>
             <button className="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-3 font-bold transition hover:bg-outline">
               <Headphones size={18} className="text-secondary" /> Nghe audio trước khi ngủ
             </button>

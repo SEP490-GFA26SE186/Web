@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import logo from "../../assets/logo.png";
 import { ROUTES } from "../../constants/routes";
+import LogoutButton from "../common/LogoutButton";
 import { useParentProfile } from "../../hooks/useParent";
 
 const mainNav = [
@@ -99,10 +100,11 @@ function ParentSidebar({ open, onClose }) {
           {parent && (
             <div className="mt-3 flex items-center gap-3 rounded-2xl bg-surface p-3">
               <img src={parent.avatar} alt="" className="h-9 w-9 rounded-full object-cover" />
-              <div className="leading-tight">
-                <p className="text-sm font-bold">{parent.name}</p>
-                <p className="text-xs font-bold text-secondary">{parent.plan} ✨</p>
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="truncate text-sm font-bold">{parent.name}</p>
+                <p className="truncate text-xs font-bold text-secondary">{parent.plan} ✨</p>
               </div>
+              <LogoutButton />
             </div>
           )}
         </div>
