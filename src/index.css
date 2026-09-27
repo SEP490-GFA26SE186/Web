@@ -14,6 +14,12 @@
   --color-secondary-tint: #e6f7f5;
   --color-navy: #1e293b;
   --color-navy-soft: #545f73;
+  --color-navy-tint: #e8edf7;
+
+  /* Trạng thái nguy hiểm (báo cáo, từ chối, lỗi) */
+  --color-danger: #ba1a1a;
+  --color-danger-dark: #93000a;
+  --color-danger-tint: #ffdad6;
 
   /* Surfaces */
   --color-canvas: #fffdf9;
@@ -61,5 +67,19 @@
   }
   .tag-theme {
     @apply inline-flex items-center gap-1 rounded-full bg-primary-tint px-3 py-1 text-xs font-bold text-primary-dark;
+  }
+}
+
+/* Lắc nhẹ để nhắc bé (chưa chọn lựa chọn, nhập sai PIN) */
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
   }
 }
