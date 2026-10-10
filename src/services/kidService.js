@@ -7,7 +7,7 @@ const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 
 const progressDb = structuredClone(mockKidProgress);
 const getProgress = (storyId) =>
-  (progressDb[storyId] ??= { currentPage: 1, choices: {}, starsEarned: 0, completed: false });
+  (progressDb[storyId] ??= { currentPage: 1, choices: {}, completed: false });
 
 export const getKidStory = async (storyId) => {
   if (USE_MOCK) {
@@ -34,11 +34,9 @@ export const submitStoryChoice = async (storyId, pageNumber, choice) => {
   if (USE_MOCK) {
     await delay(350);
     const p = getProgress(storyId);
-    if (!p.choices[pageNumber]) {
-      p.choices[pageNumber] = choice.id;
-      p.starsEarned += choice.stars;
-    }
-    return { starsAwarded: choice.stars, skill: choice.skill };
+    // Chỉ lần chọn đầu được ghi nhận (BE chấm EQ theo lần chọn đầu của lần chơi đầu)
+    p.choices[pageNumber] ??= choice.id;
+    return { choiceId: p.choices[pageNumber] };
   }
   // const { data } = await api.post(`/kid/stories/${storyId}/choices`, { pageNumber, choiceId: choice.id });
   // return data;
@@ -49,7 +47,7 @@ export const completeStory = async (storyId) => {
     await delay(400);
     const p = getProgress(storyId);
     p.completed = true;
-    return { storyId, starsEarned: p.starsEarned };
+    return { storyId, completed: true };
   }
   // const { data } = await api.post(`/kid/stories/${storyId}/complete`);
   // return data;

@@ -1,23 +1,21 @@
 import { useState } from "react";
 import { ChevronRight, LayoutGrid, List, Loader2, SearchX } from "lucide-react";
 import Pagination from "../../components/common/Pagination";
+import NoChildState from "../../components/parent/NoChildState";
 import ContinueReadingItem from "../../components/parent/library/ContinueReadingItem";
 import LibraryHero from "../../components/parent/library/LibraryHero";
 import LibraryStoryCard from "../../components/parent/library/LibraryStoryCard";
 import LibraryStoryRow from "../../components/parent/library/LibraryStoryRow";
+import { useChildBookshelf, useSelectedChild } from "../../hooks/useChildProfile";
 import useDebounce from "../../hooks/useDebounce";
-import { useLibraryStories, useLibrarySummary, useToggleFavorite } from "../../hooks/useLibrary";
-import { useChildren } from "../../hooks/useParent";
-import useParentStore from "../../stores/parentStore";
 
 const PAGE_SIZE = 6;
-const DEFAULT_FILTERS = { age: "all", duration: "all", topic: "all", sort: "recent" };
 
 function GridSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: PAGE_SIZE }).map((_, i) => (
-        <div key={i} className="h-[420px] animate-pulse rounded-card bg-surface" />
+        <div key={i} className="h-[380px] animate-pulse rounded-card bg-surface" />
       ))}
     </div>
   );
@@ -25,41 +23,29 @@ function GridSkeleton() {
 
 function LibraryContent({ childId, childName }) {
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [competency, setCompetency] = useState("all");
   const [tab, setTab] = useState("all");
   const [page, setPage] = useState(1);
   const [view, setView] = useState("grid");
   const debouncedSearch = useDebounce(search);
 
-  const { data: summary } = useLibrarySummary(childId);
-  const { data, isLoading, isFetching, isError, refetch } = useLibraryStories(childId, {
+  // GET /children/:id/bookshelf
+  const { data, isLoading, isFetching, isError, refetch } = useChildBookshelf(childId, {
     search: debouncedSearch,
-    ...filters,
-    tab,
+    competency,
+    status: tab,
     page,
-    pageSize: PAGE_SIZE,
+    limit: PAGE_SIZE,
   });
-  const toggleFavorite = useToggleFavorite(childId);
-
-  const handleToggleFavorite = (story) =>
-    toggleFavorite.mutate({ storyId: story.id, isFavorite: !story.isFavorite });
 
   // Mọi thay đổi bộ lọc đều quay về trang 1
-  const handleSearch = (value) => {
-    setSearch(value);
-    setPage(1);
-  };
-  const handleFilter = (key, value) => {
-    setFilters((f) => ({ ...f, [key]: value }));
-    setPage(1);
-  };
-  const handleTab = (value) => {
-    setTab(value);
+  const withReset = (setter) => (value) => {
+    setter(value);
     setPage(1);
   };
   const resetAll = () => {
     setSearch("");
-    setFilters(DEFAULT_FILTERS);
+    setCompetency("all");
     setTab("all");
     setPage(1);
   };
@@ -68,19 +54,19 @@ function LibraryContent({ childId, childName }) {
     document.getElementById("library-collection")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const continueReading = summary?.continueReading ?? [];
+  const continueReading = data?.continueReading ?? [];
 
   return (
     <div className="space-y-10">
       <LibraryHero
         childName={childName}
-        counts={summary?.counts}
+        counts={data?.counts}
         search={search}
-        onSearchChange={handleSearch}
-        filters={filters}
-        onFilterChange={handleFilter}
+        onSearchChange={withReset(setSearch)}
+        competency={competency}
+        onCompetencyChange={withReset(setCompetency)}
         tab={tab}
-        onTabChange={handleTab}
+        onTabChange={withReset(setTab)}
       />
 
       {continueReading.length > 0 && (
@@ -88,7 +74,7 @@ function LibraryContent({ childId, childName }) {
           <div className="mb-4 flex items-center justify-between gap-2">
             <h2 className="text-2xl">Tiếp tục đọc dở 📖</h2>
             <button
-              onClick={() => handleTab("reading")}
+              onClick={() => withReset(setTab)("reading")}
               className="inline-flex items-center gap-0.5 text-sm font-semibold text-secondary-dark hover:underline"
             >
               Xem tất cả đang đọc <ChevronRight size={16} />
@@ -96,7 +82,7 @@ function LibraryContent({ childId, childName }) {
           </div>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {continueReading.slice(0, 2).map((story, i) => (
-              <ContinueReadingItem key={story.id} story={story} accent={i % 2 ? "secondary" : "primary"} />
+              <ContinueReadingItem key={story.storyId} story={story} accent={i % 2 ? "secondary" : "primary"} />
             ))}
           </div>
         </section>
@@ -105,9 +91,9 @@ function LibraryContent({ childId, childName }) {
       <section id="library-collection" className="scroll-mt-24">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl">Bộ sưu tập truyện tương tác</h2>
+            <h2 className="text-2xl">Truyện trên giá sách</h2>
             <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-bold text-navy/70">
-              {data?.total ?? "…"} Truyện
+              {data?.pagination.total ?? "…"} Truyện
             </span>
             {isFetching && !isLoading && <Loader2 size={16} className="animate-spin text-primary" />}
           </div>
@@ -144,7 +130,7 @@ function LibraryContent({ childId, childName }) {
         ) : data.items.length === 0 ? (
           <div className="card flex flex-col items-center gap-2 p-10 text-center">
             <SearchX size={40} className="text-primary" />
-            <p className="font-display text-lg font-bold">Chưa tìm thấy câu chuyện phù hợp</p>
+            <p className="font-display text-lg font-bold">Chưa có truyện phù hợp</p>
             <p className="text-sm text-navy/60">Thử đổi từ khóa hoặc bỏ bớt bộ lọc ba mẹ nhé.</p>
             <button onClick={resetAll} className="btn-ghost mt-3 py-2 text-sm">
               Xóa bộ lọc
@@ -155,26 +141,26 @@ function LibraryContent({ childId, childName }) {
             {view === "grid" ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {data.items.map((story) => (
-                  <LibraryStoryCard key={story.id} story={story} onToggleFavorite={handleToggleFavorite} />
+                  <LibraryStoryCard key={story.storyId} story={story} />
                 ))}
               </div>
             ) : (
               <div className="flex flex-col gap-3">
                 {data.items.map((story) => (
-                  <LibraryStoryRow key={story.id} story={story} onToggleFavorite={handleToggleFavorite} />
+                  <LibraryStoryRow key={story.storyId} story={story} />
                 ))}
               </div>
             )}
           </div>
         )}
 
-        {data && data.total > 0 && (
+        {data && data.pagination.total > 0 && (
           <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-outline py-4 sm:flex-row">
             <span className="text-sm text-navy/70">
               Hiển thị <strong className="text-navy">{data.items.length}</strong> trên tổng số{" "}
-              <strong className="text-navy">{data.total}</strong> truyện tương tác
+              <strong className="text-navy">{data.pagination.total}</strong> truyện
             </span>
-            <Pagination page={data.page} totalPages={data.totalPages} onChange={handlePage} />
+            <Pagination page={data.pagination.page} totalPages={data.pagination.totalPages} onChange={handlePage} />
           </div>
         )}
       </section>
@@ -183,10 +169,9 @@ function LibraryContent({ childId, childName }) {
 }
 
 function LibraryPage() {
-  const selectedChildId = useParentStore((s) => s.selectedChildId);
-  const { data: children = [] } = useChildren();
-  const child = children.find((c) => c.id === selectedChildId);
+  const { child, isEmpty } = useSelectedChild();
 
+  if (isEmpty) return <NoChildState />;
   if (!child) return <div className="h-64 animate-pulse rounded-stage bg-surface" />;
 
   // key theo bé để reset bộ lọc/trang khi đổi hồ sơ

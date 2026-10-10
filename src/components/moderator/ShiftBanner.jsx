@@ -72,8 +72,8 @@ function ShiftBanner({ shift, onStart, canStart }) {
         <button onClick={onStart} disabled={!canStart} className="btn-primary py-2.5 disabled:opacity-50">
           <PlayCircle size={20} className="fill-white/25" /> Bắt đầu duyệt ca trực
         </button>
-        <Link to={ROUTES.MODERATOR.CASEL} className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-sm font-semibold shadow-low transition hover:bg-canvas">
-          <ShieldCheck size={17} /> Xem quy chuẩn CASEL
+        <Link to={ROUTES.MODERATOR.GUIDELINES} className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-sm font-semibold shadow-low transition hover:bg-canvas">
+          <ShieldCheck size={17} /> Xem quy chuẩn kiểm duyệt
         </Link>
         <button
           onClick={() => setIncidentOpen(true)}

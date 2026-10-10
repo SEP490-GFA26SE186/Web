@@ -2,17 +2,20 @@ import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import HomePage from "../pages/home/HomePage";
 import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
 import ProtectedRoute from "./ProtectedRoute";
 import { ROLES } from "../constants/roles";
 import ParentLayout from "../layouts/ParentLayout";
 import ParentDashboardPage from "../pages/parent/ParentDashboardPage";
 import ComingSoonPage from "../pages/parent/ComingSoonPage";
 import LibraryPage from "../pages/parent/LibraryPage";
-import ExplorePage from "../pages/parent/ExplorePage";
+import MarketplacePage from "../pages/parent/MarketplacePage";
+import SettingsPage from "../pages/parent/SettingsPage";
 import ChildrenPage from "../pages/parent/ChildrenPage";
 
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
 const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
+const TopicsPage = lazy(() => import("../pages/moderator/TopicsPage"));
 const ModeratorDashboardPage = lazy(
   () => import("../pages/moderator/ModeratorDashboardPage"),
 );
@@ -49,17 +52,14 @@ function PageLoader() {
 const parentPlaceholders = [
   { path: "family-characters", title: "Nhân vật gia đình" },
   { path: "studio", title: "Sáng tác truyện" },
-  { path: "eq-journey", title: "Hành trình EQ" },
-  { path: "marketplace", title: "Chợ truyện" },
-  { path: "billing", title: "Gói & AI Credits" },
+  { path: "eq-journey", title: "Báo cáo EQ" },
+  { path: "billing", title: "Gói dịch vụ & Credit" },
   { path: "help", title: "Trợ giúp" },
-  { path: "settings", title: "Cài đặt" },
 ];
 
 const moderatorPlaceholders = [
   { path: "seller-applications", title: "Duyệt đơn Seller" },
   { path: "queue", title: "Hàng chờ duyệt truyện" },
-  { path: "casel", title: "Khung sư phạm CASEL" },
   { path: "backgrounds", title: "Thư viện bối cảnh" },
   { path: "reports", title: "Báo cáo vi phạm" },
   { path: "suspended", title: "Truyện tạm đình chỉ" },
@@ -84,7 +84,6 @@ const adminPlaceholders = [
 
 const kidPlaceholders = [
   { path: "bookshelf", title: "Tủ Sách Bé Ngoan" },
-  { path: "trophies", title: "Góc Huy Hiệu" },
 ];
 
 const publicPlaceholders = [
@@ -92,7 +91,6 @@ const publicPlaceholders = [
   { path: "/dieu-khoan-dich-vu", title: "Điều khoản dịch vụ" },
   { path: "/goc-chuyen-gia", title: "Góc chuyên gia EQ" },
   { path: "/huong-dan-phu-huynh", title: "Hướng dẫn phụ huynh" },
-  { path: "/register", title: "Đăng ký tài khoản" },
 ];
 
 const placeholderRoutes = (items) =>
@@ -106,6 +104,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         <Route
           path="/parent"
@@ -117,7 +116,8 @@ function AppRoutes() {
         >
           <Route index element={<ParentDashboardPage />} />
           <Route path="library" element={<LibraryPage />} />
-          <Route path="explore" element={<ExplorePage />} />
+          <Route path="marketplace" element={<MarketplacePage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="children" element={<ChildrenPage />} />
           {placeholderRoutes(parentPlaceholders)}
         </Route>
@@ -131,6 +131,7 @@ function AppRoutes() {
           }
         >
           <Route index element={<ModeratorDashboardPage />} />
+          <Route path="topics" element={<TopicsPage />} />
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
           {placeholderRoutes(moderatorPlaceholders)}

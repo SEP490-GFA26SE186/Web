@@ -20,7 +20,6 @@ export const useSubmitChoice = (storyId) => {
               progress: {
                 ...old.progress,
                 choices: { ...old.progress.choices, [pageNumber]: choice.id },
-                starsEarned: old.progress.starsEarned + choice.stars,
               },
             }
           : old,

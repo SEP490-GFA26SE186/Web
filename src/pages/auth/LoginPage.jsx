@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, AtSign, Eye, EyeOff, Loader2, Lock, ShieldCheck } from "lucide-react";
@@ -9,11 +9,6 @@ import { ROUTES } from "../../constants/routes";
 import { isValidIdentity, login } from "../../services/authService";
 import useAuthStore from "../../stores/authStore";
 import { toast } from "../../stores/toastStore";
-
-const MIN_PASSWORD = 6;
-
-// Khung tài khoản demo chỉ tồn tại ở bản dev — bản build production loại bỏ hoàn toàn (kể cả mật khẩu mock)
-const DemoAccounts = import.meta.env.DEV ? lazy(() => import("../../components/auth/DemoAccounts")) : null;
 
 const inputClass = (invalid) =>
   `w-full rounded-2xl bg-surface py-3 pl-10 text-navy outline-none transition placeholder:text-muted/60 focus:bg-white focus:ring-[3px] ${
@@ -35,9 +30,9 @@ function LoginPage() {
   // Sau khi đăng nhập: quay lại trang đang định vào (nếu đúng vai trò), không thì về trang chủ của vai trò
   const redirectAfterLogin = (session) => {
     const from = location.state?.from?.pathname;
-    const home = ROLE_HOME[session.user.role];
+    const home = ROLE_HOME[session.user.role] ?? ROUTES.HOME;
     const target = from && from.startsWith(`/${home.split("/")[1]}`) ? from : home;
-    toast.success(`Chào mừng ${session.user.name} trở lại ✨`);
+    toast.success(`Chào mừng ${session.user.fullName || session.user.username} trở lại ✨`);
     navigate(target, { replace: true });
   };
 
@@ -70,10 +65,9 @@ function LoginPage() {
 
   const validate = () => {
     const next = {};
-    if (!form.identity.trim()) next.identity = "Ba mẹ nhập email hoặc số điện thoại nhé";
-    else if (!isValidIdentity(form.identity.trim())) next.identity = "Email hoặc số điện thoại chưa đúng định dạng";
+    if (!form.identity.trim()) next.identity = "Ba mẹ nhập email hoặc tên đăng nhập nhé";
+    else if (!isValidIdentity(form.identity.trim())) next.identity = "Email hoặc tên đăng nhập chưa đúng định dạng";
     if (!form.password) next.password = "Ba mẹ nhập mật khẩu nhé";
-    else if (form.password.length < MIN_PASSWORD) next.password = `Mật khẩu có ít nhất ${MIN_PASSWORD} ký tự`;
     setErrors(next);
     return !Object.keys(next).length;
   };
@@ -112,7 +106,7 @@ function LoginPage() {
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="identity" className="text-sm font-semibold">
-                Email hoặc Số điện thoại
+                Email hoặc Tên đăng nhập
               </label>
               <div className="relative">
                 <AtSign size={18} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-muted" />
@@ -203,18 +197,6 @@ function LoginPage() {
               Đăng ký ngay
             </Link>
           </p>
-
-          {/* Chỉ hiện khi chạy dev: điền nhanh tài khoản demo để test các cổng */}
-          {DemoAccounts && (
-            <Suspense fallback={null}>
-              <DemoAccounts
-                onPick={(identity, password) => {
-                  setForm((f) => ({ ...f, identity, password }));
-                  setErrors({});
-                }}
-              />
-            </Suspense>
-          )}
         </div>
 
         <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-sm text-muted">

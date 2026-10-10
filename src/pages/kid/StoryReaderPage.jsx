@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Lock, Moon, PartyPopper } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lock, PartyPopper } from "lucide-react";
 import DecisionPoint from "../../components/kid/DecisionPoint";
 import IllustrationStage from "../../components/kid/IllustrationStage";
 import { ChoiceResultDialog, StoryCompleteDialog } from "../../components/kid/KidDialogs";
@@ -8,10 +8,9 @@ import ReadAlongPanel from "../../components/kid/ReadAlongPanel";
 import StoryProgressMap from "../../components/kid/StoryProgressMap";
 import { ROUTES } from "../../constants/routes";
 import { useCompleteStory, useKidStory, useSaveProgress, useSubmitChoice } from "../../hooks/useKid";
-import useLullaby from "../../hooks/useLullaby";
-import { useChildren } from "../../hooks/useParent";
+import { useSelectedChild } from "../../hooks/useChildProfile";
+import useUsageTracker from "../../hooks/useUsageTracker";
 import useKidStore from "../../stores/kidStore";
-import useParentStore from "../../stores/parentStore";
 import { toast } from "../../stores/toastStore";
 import { stopSpeaking } from "../../utils/speech";
 
@@ -25,23 +24,21 @@ const resolvePage = (page, pages, choices) => {
 
 function Reader({ story, progress, child }) {
   const navigate = useNavigate();
-  const { muted, rate, lullaby, toggleLullaby, setParentGateOpen } = useKidStore();
+  const { muted, rate, setParentGateOpen } = useKidStore();
   const [current, setCurrent] = useState(progress.currentPage);
   const [maxReached, setMaxReached] = useState(progress.currentPage);
-  const [result, setResult] = useState(null); // { feedback, stars }
+  const [result, setResult] = useState(null); // { feedback }
   const [completed, setCompleted] = useState(false);
   const [shake, setShake] = useState(0);
 
   const saveProgress = useSaveProgress(story.id);
   const submitChoice = useSubmitChoice(story.id);
   const complete = useCompleteStory(story.id);
-  useLullaby(lullaby && !muted);
 
   const total = story.pages.length;
   const page = resolvePage(story.pages[current - 1], story.pages, progress.choices);
   const chosenId = progress.choices[current];
   const needsChoice = page.decision && !chosenId;
-  const pendingStars = needsChoice ? Math.max(...page.decision.choices.map((c) => c.stars)) : 0;
 
   const goTo = (n) => {
     stopSpeaking();
@@ -66,7 +63,7 @@ function Reader({ story, progress, child }) {
     submitChoice.mutate(
       { pageNumber: current, choice },
       {
-        onSuccess: ({ starsAwarded }) => setResult({ feedback: choice.feedback, stars: starsAwarded }),
+        onSuccess: () => setResult({ feedback: choice.feedback }),
         onError: () => toast.error("Ôi, chưa lưu được lựa chọn. Bé thử lại nhé!"),
       },
     );
@@ -79,7 +76,6 @@ function Reader({ story, progress, child }) {
         current={current}
         maxReached={maxReached}
         onJump={goTo}
-        pendingStars={pendingStars}
         caselFocus={story.caselFocus}
       />
 
@@ -103,29 +99,8 @@ function Reader({ story, progress, child }) {
         </div>
       )}
 
-      {page.isEnding && (
-        <section className="flex flex-col items-center gap-2 rounded-stage bg-gradient-to-br from-primary-tint via-white to-secondary-tint p-6 text-center shadow-mid">
-          <span className="text-5xl">{story.badge.emoji}</span>
-          <h3 className="text-2xl">Sắp nhận {story.badge.name} rồi!</h3>
-          <p className="text-navy/70">Bấm “Hoàn thành” để cất huy hiệu vào Góc Huy Hiệu của con nhé.</p>
-        </section>
-      )}
-
       <div className="flex w-full flex-col items-center justify-between gap-4 py-2 sm:flex-row">
-        <button
-          onClick={toggleLullaby}
-          aria-pressed={lullaby}
-          className={`flex items-center gap-2 rounded-full px-4 py-2.5 shadow-low transition ${
-            lullaby ? "bg-secondary-tint text-secondary-dark" : "bg-surface text-navy/70 hover:bg-outline hover:text-navy"
-          }`}
-        >
-          <Moon size={21} className="text-navy-soft" />
-          <span className="text-sm font-semibold">Nhạc êm dịu ru ngủ</span>
-          <span className="relative flex h-2 w-2">
-            {lullaby && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-secondary opacity-75" />}
-            <span className={`relative inline-flex h-2 w-2 rounded-full ${lullaby ? "bg-secondary" : "bg-navy/30"}`} />
-          </span>
-        </button>
+        <span className="hidden w-36 sm:block" />
 
         <div className="flex items-center gap-4">
           <button
@@ -166,7 +141,6 @@ function Reader({ story, progress, child }) {
         <ChoiceResultDialog
           childName={child?.name ?? "bé"}
           feedback={result.feedback}
-          stars={result.stars}
           isLast={current + 1 === total}
           onNext={() => {
             setResult(null);
@@ -178,8 +152,6 @@ function Reader({ story, progress, child }) {
       {completed && (
         <StoryCompleteDialog
           childName={child?.name ?? "Bé"}
-          starsEarned={progress.starsEarned}
-          badge={story.badge}
           onReadAgain={() => {
             setCompleted(false);
             goTo(1);
@@ -197,9 +169,8 @@ function Reader({ story, progress, child }) {
 function StoryReaderPage() {
   const { storyId } = useParams();
   const { data, isLoading, isError } = useKidStory(storyId);
-  const selectedChildId = useParentStore((s) => s.selectedChildId);
-  const { data: children = [] } = useChildren();
-  const child = children.find((c) => c.id === selectedChildId);
+  const { child } = useSelectedChild();
+  useUsageTracker(child?.id);
 
   if (isLoading) {
     return (

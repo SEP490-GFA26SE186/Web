@@ -10,7 +10,6 @@ export const mockKidStory = {
   title: "Tập 1: Bạn Khủng Long Roco",
   caselFocus: "CASEL: Làm dịu cơn nóng giận",
   narrator: "Chị Hướng Dương ấm áp",
-  badge: { emoji: "🫧", name: "Huy hiệu Bình Tĩnh" },
   pages: [
     {
       number: 1,
@@ -92,13 +91,13 @@ export const mockKidStory = {
         hint: "Con hãy chọn 1 cách giải quyết thật thông minh nhé:",
         choices: [
           {
-            id: "a", emoji: "🌰", tone: "secondary", skill: "Kỹ năng quan hệ", skillIcon: "groups", stars: 1,
+            id: "a", emoji: "🌰", tone: "secondary", skill: "Kỹ năng quan hệ", skillIcon: "groups",
             title: "Cùng Sóc nhặt hạt dẻ và xây lại tháp cát mới",
             desc: "Roco rủ bạn chơi lại từ đầu trong vui vẻ và sẻ chia.",
             feedback: "Roco và Sóc đã nhặt hạt dẻ cùng nhau! Hai bạn đang rất vui và xây được một ngọn tháp cát còn to hơn trước!",
           },
           {
-            id: "b", emoji: "🎨", tone: "primary", skill: "Tự quản lý cảm xúc", skillIcon: "spa", stars: 1,
+            id: "b", emoji: "🎨", tone: "primary", skill: "Tự quản lý cảm xúc", skillIcon: "spa",
             title: "Ngồi dưới bóng cây hít thở sâu và vẽ tranh cảm xúc",
             desc: "Roco dành thêm thời gian yên tĩnh để tâm trạng hoàn toàn thư thái.",
             feedback: "Roco hít thở sâu và vẽ một bức tranh cầu vồng rực rỡ! Cơn tức giận đã tan biến hoàn toàn rồi!",
@@ -154,5 +153,5 @@ export const mockKidStory = {
 
 // Tiến độ đọc đã lưu của bé (bé đang ở trang 6, chưa chọn ở điểm rẽ)
 export const mockKidProgress = {
-  s_101: { currentPage: 6, choices: {}, starsEarned: 0, completed: false },
+  s_101: { currentPage: 6, choices: {}, completed: false },
 };

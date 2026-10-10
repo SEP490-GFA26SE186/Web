@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom";
 import {
   BookOpen,
-  Compass,
   CreditCard,
   HelpCircle,
   LayoutGrid,
@@ -15,19 +14,19 @@ import {
 } from "lucide-react";
 import logo from "../../assets/logo.png";
 import { ROUTES } from "../../constants/routes";
+import InitialAvatar from "../common/InitialAvatar";
 import LogoutButton from "../common/LogoutButton";
 import { useParentProfile } from "../../hooks/useParent";
 
 const mainNav = [
   { to: ROUTES.PARENT.DASHBOARD, label: "Tổng quan", icon: LayoutGrid, end: true },
   { to: ROUTES.PARENT.LIBRARY, label: "Tủ sách", icon: BookOpen },
-  { to: ROUTES.PARENT.EXPLORE, label: "Khám phá", icon: Compass },
   { to: ROUTES.PARENT.CHILDREN, label: "Bé nhà mình", icon: Smile },
   { to: ROUTES.PARENT.FAMILY_CHARACTERS, label: "Nhân vật gia đình", icon: UsersRound },
   { to: ROUTES.PARENT.STUDIO, label: "Sáng tác truyện", icon: PenTool },
-  { to: ROUTES.PARENT.EQ_JOURNEY, label: "Hành trình EQ", icon: TrendingUp },
+  { to: ROUTES.PARENT.EQ_JOURNEY, label: "Báo cáo EQ", icon: TrendingUp },
   { to: ROUTES.PARENT.MARKETPLACE, label: "Chợ truyện", icon: Store },
-  { to: ROUTES.PARENT.BILLING, label: "Gói & AI Credits", icon: CreditCard },
+  { to: ROUTES.PARENT.BILLING, label: "Gói dịch vụ & Credit", icon: CreditCard },
 ];
 
 const bottomNav = [
@@ -56,7 +55,7 @@ function NavItem({ to, label, icon: Icon, end, onNavigate }) {
 }
 
 function ParentSidebar({ open, onClose }) {
-  const { data: parent } = useParentProfile();
+  const parent = useParentProfile();
 
   return (
     <>
@@ -97,16 +96,14 @@ function ParentSidebar({ open, onClose }) {
             <NavItem key={item.to} {...item} onNavigate={onClose} />
           ))}
 
-          {parent && (
-            <div className="mt-3 flex items-center gap-3 rounded-2xl bg-surface p-3">
-              <img src={parent.avatar} alt="" className="h-9 w-9 rounded-full object-cover" />
-              <div className="min-w-0 flex-1 leading-tight">
-                <p className="truncate text-sm font-bold">{parent.name}</p>
-                <p className="truncate text-xs font-bold text-secondary">{parent.plan} ✨</p>
-              </div>
-              <LogoutButton />
+          <div className="mt-3 flex items-center gap-3 rounded-2xl bg-surface p-3">
+            <InitialAvatar name={parent.name} />
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="truncate text-sm font-bold">{parent.name}</p>
+              <p className="truncate text-xs font-bold text-secondary">{parent.planName ?? "…"}</p>
             </div>
-          )}
+            <LogoutButton />
+          </div>
         </div>
       </aside>
     </>
