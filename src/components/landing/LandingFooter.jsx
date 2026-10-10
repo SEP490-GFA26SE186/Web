@@ -19,7 +19,7 @@ const COLUMNS = [
       { label: "Phụ huynh & Gia đình", section: "danh-cho-gia-dinh" },
       { label: "Cộng đồng Tác giả", section: "cong-dong" },
       { label: "Góc chuyên gia EQ", to: "/goc-chuyen-gia" },
-      { label: "Thư viện truyện tương tác", to: ROUTES.PARENT.EXPLORE },
+      { label: "Chợ truyện", to: ROUTES.PARENT.MARKETPLACE },
     ],
   },
 ];

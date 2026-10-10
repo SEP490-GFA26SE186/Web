@@ -85,7 +85,6 @@ function DecisionPoint({ decision, childName, chosenId, onChoose, pendingId, sha
                     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${t.tag}`}>
                       <SkillIcon size={14} /> {c.skill}
                     </span>
-                    <span className={`text-sm font-bold ${t.text}`}>+{c.stars} ⭐</span>
                   </div>
                   <h4 className={`text-lg leading-snug transition-colors sm:text-xl ${t.title}`}>{c.title}</h4>
                   <p className="mt-1.5 text-sm text-navy/65">{c.desc}</p>

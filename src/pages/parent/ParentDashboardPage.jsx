@@ -1,14 +1,17 @@
-import { ChevronRight, ClipboardCheck, Library, Medal, Target, Timer, TrendingUp } from "lucide-react";
+import { ChevronRight, ClipboardCheck, Hourglass, Library, Timer, TrendingDown, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
-import BedtimeCard from "../../components/parent/BedtimeCard";
 import ContinueReadingCard from "../../components/parent/ContinueReadingCard";
-import EqRadarCard from "../../components/parent/EqRadarCard";
 import DraftReviewCard from "../../components/parent/DraftReviewCard";
+import EqRadarCard from "../../components/parent/EqRadarCard";
+import ListingCard from "../../components/parent/marketplace/ListingCard";
+import NoChildState from "../../components/parent/NoChildState";
 import StatCard from "../../components/parent/StatCard";
-import StoryRecommendationCard from "../../components/parent/StoryRecommendationCard";
 import { ROUTES } from "../../constants/routes";
-import { useChildren, useParentDashboard, useParentProfile } from "../../hooks/useParent";
-import useParentStore from "../../stores/parentStore";
+import { useChildBookshelf, useChildOverview, useChildUsage, useSelectedChild } from "../../hooks/useChildProfile";
+import { useListings } from "../../hooks/useMarketplace";
+import { usePendingDrafts, useParentProfile } from "../../hooks/useParent";
+import { toast } from "../../stores/toastStore";
+import { childEmoji, vnDateOffset } from "../../utils/child";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -37,28 +40,32 @@ function DashboardSkeleton() {
 }
 
 function ParentDashboardPage() {
-  const selectedChildId = useParentStore((s) => s.selectedChildId);
-  const { data: parent } = useParentProfile();
-  const { data: children = [] } = useChildren();
-  const { data, isLoading, isError, refetch } = useParentDashboard(selectedChildId);
-  const child = children.find((c) => c.id === selectedChildId);
+  const { child, isEmpty } = useSelectedChild();
+  const parent = useParentProfile();
+  const overview = useChildOverview(child?.id);
+  const yesterday = useChildUsage(child?.id, vnDateOffset(-1));
+  const bookshelf = useChildBookshelf(child?.id, { limit: 1 });
+  const drafts = usePendingDrafts();
+  const featured = useListings({ sort: "best_selling", limit: 3 });
 
-  if (isLoading || !child || !parent) return <DashboardSkeleton />;
+  if (isEmpty) return <NoChildState />;
+  if (overview.isLoading || !child) return <DashboardSkeleton />;
 
-  if (isError || !data) {
+  if (overview.isError) {
     return (
       <div className="card mx-auto mt-20 max-w-md p-8 text-center">
         <p className="font-display text-lg font-bold">Ôi, có lỗi xảy ra rồi 😢</p>
-        <button onClick={() => refetch()} className="btn-primary mt-4">
+        <button onClick={() => overview.refetch()} className="btn-primary mt-4">
           Thử lại
         </button>
       </div>
     );
   }
 
-  const { todaySummary, continueReading, stats, eqRadar, draftReview, bedtime, recommendations } = data;
-  // "Mẹ Lan Hương" → "Mẹ", dùng cho các câu như "Cần Mẹ duyệt"
-  const parentTitle = parent.name.split(" ")[0];
+  const { todayUsage, readingStats, eqReport } = overview.data;
+  const usageDelta = yesterday.data ? todayUsage.usedMinutes - yesterday.data.usedMinutes : null;
+  const continueReading = bookshelf.data?.continueReading[0];
+  const pendingDrafts = drafts.data ?? [];
 
   return (
     <div className="space-y-8">
@@ -69,25 +76,25 @@ function ParentDashboardPage() {
             {getGreeting()}, {parent.name}! 👋
           </h1>
           <p className="mt-2 text-navy/70">
-            Hôm nay {child.name} đã hoàn thành {todaySummary.completedStories} câu chuyện về {todaySummary.topic} và
-            kiếm được{" "}
-            <span className="font-bold text-primary">+{todaySummary.earnedStars} Sao Yêu Thương</span>.
+            Hôm nay {child.name} đã đọc <span className="font-bold text-primary">{todayUsage.usedMinutes} phút</span>
+            {todayUsage.isLimitReached
+              ? " — đã chạm giới hạn thời gian trong ngày."
+              : `, còn ${todayUsage.remainingMinutes} phút trong giới hạn hôm nay.`}
           </p>
         </div>
         <div className="hidden items-center gap-3 rounded-full border border-outline bg-white py-2 pr-5 pl-2 shadow-low md:flex">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-secondary-tint text-xl">
-            {child.avatarEmoji}
-          </span>
+          <span className="grid h-10 w-10 place-items-center rounded-full bg-secondary-tint text-xl">{childEmoji(child)}</span>
           <div className="leading-tight">
             <p className="text-sm font-bold">
-              {child.name} • {child.age} tuổi
+              {child.name}
+              {child.age != null && ` • ${child.age} tuổi`}
             </p>
-            <p className="text-xs text-secondary-dark">{stats.loveStars} Sao Yêu Thương ⭐</p>
+            <p className="text-xs text-secondary-dark">📚 {readingStats.booksInBookshelf} truyện trên giá sách</p>
           </div>
         </div>
       </div>
 
-      <ContinueReadingCard story={continueReading} />
+      {continueReading && <ContinueReadingCard story={continueReading} />}
 
       {/* Thống kê nhanh */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -95,75 +102,76 @@ function ParentDashboardPage() {
           icon={Timer}
           tone="orange"
           label="Thời gian đọc hôm nay"
-          value={`${stats.readingMinutesToday} phút`}
+          value={`${todayUsage.usedMinutes} phút`}
           hint={
-            <span className="inline-flex items-center gap-1">
-              <TrendingUp size={12} /> +{stats.readingDeltaMinutes}m so với hôm qua
-            </span>
+            usageDelta == null ? null : (
+              <span className="inline-flex items-center gap-1">
+                {usageDelta >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {usageDelta >= 0 ? "+" : ""}
+                {usageDelta}m so với hôm qua
+              </span>
+            )
           }
         />
         <StatCard
-          icon={Library}
+          icon={Hourglass}
           tone="teal"
-          label="Truyện đã hoàn thành"
-          value={`${stats.completedBooks} cuốn`}
-          hint="Vượt mốc tuần này 🎯"
+          label="Còn lại hôm nay"
+          value={`${todayUsage.remainingMinutes} phút`}
+          hint={`Giới hạn ${todayUsage.dailyLimitMinutes} phút/ngày`}
+          hintClassName="text-navy/60"
+        />
+        <StatCard
+          icon={Library}
+          tone="navy"
+          label="Truyện đã đọc xong"
+          value={`${readingStats.completedStories} truyện`}
+          hint={`${readingStats.booksInBookshelf} truyện trên giá sách`}
           hintClassName="text-navy/60"
         />
         <StatCard
           icon={ClipboardCheck}
-          tone="navy"
-          label="Bản thảo cần duyệt"
-          value={`${stats.pendingDrafts} truyện`}
-          hint={stats.pendingDrafts ? `Cần ${parentTitle} duyệt trước khi đọc ✨` : "Đã duyệt hết 🎉"}
+          tone="orange"
+          label="Truyện chờ xem lại"
+          value={`${pendingDrafts.length} truyện`}
+          hint={pendingDrafts.length ? "Xem lại xong mới đưa lên giá sách ✨" : "Đã xem lại hết 🎉"}
           hintClassName="text-primary-dark"
         />
-        <StatCard
-          icon={Medal}
-          tone="orange"
-          label="Sao Yêu Thương"
-          value={`${stats.loveStars} sao`}
-          hint="Có thể đổi quà tặng 🎁"
-        />
       </div>
 
-      {/* EQ + Bản thảo cần duyệt */}
+      {/* EQ + Truyện chờ xem lại */}
       <div className="grid gap-6 xl:grid-cols-12">
         <div className="xl:col-span-7">
-          <EqRadarCard childName={child.name} eq={eqRadar} />
+          <EqRadarCard childName={child.name} skills={eqReport.skills} />
         </div>
         <div className="flex flex-col gap-4 xl:col-span-5">
-          <DraftReviewCard draft={draftReview} parentTitle={parentTitle} />
-          <BedtimeCard childId={selectedChildId} bedtime={bedtime} />
+          <DraftReviewCard draft={pendingDrafts[0]} moreCount={Math.max(0, pendingDrafts.length - 1)} />
         </div>
       </div>
 
-      {/* Gợi ý truyện */}
-      <section>
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <h2 className="text-2xl">Gợi ý cho {child.name} tối nay ✨</h2>
-            <p className="mt-1 text-sm text-navy/60">
-              Lựa chọn dựa theo khung giờ đi ngủ và xu hướng phát triển tuần này
-            </p>
+      {/* Nổi bật trên chợ truyện */}
+      {featured.data?.items.length > 0 && (
+        <section>
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 className="text-2xl">Bán chạy trên Chợ truyện</h2>
+              <p className="mt-1 text-sm text-navy/60">Truyện từ các gia đình khác, đã được Moderator duyệt từng trang</p>
+            </div>
+            <Link to={ROUTES.PARENT.MARKETPLACE} className="inline-flex items-center gap-1 text-sm font-bold text-primary-dark hover:text-primary">
+              Xem chợ truyện <ChevronRight size={16} />
+            </Link>
           </div>
-          <Link
-            to={ROUTES.PARENT.LIBRARY}
-            className="inline-flex items-center gap-1 text-sm font-bold text-primary-dark hover:text-primary"
-          >
-            Xem toàn bộ tủ sách <ChevronRight size={16} />
-          </Link>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {recommendations.map((story) => (
-            <StoryRecommendationCard key={story.id} story={story} />
-          ))}
-        </div>
-      </section>
-
-      <p className="flex items-center justify-center gap-1.5 pb-4 text-xs text-navy/40">
-        <Target size={12} /> Dữ liệu minh họa (mock) — sẽ được thay bằng API thật
-      </p>
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {featured.data.items.map((listing) => (
+              <ListingCard
+                key={listing.id}
+                listing={listing}
+                onAddToCart={(l) => toast.info(`Giỏ hàng đang được hoàn thiện — "${l.title}"`)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

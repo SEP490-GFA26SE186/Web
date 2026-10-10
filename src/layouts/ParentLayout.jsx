@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
+import EmailVerifyBanner from "../components/auth/EmailVerifyBanner";
 import ParentSidebar from "../components/parent/ParentSidebar";
 import ParentTopbar from "../components/parent/ParentTopbar";
 
@@ -12,6 +13,9 @@ function ParentLayout() {
       <div className="lg:pl-64">
         <ParentTopbar onOpenMenu={() => setMenuOpen(true)} />
         <main className="mx-auto max-w-[1440px] px-4 py-6 md:px-8 lg:px-12">
+          <div className="mb-6 empty:hidden">
+            <EmailVerifyBanner />
+          </div>
           <Outlet />
         </main>
       </div>

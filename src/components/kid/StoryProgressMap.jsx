@@ -1,7 +1,8 @@
-import { Check, LockOpen, Smile, Sparkles, Star } from "lucide-react";
+import { BookOpen, Check, LockOpen, Smile, Sparkles } from "lucide-react";
+import { childEmoji } from "../../utils/child";
 
 // Bản đồ tiến độ dạng "viên đá" cho bé: trang đã đọc, trang hiện tại, trang sắp tới, đích
-function StoryProgressMap({ child, total, current, maxReached, onJump, pendingStars, caselFocus }) {
+function StoryProgressMap({ child, total, current, maxReached, onJump, caselFocus }) {
   const percent = ((current - 1) / (total - 1)) * 100;
 
   return (
@@ -11,7 +12,7 @@ function StoryProgressMap({ child, total, current, maxReached, onJump, pendingSt
 
       <div className="relative flex w-full items-center gap-3 md:w-auto">
         <div className="relative">
-          <span className="grid h-12 w-12 place-items-center rounded-full bg-primary-tint text-2xl shadow-low">{child?.avatarEmoji ?? <Smile />}</span>
+          <span className="grid h-12 w-12 place-items-center rounded-full bg-primary-tint text-2xl shadow-low">{child ? childEmoji(child) : <Smile />}</span>
           <span className="absolute -right-1 -bottom-1 flex h-4 w-4">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
             <span className="relative inline-flex h-4 w-4 rounded-full bg-primary" />
@@ -20,13 +21,13 @@ function StoryProgressMap({ child, total, current, maxReached, onJump, pendingSt
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg">
-              {child?.name} ({child?.age} tuổi)
+              {child?.name ?? "Bé"}
+              {child?.age != null && ` (${child.age} tuổi)`}
             </h2>
             <span className="rounded-full bg-secondary-tint px-2.5 py-0.5 text-xs font-bold text-secondary-dark">Độc giả nhí</span>
           </div>
           <p className="flex items-center gap-1 text-sm font-bold text-primary-dark">
-            <Star size={16} className="fill-primary text-primary" />
-            {pendingStars > 0 ? `+${pendingStars} Sao vàng đang chờ ở trang này!` : "Đọc tiếp để khám phá nhé!"}
+            <BookOpen size={16} className="text-primary" /> Trang {current}/{total} — đọc tiếp để khám phá nhé!
           </p>
         </div>
       </div>
@@ -55,7 +56,6 @@ function StoryProgressMap({ child, total, current, maxReached, onJump, pendingSt
                     <span className="-my-1 grid h-10 w-10 animate-pulse place-items-center rounded-full bg-primary font-display font-bold text-white shadow-high ring-4 ring-primary-tint">
                       {n}
                     </span>
-                    <Star size={18} className="absolute -top-3 -right-2 animate-bounce fill-primary text-primary" />
                   </span>
                 ) : (
                   <span

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Delete, Loader2, Lock, X } from "lucide-react";
+import { Check, Delete, Loader2, Lock, X } from "lucide-react";
 import { useVerifyParentPin } from "../../hooks/useKid";
 
 // Khung hộp thoại to, bo tròn, thân thiện với bé
@@ -21,13 +21,12 @@ function KidDialog({ children, onClose, labelledBy }) {
   );
 }
 
-export function ChoiceResultDialog({ childName, feedback, stars, onNext, isLast }) {
+export function ChoiceResultDialog({ childName, feedback, onNext, isLast }) {
   return (
     <KidDialog onClose={onNext} labelledBy="choice-title">
       <span className="mb-4 grid h-20 w-20 animate-bounce place-items-center rounded-full bg-primary-tint text-4xl">🌟</span>
-      <span className="text-sm font-bold tracking-wider text-secondary-dark uppercase">Tuyệt vời lắm {childName}!</span>
-      <h4 id="choice-title" className="mt-1 text-2xl">
-        Con nhận được +{stars} Sao vàng!
+      <h4 id="choice-title" className="text-2xl">
+        Cảm ơn {childName} đã chọn!
       </h4>
       <p className="mt-2 text-navy/70">{feedback}</p>
       <button onClick={onNext} autoFocus className="btn-primary mt-6 w-full py-3.5 font-display text-lg">
@@ -37,19 +36,17 @@ export function ChoiceResultDialog({ childName, feedback, stars, onNext, isLast 
   );
 }
 
-export function StoryCompleteDialog({ childName, starsEarned, badge, onReadAgain, onBookshelf }) {
+export function StoryCompleteDialog({ childName, onReadAgain, onBookshelf }) {
   return (
     <KidDialog onClose={onBookshelf} labelledBy="complete-title">
       <span className="mb-3 grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-primary-tint to-secondary-tint text-5xl shadow-glow">
-        {badge.emoji}
+        🎉
       </span>
       <span className="text-sm font-bold tracking-wider text-secondary-dark uppercase">Hoàn thành câu chuyện!</span>
       <h4 id="complete-title" className="mt-1 text-2xl">
-        {childName} nhận được {badge.name}
+        {childName} đã đọc xong truyện rồi!
       </h4>
-      <p className="mt-2 text-navy/70">
-        Hôm nay con đã thu thập <b className="text-primary-dark">{starsEarned} Sao vàng</b> trong truyện này. Ba mẹ sẽ rất tự hào đó!
-      </p>
+      <p className="mt-2 text-navy/70">Con muốn đọc lại từ đầu hay chọn truyện khác trên giá sách?</p>
       <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row">
         <button onClick={onReadAgain} className="flex-1 rounded-full bg-surface px-5 py-3 font-bold transition hover:bg-outline">
           Đọc lại từ đầu
@@ -62,38 +59,46 @@ export function StoryCompleteDialog({ childName, starsEarned, badge, onReadAgain
   );
 }
 
-// Cổng Ba Mẹ: nhập mã PIN 4 số để thoát chế độ trẻ em
+// PIN thoát Kid Mode của tài khoản phụ huynh: 4–6 chữ số (BE)
+const PIN_MIN = 4;
+const PIN_MAX = 6;
+
+// Cổng Ba Mẹ: nhập mã PIN để thoát chế độ trẻ em
 export function ParentGateDialog({ onClose, onUnlock }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
   const verify = useVerifyParentPin();
 
+  const submit = (value = pin) => {
+    if (verify.isPending || value.length < PIN_MIN) return;
+    verify.mutate(value, {
+      onSuccess: ({ ok }) => {
+        if (ok) onUnlock();
+        else {
+          setError(true);
+          setPin("");
+        }
+      },
+      onError: () => {
+        setError(true);
+        setPin("");
+      },
+    });
+  };
+
   const press = (d) => {
-    if (verify.isPending || pin.length >= 4) return;
+    if (verify.isPending || pin.length >= PIN_MAX) return;
     const next = pin + d;
     setError(false);
     setPin(next);
-    if (next.length === 4) {
-      verify.mutate(next, {
-        onSuccess: ({ ok }) => {
-          if (ok) onUnlock();
-          else {
-            setError(true);
-            setPin("");
-          }
-        },
-        onError: () => {
-          setError(true);
-          setPin("");
-        },
-      });
-    }
+    if (next.length === PIN_MAX) submit(next); // đủ 6 số thì tự gửi
   };
 
   useEffect(() => {
     const onKey = (e) => {
       if (/^\d$/.test(e.key)) press(e.key);
       if (e.key === "Backspace") setPin((p) => p.slice(0, -1));
+      if (e.key === "Enter") submit();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -113,7 +118,7 @@ export function ParentGateDialog({ onClose, onUnlock }) {
       <p className="mt-1 text-sm text-navy/60">Nhập mã PIN phụ huynh để thoát Chế độ Trẻ Em</p>
 
       <div className={`my-5 flex gap-3 ${error ? "animate-[wiggle_0.4s_ease-in-out_2]" : ""}`} aria-live="polite">
-        {Array.from({ length: 4 }).map((_, i) => (
+        {Array.from({ length: Math.max(PIN_MIN, pin.length) }).map((_, i) => (
           <span key={i} className={`h-4 w-4 rounded-full transition ${i < pin.length ? "bg-primary" : error ? "bg-danger/40" : "bg-outline"}`} />
         ))}
       </div>
@@ -125,7 +130,14 @@ export function ParentGateDialog({ onClose, onUnlock }) {
             {d}
           </button>
         ))}
-        <span className="grid place-items-center">{verify.isPending && <Loader2 className="animate-spin text-primary" />}</span>
+        <button
+          onClick={() => submit()}
+          disabled={pin.length < PIN_MIN || verify.isPending}
+          aria-label="Xác nhận"
+          className="grid h-14 place-items-center rounded-2xl bg-primary text-white transition hover:bg-primary-dark active:scale-95 disabled:bg-outline disabled:text-navy/40"
+        >
+          {verify.isPending ? <Loader2 className="animate-spin" /> : <Check size={22} />}
+        </button>
         <button onClick={() => press("0")} className="h-14 rounded-2xl bg-surface font-display text-xl font-bold transition hover:bg-outline active:scale-95">
           0
         </button>

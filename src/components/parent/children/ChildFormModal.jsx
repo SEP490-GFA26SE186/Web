@@ -1,32 +1,61 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import DateInput from "../../common/DateInput";
 import Modal from "../../common/Modal";
+import { isoToViDate, parseViDate, toIsoDate } from "../../../utils/date";
 
-const AVATARS = ["🧒", "👧", "👦", "👶", "🧒🏻", "👧🏻", "🐻", "🐰", "🦊", "🐼", "🦁", "🐯"];
-const today = new Date().toISOString().slice(0, 10);
+const today = toIsoDate(new Date());
 const minDate = `${new Date().getFullYear() - 12}-01-01`;
+
+/** Kiểm tra ngày sinh gõ tay; trả về thông báo lỗi hoặc "" nếu hợp lệ */
+const validateBirthDate = (text) => {
+  if (!text) return "Ba mẹ nhập ngày sinh của bé nhé";
+  const iso = parseViDate(text);
+  if (!iso) return "Ngày sinh chưa đúng, ba mẹ nhập theo dạng dd/mm/yyyy (VD 10/05/2020)";
+  if (iso > today) return "Ngày sinh không được sau hôm nay";
+  if (iso < minDate) return `Ngày sinh phải từ ${isoToViDate(minDate)} trở đi (bé tối đa 12 tuổi)`;
+  return "";
+};
 
 const inputClass =
   "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-3 outline-none transition placeholder:text-navy/40 focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
 
-// Dùng cho cả Thêm bé mới và Sửa hồ sơ bé (khi truyền `child`)
-function ChildFormModal({ open, onClose, child, onSubmit, isPending }) {
+// Dùng cho cả Thêm bé mới và Sửa hồ sơ bé (khi truyền `child`). Field khớp children.validation.js của BE
+function ChildFormModal({ open, onClose, child, onSubmit, isPending, error: serverError }) {
   const [form, setForm] = useState(() => ({
     name: child?.name ?? "",
-    birthday: child?.birthday ?? "",
-    gender: child?.gender ?? "boy",
-    avatarEmoji: child?.avatarEmoji ?? AVATARS[0],
+    birthDate: isoToViDate(child?.birthDate), // hiển thị "dd/mm/yyyy", đổi sang "YYYY-MM-DD" khi gửi BE
+    appearance: child?.character?.appearance ?? "",
   }));
   const [error, setError] = useState("");
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target?.value ?? e }));
+  const [birthDateError, setBirthDateError] = useState("");
+  const set = (key) => (e) => {
+    setForm((f) => ({ ...f, [key]: e.target.value }));
+    setError("");
+  };
+
+  const setBirthDate = (text) => {
+    setForm((f) => ({ ...f, birthDate: text }));
+    setBirthDateError("");
+    setError("");
+  };
 
   const submit = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return setError("Ba mẹ nhập tên gọi của bé nhé");
-    if (!form.birthday) return setError("Ba mẹ chọn ngày sinh của bé nhé");
+    const dateError = validateBirthDate(form.birthDate);
+    if (dateError) return setBirthDateError(dateError);
     setError("");
-    onSubmit({ ...form, name: form.name.trim() });
+    const appearance = form.appearance.trim();
+    onSubmit({
+      name: form.name.trim(),
+      birthDate: parseViDate(form.birthDate),
+      // Sửa hồ sơ: gửi null để xóa mô tả; tạo mới: bỏ trống thì không gửi
+      appearance: appearance || (child ? null : undefined),
+    });
   };
+
+  const message = error || serverError;
 
   return (
     <Modal
@@ -47,55 +76,51 @@ function ChildFormModal({ open, onClose, child, onSubmit, isPending }) {
       }
     >
       <form id="child-form" onSubmit={submit} className="space-y-4">
-        <div>
-          <span className="mb-2 block text-sm font-semibold">Ảnh đại diện</span>
-          <div className="flex flex-wrap gap-2">
-            {AVATARS.map((a) => (
-              <button
-                key={a}
-                type="button"
-                onClick={() => set("avatarEmoji")(a)}
-                aria-pressed={form.avatarEmoji === a}
-                className={`grid h-12 w-12 place-items-center rounded-2xl text-2xl transition ${
-                  form.avatarEmoji === a ? "bg-primary-tint ring-2 ring-primary" : "bg-surface hover:bg-outline"
-                }`}
-              >
-                {a}
-              </button>
-            ))}
-          </div>
-        </div>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Tên gọi ở nhà</span>
-          <input value={form.name} onChange={set("name")} maxLength={30} placeholder="Ví dụ: Bé Bi" className={inputClass} />
+          <input value={form.name} onChange={set("name")} maxLength={100} placeholder="Ví dụ: Bé Bi" className={inputClass} />
         </label>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-semibold">Ngày sinh</span>
-            <input type="date" value={form.birthday} onChange={set("birthday")} min={minDate} max={today} className={inputClass} />
+        <div>
+          <label htmlFor="child-birth-date" className="mb-1.5 block text-sm font-semibold">
+            Ngày sinh
           </label>
-          <div>
-            <span className="mb-1.5 block text-sm font-semibold">Giới tính</span>
-            <div className="flex gap-2">
-              {[
-                { value: "boy", label: "Bé trai" },
-                { value: "girl", label: "Bé gái" },
-              ].map((g) => (
-                <button
-                  key={g.value}
-                  type="button"
-                  onClick={() => set("gender")(g.value)}
-                  className={`flex-1 rounded-full py-3 text-sm font-bold transition ${
-                    form.gender === g.value ? "bg-secondary text-white" : "bg-surface hover:bg-outline"
-                  }`}
-                >
-                  {g.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <DateInput
+            id="child-birth-date"
+            value={form.birthDate}
+            onChange={setBirthDate}
+            // Gõ xong rời ô mới báo lỗi, tránh báo khi đang gõ dở
+            onBlur={() => form.birthDate && setBirthDateError(validateBirthDate(form.birthDate))}
+            min={minDate}
+            max={today}
+            aria-invalid={!!birthDateError}
+            aria-describedby={birthDateError ? "child-birth-date-error" : "child-birth-date-hint"}
+            className={`${inputClass} ${birthDateError ? "border-danger focus:border-danger focus:ring-danger/15" : ""}`}
+          />
+          {birthDateError ? (
+            <p id="child-birth-date-error" className="mt-1 text-xs font-semibold text-red-600">
+              {birthDateError}
+            </p>
+          ) : (
+            <p id="child-birth-date-hint" className="mt-1 text-xs text-navy/50">
+              Gõ ngày dạng dd/mm/yyyy hoặc bấm biểu tượng lịch để chọn
+            </p>
+          )}
         </div>
-        {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold">
+            Ngoại hình của bé <span className="font-normal text-navy/50">(không bắt buộc)</span>
+          </span>
+          <textarea
+            value={form.appearance}
+            onChange={set("appearance")}
+            maxLength={500}
+            rows={3}
+            placeholder="Ví dụ: tóc ngắn xoăn, má phúng phính, hay mặc áo khủng long xanh"
+            className={`${inputClass} resize-none`}
+          />
+          <span className="mt-1 block text-xs text-navy/50">AI dùng mô tả này để vẽ bé thành nhân vật chính trong truyện</span>
+        </label>
+        {message && <p className="text-sm font-semibold text-red-600">{message}</p>}
       </form>
     </Modal>
   );
