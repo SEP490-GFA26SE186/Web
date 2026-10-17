@@ -16,6 +16,8 @@ import {
   updateCheckpoint,
   updatePage,
 } from "../services/storyService";
+import { getMe } from "../services/authService";
+import useAuthStore from "../stores/authStore";
 import { parentKeys } from "./useParent";
 
 export const studioKeys = {
@@ -27,6 +29,20 @@ export const studioKeys = {
 };
 
 const ACTIVE = new Set(["queued", "processing"]);
+
+/**
+ * Credit trên topbar đọc từ user trong authStore (đồng bộ từ GET /auth/me) → sau mỗi thao tác giữ / hoàn credit
+ * gọi lại /auth/me và ghi thẳng vào store, không chờ query ["auth","me"] tự tải lại.
+ */
+export const refreshCredit = async (queryClient) => {
+  try {
+    const me = await getMe();
+    useAuthStore.getState().setUser(me);
+    queryClient.setQueryData(["auth", "me", me.id], me);
+  } catch {
+    // Lỗi mạng thì giữ số cũ; lần tải /auth/me sau sẽ đúng lại
+  }
+};
 export const isGenerating = (generation) => !!generation && ACTIVE.has(generation.status);
 
 export const useStories = (params) => useQuery({ queryKey: studioKeys.list(params), queryFn: () => getStories(params) });
@@ -42,7 +58,7 @@ export const useGeneration = (id, { enabled = true } = {}) => {
       const generation = await getGeneration(id);
       if (generation && !ACTIVE.has(generation.status)) {
         queryClient.invalidateQueries({ queryKey: studioKeys.story(id) });
-        queryClient.invalidateQueries({ queryKey: ["auth", "me"] }); // credit hoàn lại khi lỗi
+        refreshCredit(queryClient); // credit hoàn lại khi lỗi
       }
       return generation;
     },
@@ -79,7 +95,7 @@ export const useGenerateStory = (id) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: studioKeys.generation(id) });
       queryClient.invalidateQueries({ queryKey: studioKeys.story(id) });
-      queryClient.invalidateQueries({ queryKey: ["auth", "me"] }); // credit bị giữ
+      refreshCredit(queryClient); // credit bị giữ
     },
   });
 };
@@ -89,7 +105,9 @@ export const useDeleteStory = () => {
   return useMutation({
     mutationFn: deleteStory,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: studioKeys.all });
+      // Chỉ làm mới danh sách: đụng vào cache của truyện vừa xóa sẽ làm trang editor còn mở gọi lại → 404.
+      // Cache đó không còn ai dùng sau khi rời trang nên React Query tự dọn.
+      queryClient.invalidateQueries({ queryKey: ["studio", "list"] });
       queryClient.invalidateQueries({ queryKey: parentKeys.drafts });
     },
   });

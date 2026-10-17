@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Bot, Check, Loader2, PenLine, Plus, Sparkles, Star } from "lucide-react";
 import Modal from "../../../components/common/Modal";
@@ -7,7 +8,7 @@ import CaselTag from "../../../components/parent/library/CaselTag";
 import { fieldClass } from "../../../components/parent/studio/PageEditor";
 import { AI_LENGTHS } from "../../../constants/story";
 import { ROUTES } from "../../../constants/routes";
-import { useCreateCharacter, useCharacters, useCreateStory } from "../../../hooks/useStudio";
+import { refreshCredit, useCreateCharacter, useCharacters, useCreateStory } from "../../../hooks/useStudio";
 import { useTopics } from "../../../hooks/useTopics";
 import { generateStory } from "../../../services/storyService";
 import useAuthStore from "../../../stores/authStore";
@@ -88,6 +89,7 @@ function NewCharacterModal({ open, onClose, onCreated }) {
 
 function CreateStoryPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const creditBalance = useAuthStore((s) => s.user?.wallet?.creditBalance);
   const topics = useTopics({});
   const characters = useCharacters();
@@ -137,6 +139,7 @@ function CreateStoryPage() {
       if (mode === "ai") {
         try {
           await generateStory(story.id);
+          refreshCredit(queryClient); // credit vừa bị giữ
         } catch (err) {
           // Truyện đã tạo; báo lỗi rồi để trang editor cho bấm "Cho AI viết" lại
           toast.error(err.status === 402 ? "Ba mẹ không đủ credit để AI viết truyện" : err.message);
@@ -166,6 +169,8 @@ function CreateStoryPage() {
               key={t.id}
               type="button"
               onClick={() => setTopicId(t.id)}
+              aria-pressed={topicId === t.id}
+              aria-label={`Bài học: ${t.title}`}
               className={`space-y-2 rounded-2xl border-2 p-4 text-left transition ${
                 topicId === t.id ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"
               }`}
@@ -239,6 +244,8 @@ function CreateStoryPage() {
               key={value}
               type="button"
               onClick={() => setMode(value)}
+              aria-pressed={mode === value}
+              aria-label={label}
               className={`space-y-1 rounded-2xl border-2 p-4 text-left transition ${mode === value ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"}`}
             >
               <p className="flex items-center gap-2 font-display font-bold">
@@ -255,6 +262,7 @@ function CreateStoryPage() {
                 key={l.value}
                 type="button"
                 onClick={() => setLength(l.value)}
+                aria-pressed={length === l.value}
                 className={`rounded-full px-4 py-2 text-sm font-bold ${length === l.value ? "bg-secondary text-white" : "bg-surface hover:bg-secondary-tint"}`}
               >
                 {l.label} · {l.pages} trang

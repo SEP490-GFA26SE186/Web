@@ -1,8 +1,10 @@
 import { AlertTriangle, Loader2, RotateCcw, Sparkles } from "lucide-react";
 
 // Trạng thái AI viết truyện (GET /stories/:id/generation). Lỗi do BE trả về đã là câu tiếng Việt.
-function GenerationPanel({ generation, neverGenerated, onStart, starting, startError }) {
-  if (generation && (generation.status === "queued" || generation.status === "processing")) {
+// `busy`: job còn chạy HOẶC truyện vẫn đang ở trạng thái generating (job vừa xong nhưng truyện chưa tải lại
+// xong) — vẫn hiện khung "đang viết" để trang không trống trong lúc chờ.
+function GenerationPanel({ generation, busy, neverGenerated, onStart, starting, startError }) {
+  if (busy) {
     return (
       <div className="card flex flex-col items-center gap-3 p-8 text-center">
         <Loader2 size={40} className="animate-spin text-primary" />

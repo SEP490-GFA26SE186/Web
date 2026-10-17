@@ -1,6 +1,6 @@
 import { Fragment, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Bot, CheckCircle2, Loader2, PenLine, Plus } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Bot, CheckCircle2, Loader2, PenLine, Plus, Trash2 } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
 import CheckpointEditor from "../../../components/parent/studio/CheckpointEditor";
 import GenerationPanel from "../../../components/parent/studio/GenerationPanel";
@@ -8,7 +8,14 @@ import PageEditor, { fieldClass } from "../../../components/parent/studio/PageEd
 import { CHECKPOINT_TYPES, NEEDS_TARGET, STORY_STATUS_LABELS } from "../../../constants/story";
 import { STORY_LENGTH_LABELS } from "../../../constants/casel";
 import { ROUTES } from "../../../constants/routes";
-import { isGenerating, useGenerateStory, useGeneration, useStory, useStoryEditor } from "../../../hooks/useStudio";
+import {
+  isGenerating,
+  useDeleteStory,
+  useGenerateStory,
+  useGeneration,
+  useStory,
+  useStoryEditor,
+} from "../../../hooks/useStudio";
 import { toast } from "../../../stores/toastStore";
 
 // Lỗi theo đường dẫn của BE: "pages.<id>" / "checkpoints.<id>" → câu báo, để tô đỏ đúng chỗ
@@ -64,8 +71,43 @@ function AddCheckpointForm({ page, characters, onAdd, adding, onCancel }) {
   );
 }
 
+/** Xóa cả truyện: bấm lần 1 hiện xác nhận ngay tại chỗ, bấm "Xóa hẳn" mới gọi API. */
+function DeleteStoryButton({ onConfirm, deleting, disabled }) {
+  const [confirming, setConfirming] = useState(false);
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        disabled={disabled}
+        className="inline-flex items-center gap-1 text-sm font-semibold text-danger hover:underline disabled:opacity-50"
+      >
+        <Trash2 size={15} /> Xóa truyện
+      </button>
+    );
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-sm">
+      <span className="font-semibold text-danger">Xóa truyện này? Không khôi phục được.</span>
+      <button type="button" onClick={() => setConfirming(false)} className="btn-ghost px-3 py-1.5 text-sm">
+        Giữ lại
+      </button>
+      <button
+        type="button"
+        onClick={onConfirm}
+        disabled={deleting}
+        className="inline-flex items-center gap-1 rounded-full bg-danger px-3 py-1.5 font-semibold text-white disabled:opacity-60"
+      >
+        {deleting ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />} Xóa hẳn
+      </button>
+    </div>
+  );
+}
+
 function StoryEditorPage() {
   const { storyId } = useParams();
+  const navigate = useNavigate();
+  const removeStory = useDeleteStory();
   const { data: story, isLoading, error } = useStory(storyId);
   const isCustom = story?.length === "custom";
   const generation = useGeneration(storyId, { enabled: !!story && !isCustom });
@@ -139,11 +181,25 @@ function StoryEditorPage() {
           Bài học: <span className="font-semibold text-navy">{story.topic?.title}</span> · Nhân vật:{" "}
           {characters.map((c) => c.name).filter(Boolean).join(", ")}
         </p>
+        <DeleteStoryButton
+          disabled={busy}
+          deleting={removeStory.isPending}
+          onConfirm={() =>
+            removeStory.mutate(storyId, {
+              onSuccess: () => {
+                toast.success("Đã xóa truyện");
+                navigate(ROUTES.PARENT.STUDIO, { replace: true });
+              },
+              onError: (err) => toast.error(err.message),
+            })
+          }
+        />
       </header>
 
       {!isCustom && (
         <GenerationPanel
           generation={generation.data}
+          busy={busy}
           neverGenerated={neverGenerated}
           onStart={() => run(generate)}
           starting={generate.isPending}
