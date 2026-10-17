@@ -11,7 +11,7 @@ export const useSubscription = () => useQuery({ queryKey: parentKeys.subscriptio
 
 export const usePendingDrafts = () => useQuery({ queryKey: parentKeys.drafts, queryFn: getPendingDrafts });
 
-/** Thông tin phụ huynh hiển thị trên giao diện: tên & credit lấy từ /auth/me, gói lấy từ subscription (mock) */
+/** Thông tin phụ huynh hiển thị trên giao diện: tên & credit lấy từ /auth/me, gói lấy từ GET /subscriptions/me */
 export const useParentProfile = () => {
   const user = useAuthStore((s) => s.user);
   const { data: subscription } = useSubscription();
