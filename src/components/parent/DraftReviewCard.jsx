@@ -7,7 +7,7 @@ import CaselTag from "./library/CaselTag";
 // Truyện riêng đã tạo xong, ba mẹ phải xem lại hết từng trang trước khi đưa lên giá sách của bé.
 // Schema rev8 chỉ lưu reviewed_at (đã xem xong hay chưa), không lưu đã xem bao nhiêu trang.
 function DraftReviewCard({ draft, moreCount = 0 }) {
-  const reviewUrl = draft ? `${ROUTES.PARENT.STUDIO}?story=${draft.id}` : ROUTES.PARENT.STUDIO;
+  const reviewUrl = draft ? ROUTES.PARENT.studioStory(draft.id) : ROUTES.PARENT.STUDIO;
 
   return (
     <section className="card flex flex-1 flex-col justify-between p-6">

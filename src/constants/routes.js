@@ -9,6 +9,8 @@ export const ROUTES = {
     CHILDREN: "/parent/children",
     FAMILY_CHARACTERS: "/parent/family-characters",
     STUDIO: "/parent/studio",
+    STUDIO_NEW: "/parent/studio/new",
+    studioStory: (storyId) => `/parent/studio/${storyId}`,
     EQ_JOURNEY: "/parent/eq-journey",
     MARKETPLACE: "/parent/marketplace",
     BILLING: "/parent/billing",

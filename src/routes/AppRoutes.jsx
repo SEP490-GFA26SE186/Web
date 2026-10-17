@@ -12,6 +12,9 @@ import LibraryPage from "../pages/parent/LibraryPage";
 import MarketplacePage from "../pages/parent/MarketplacePage";
 import SettingsPage from "../pages/parent/SettingsPage";
 import ChildrenPage from "../pages/parent/ChildrenPage";
+import StudioPage from "../pages/parent/studio/StudioPage";
+import CreateStoryPage from "../pages/parent/studio/CreateStoryPage";
+import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
 const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
@@ -51,7 +54,6 @@ function PageLoader() {
 
 const parentPlaceholders = [
   { path: "family-characters", title: "Nhân vật gia đình" },
-  { path: "studio", title: "Sáng tác truyện" },
   { path: "eq-journey", title: "Báo cáo EQ" },
   { path: "billing", title: "Gói dịch vụ & Credit" },
   { path: "help", title: "Trợ giúp" },
@@ -119,6 +121,9 @@ function AppRoutes() {
           <Route path="marketplace" element={<MarketplacePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="children" element={<ChildrenPage />} />
+          <Route path="studio" element={<StudioPage />} />
+          <Route path="studio/new" element={<CreateStoryPage />} />
+          <Route path="studio/:storyId" element={<StoryEditorPage />} />
           {placeholderRoutes(parentPlaceholders)}
         </Route>
 

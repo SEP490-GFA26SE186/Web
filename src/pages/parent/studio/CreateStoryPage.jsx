@@ -1,0 +1,332 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Bot, Check, Loader2, PenLine, Plus, Sparkles, Star } from "lucide-react";
+import Modal from "../../../components/common/Modal";
+import Switch from "../../../components/common/Switch";
+import CaselTag from "../../../components/parent/library/CaselTag";
+import { fieldClass } from "../../../components/parent/studio/PageEditor";
+import { AI_LENGTHS } from "../../../constants/story";
+import { ROUTES } from "../../../constants/routes";
+import { useCreateCharacter, useCharacters, useCreateStory } from "../../../hooks/useStudio";
+import { useTopics } from "../../../hooks/useTopics";
+import { generateStory } from "../../../services/storyService";
+import useAuthStore from "../../../stores/authStore";
+import { toast } from "../../../stores/toastStore";
+
+function Section({ step, title, hint, children }) {
+  return (
+    <section className="card space-y-4 p-6">
+      <div>
+        <h2 className="flex items-center gap-2 text-lg">
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-primary text-sm text-white">{step}</span>
+          {title}
+        </h2>
+        {hint && <p className="mt-1 text-sm text-navy/60">{hint}</p>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function NewCharacterModal({ open, onClose, onCreated }) {
+  const [form, setForm] = useState({ name: "", appearance: "" });
+  const create = useCreateCharacter();
+  const submit = (e) => {
+    e.preventDefault();
+    create.mutate(
+      { name: form.name.trim(), appearance: form.appearance.trim() },
+      {
+        onSuccess: (character) => {
+          setForm({ name: "", appearance: "" });
+          onCreated(character);
+        },
+      },
+    );
+  };
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Thêm nhân vật gia đình"
+      description="Ông bà, anh chị em, bạn bè… Tên thật không gửi cho AI, chỉ mô tả ngoại hình."
+      footer={
+        <>
+          <button type="button" onClick={onClose} className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline">
+            Hủy
+          </button>
+          <button
+            type="submit"
+            form="character-form"
+            disabled={create.isPending || !form.name.trim() || !form.appearance.trim()}
+            className="btn-primary py-2.5 text-sm disabled:opacity-60"
+          >
+            {create.isPending && <Loader2 size={16} className="animate-spin" />} Thêm nhân vật
+          </button>
+        </>
+      }
+    >
+      <form id="character-form" onSubmit={submit} className="space-y-4">
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold">Tên gọi</span>
+          <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className={fieldClass} placeholder="VD: Bà nội" />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold">Ngoại hình</span>
+          <textarea
+            value={form.appearance}
+            onChange={(e) => setForm((f) => ({ ...f, appearance: e.target.value }))}
+            rows={3}
+            className={fieldClass}
+            placeholder="VD: Tóc bạc búi gọn, đeo kính, hay mặc áo bà ba nâu"
+          />
+        </label>
+        {create.error && <p className="text-sm font-semibold text-danger">{create.error.message}</p>}
+      </form>
+    </Modal>
+  );
+}
+
+function CreateStoryPage() {
+  const navigate = useNavigate();
+  const creditBalance = useAuthStore((s) => s.user?.wallet?.creditBalance);
+  const topics = useTopics({});
+  const characters = useCharacters();
+  const createStory = useCreateStory();
+
+  const [topicId, setTopicId] = useState(null);
+  const [selected, setSelected] = useState([]); // characterId theo thứ tự chọn
+  const [mainId, setMainId] = useState(null);
+  const [mode, setMode] = useState("ai");
+  const [length, setLength] = useState("medium");
+  const [title, setTitle] = useState("");
+  const [situation, setSituation] = useState("");
+  const [useTts, setUseTts] = useState(true);
+  const [showNewCharacter, setShowNewCharacter] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const toggleCharacter = (id) => {
+    const next = selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id];
+    setSelected(next);
+    // Nhân vật chính bị bỏ chọn (hoặc chưa có) → lấy nhân vật đầu tiên còn lại
+    if (!next.includes(mainId)) setMainId(next[0] ?? null);
+  };
+
+  const missing =
+    (!topicId && "Ba mẹ chọn một bài học nhé") ||
+    (selected.length === 0 && "Ba mẹ chọn ít nhất một nhân vật nhé") ||
+    (!title.trim() && "Ba mẹ đặt tên cho truyện nhé") ||
+    "";
+
+  const submit = async () => {
+    if (missing) return setError(missing);
+    setError("");
+    setSubmitting(true);
+    // Nhân vật chính đứng đầu → token {NV1}; thứ tự còn lại theo lúc chọn
+    const ordered = [mainId, ...selected.filter((id) => id !== mainId)];
+    try {
+      const story = await createStory.mutateAsync({
+        topicId,
+        length: mode === "ai" ? length : "custom",
+        title: title.trim(),
+        ...(situation.trim() && { situation: situation.trim() }),
+        characters: ordered.map((characterId) => ({ characterId, isMain: characterId === mainId })),
+        useAiImage: false,
+        useTts,
+      });
+      if (mode === "ai") {
+        try {
+          await generateStory(story.id);
+        } catch (err) {
+          // Truyện đã tạo; báo lỗi rồi để trang editor cho bấm "Cho AI viết" lại
+          toast.error(err.status === 402 ? "Ba mẹ không đủ credit để AI viết truyện" : err.message);
+        }
+      }
+      navigate(ROUTES.PARENT.studioStory(story.id));
+    } catch (err) {
+      setError(err.errors?.[0]?.message || err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-5 pb-10">
+      <Link to={ROUTES.PARENT.STUDIO} className="inline-flex items-center gap-1 text-sm font-semibold text-navy/60 hover:text-primary">
+        <ArrowLeft size={16} /> Truyện của ba mẹ
+      </Link>
+      <h1 className="text-3xl">Sáng tác truyện mới</h1>
+
+      <Section step={1} title="Chọn bài học" hint="Bài học do chuyên gia soạn, mỗi bài gắn một năng lực cảm xúc (CASEL).">
+        {topics.isLoading && <Loader2 className="animate-spin text-primary" />}
+        {topics.error && <p className="text-sm text-danger">{topics.error.message}</p>}
+        <div className="grid gap-3 sm:grid-cols-2">
+          {(topics.data ?? []).map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTopicId(t.id)}
+              className={`space-y-2 rounded-2xl border-2 p-4 text-left transition ${
+                topicId === t.id ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"
+              }`}
+            >
+              <CaselTag competency={t.skill?.caselCode} className="bg-secondary-tint" />
+              <p className="font-display font-bold">{t.title}</p>
+              <p className="text-xs text-navy/55">
+                {t.ageMin}–{t.ageMax} tuổi
+              </p>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section step={2} title="Chọn nhân vật" hint="Chọn các nhân vật xuất hiện trong truyện và một nhân vật chính (thường là bé).">
+        {characters.isLoading && <Loader2 className="animate-spin text-primary" />}
+        <div className="grid gap-3 sm:grid-cols-2">
+          {(characters.data ?? []).map((c) => {
+            const on = selected.includes(c.id);
+            return (
+              <div
+                key={c.id}
+                className={`flex items-start gap-3 rounded-2xl border-2 p-3 transition ${on ? "border-secondary bg-secondary-tint/60" : "border-outline"}`}
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleCharacter(c.id)}
+                  aria-pressed={on}
+                  aria-label={`Chọn ${c.name}`}
+                  className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg border-2 ${on ? "border-secondary bg-secondary text-white" : "border-outline"}`}
+                >
+                  {on && <Check size={14} />}
+                </button>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold">
+                    {c.name} {c.childId && <span className="text-xs font-semibold text-secondary-dark">(con)</span>}
+                  </p>
+                  <p className="line-clamp-2 text-xs text-navy/55">{c.appearance}</p>
+                </div>
+                {on && (
+                  <button
+                    type="button"
+                    onClick={() => setMainId(c.id)}
+                    className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
+                      mainId === c.id ? "bg-primary text-white" : "bg-surface text-navy/60 hover:bg-primary-tint"
+                    }`}
+                  >
+                    <Star size={12} /> {mainId === c.id ? "Nhân vật chính" : "Đặt làm chính"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setShowNewCharacter(true)}
+            className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-outline p-3 font-semibold text-navy/60 hover:border-primary hover:text-primary"
+          >
+            <Plus size={18} /> Thêm nhân vật
+          </button>
+        </div>
+      </Section>
+
+      <Section step={3} title="Cách viết truyện">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[
+            { value: "ai", icon: Bot, title: "AI viết giúp", text: "AI viết cả truyện một lần, ba mẹ xem và sửa lại." },
+            { value: "manual", icon: PenLine, title: "Tự viết", text: "Ba mẹ tự viết từng trang và điểm dừng (4–20 trang)." },
+          ].map(({ value, icon: Icon, title: label, text }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setMode(value)}
+              className={`space-y-1 rounded-2xl border-2 p-4 text-left transition ${mode === value ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"}`}
+            >
+              <p className="flex items-center gap-2 font-display font-bold">
+                <Icon size={18} /> {label}
+              </p>
+              <p className="text-sm text-navy/60">{text}</p>
+            </button>
+          ))}
+        </div>
+        {mode === "ai" && (
+          <div className="flex flex-wrap gap-2">
+            {AI_LENGTHS.map((l) => (
+              <button
+                key={l.value}
+                type="button"
+                onClick={() => setLength(l.value)}
+                className={`rounded-full px-4 py-2 text-sm font-bold ${length === l.value ? "bg-secondary text-white" : "bg-surface hover:bg-secondary-tint"}`}
+              >
+                {l.label} · {l.pages} trang
+              </button>
+            ))}
+          </div>
+        )}
+      </Section>
+
+      <Section step={4} title="Thông tin truyện">
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold">Tên truyện</span>
+          <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} className={fieldClass} placeholder="VD: Bin và chú khủng long xanh" />
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-semibold">Chuyện thật ở nhà (không bắt buộc)</span>
+          <textarea
+            value={situation}
+            onChange={(e) => setSituation(e.target.value)}
+            maxLength={2000}
+            rows={4}
+            className={fieldClass}
+            placeholder="VD: Bin giật đồ chơi của em, em ngã và khóc to, Bin hét lên rồi ném đồ chơi."
+          />
+          <span className="mt-1 block text-xs text-navy/55">
+            Ba mẹ cứ dùng tên thật — hệ thống đổi tên thành ký hiệu trước khi gửi cho AI. AI giữ diễn biến chính của chuyện.
+          </span>
+        </label>
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4">
+          <div>
+            <p className="font-semibold">Giọng đọc kể truyện</p>
+            <p className="text-xs text-navy/55">Đọc cả lời kể, câu hỏi, gợi ý và phản hồi cho bé</p>
+          </div>
+          <Switch checked={useTts} onChange={setUseTts} label="Giọng đọc kể truyện" />
+        </div>
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4 opacity-60">
+          <div>
+            <p className="font-semibold">Tranh minh họa bằng AI</p>
+            <p className="text-xs text-navy/55">Sắp có</p>
+          </div>
+          <Switch checked={false} onChange={() => {}} label="Tranh minh họa bằng AI" disabled />
+        </div>
+      </Section>
+
+      <div className="card flex flex-wrap items-center justify-between gap-3 p-5">
+        <p className="text-sm text-navy/65">
+          {mode === "ai" ? (
+            <>
+              AI viết truyện sẽ dùng credit. Ba mẹ đang có <span className="font-bold text-navy">{creditBalance ?? "…"}</span> credit.
+            </>
+          ) : (
+            "Truyện tự viết không dùng credit."
+          )}
+        </p>
+        <button type="button" onClick={submit} disabled={submitting} className="btn-primary disabled:opacity-60">
+          {submitting ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+          {mode === "ai" ? "Tạo & cho AI viết" : "Tạo truyện"}
+        </button>
+        {error && <p className="w-full text-sm font-semibold text-danger">{error}</p>}
+      </div>
+
+      <NewCharacterModal
+        open={showNewCharacter}
+        onClose={() => setShowNewCharacter(false)}
+        onCreated={(character) => {
+          setShowNewCharacter(false);
+          toggleCharacter(character.id);
+          toast.success(`Đã thêm ${character.name}`);
+        }}
+      />
+    </div>
+  );
+}
+
+export default CreateStoryPage;
