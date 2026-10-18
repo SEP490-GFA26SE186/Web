@@ -20,7 +20,6 @@ import {
   Scale,
   SearchCheck,
   SlidersHorizontal,
-  Star,
   Users,
 } from "lucide-react";
 import {
@@ -28,8 +27,8 @@ import {
   CASEL_SKILLS,
   MISSION_PILLARS,
   PRINCIPLES,
+  FAQS,
   STEPS,
-  TESTIMONIALS,
   WORKFLOW,
 } from "../../constants/landingContent";
 
@@ -64,9 +63,9 @@ export function MissionSection() {
     <section id="gioi-thieu" className="w-full scroll-mt-20 bg-surface py-16">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 md:px-8">
         <SectionHeader
-          eyebrow="Sứ mệnh nuôi dưỡng"
-          title="Trang bị cho con hành trang cảm xúc vững chắc trước ngưỡng cửa tương lai"
-          desc="Trẻ em hôm nay đối mặt với nhiều xáo trộn tâm lý nhưng thường thiếu không gian an toàn để học cách gọi tên và xử lý. StoryWeaver ra đời để biến mỗi giờ đọc sách thành một bài học trưởng thành nhẹ nhàng."
+          eyebrow="Vì sao có StoryWeaver"
+          title="Biến giờ nghe truyện thành lúc con học hiểu cảm xúc"
+          desc="Mỗi truyện xoay quanh một tình huống thật của bé và một bài học cảm xúc. Bé không chỉ nghe — bé được hỏi, được chọn và được nghe điều xảy ra tiếp theo."
         />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
           {MISSION_PILLARS.map((p) => {
@@ -153,10 +152,10 @@ export function CaselSection() {
     <section id="mo-hinh-casel" className="w-full scroll-mt-20 bg-surface py-16">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 md:px-8">
         <SectionHeader
-          eyebrow="Tiêu chuẩn quốc tế"
+          eyebrow="Khung sư phạm"
           eyebrowTone="secondary"
-          title="5 Năng lực Cảm xúc Cốt lõi theo Chuẩn CASEL Hoa Kỳ"
-          desc="Được thiết kế dựa trên khung học tập xã hội - cảm xúc hàng đầu thế giới, chuyển thể thành các tình huống gần gũi trong đời sống hàng ngày của trẻ."
+          title="5 năng lực cảm xúc – xã hội theo khung CASEL"
+          desc="Mỗi bài học gắn một năng lực. Câu trả lời của bé ở từng truyện được cộng vào đúng năng lực đó trong Báo cáo EQ."
         />
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
           {CASEL_SKILLS.map((s) => {
@@ -172,9 +171,6 @@ export function CaselSection() {
                   <span className={`text-xs font-bold ${t.text}`}>{s.en}</span>
                   <p className="text-sm text-navy/65">{s.desc}</p>
                 </div>
-                <p className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-navy/60">
-                  <BookOpen size={16} className={t.text} /> {s.stories}+ Truyện thực hành
-                </p>
               </article>
             );
           })}
@@ -189,9 +185,9 @@ export function StepsSection() {
     <section className="mx-auto w-full max-w-[1440px] px-4 py-16 md:px-8">
       <div className="flex flex-col gap-10">
         <SectionHeader
-          eyebrow="Trải nghiệm trực quan"
-          title="3 Bước Đơn Giản để Tạo Giờ Đọc Kỳ Diệu Cho Bé"
-          desc="Không cần kỹ năng công nghệ phức tạp, cha mẹ chỉ mất chưa đầy 3 phút để chuẩn bị một câu chuyện ý nghĩa trước giờ đi ngủ."
+          eyebrow="Cách hoạt động"
+          title="3 bước để có một truyện riêng cho con"
+          desc="Ba mẹ kể tình huống, AI viết giúp trong vài phút, ba mẹ xem lại — rồi đưa lên giá sách cho bé nghe."
         />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
           {STEPS.map((s, i) => {
@@ -224,12 +220,12 @@ export function AudienceSection({ onCta }) {
     <section id="danh-cho-gia-dinh" className="w-full scroll-mt-20 bg-surface py-16">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-4 md:px-8">
         <SectionHeader
-          eyebrow="Hệ sinh thái toàn diện"
+          eyebrow="Ai dùng StoryWeaver"
           eyebrowTone="secondary"
-          title="Đồng Hành Cùng Những Người Yêu Thương Trẻ Thơ"
-          desc="StoryWeaver kết nối gia đình, nhà giáo dục và những người sáng tác truyện trong một môi trường văn minh, an toàn và bổ ích."
+          title="Cho gia đình — và cho ba mẹ thích viết truyện"
+          desc="Mọi tài khoản phụ huynh đều tạo truyện cho con. Ba mẹ nào muốn chia sẻ truyện hay có thể đăng bán trên Chợ truyện."
         />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-8">
           {AUDIENCES.map((a) => {
             const Icon = ICONS[a.icon];
             const t = TONES[a.tone];
@@ -261,36 +257,22 @@ export function AudienceSection({ onCta }) {
   );
 }
 
-export function TestimonialsSection() {
+export function FaqSection() {
   return (
-    <section id="cong-dong" className="mx-auto w-full max-w-[1440px] scroll-mt-20 px-4 py-16 md:px-8">
+    <section id="cau-hoi" className="mx-auto w-full max-w-[1440px] scroll-mt-20 px-4 py-16 md:px-8">
       <div className="flex flex-col gap-10">
-        <SectionHeader
-          eyebrow="Tiếng nói người thật việc thật"
-          title="Được Yêu Thích Bởi Các Gia Đình & Thầy Cô"
-          desc="Cảm xúc tích cực và sự chuyển biến thật của các bé là nguồn động lực lớn nhất để chúng tôi hoàn thiện mỗi ngày."
-        />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8">
-          {TESTIMONIALS.map((t) => (
-            <figure key={t.name} className="flex flex-col justify-between gap-5 rounded-[2rem] bg-white p-6 shadow-mid">
-              <div className="flex flex-col gap-3">
-                <div className="flex gap-0.5" aria-label="5 sao">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} size={20} className="fill-primary text-primary" />
-                  ))}
-                </div>
-                <blockquote className="text-navy/85 italic">“{t.quote}”</blockquote>
-              </div>
-              <figcaption className="flex items-center gap-3 pt-1">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-surface text-2xl" aria-hidden="true">
-                  {t.avatar}
+        <SectionHeader eyebrow="Câu hỏi thường gặp" title="Ba mẹ hay hỏi gì?" desc="Những điều cần biết trước khi tạo truyện đầu tiên cho con." />
+        <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 md:grid-cols-2">
+          {FAQS.map((f) => (
+            <details key={f.q} className="group rounded-[1.5rem] bg-white p-5 shadow-low open:shadow-mid">
+              <summary className="cursor-pointer list-none font-display text-lg font-bold marker:hidden">
+                <span className="flex items-start justify-between gap-3">
+                  {f.q}
+                  <ChevronsDown size={20} className="mt-1 shrink-0 text-primary transition group-open:rotate-180" aria-hidden="true" />
                 </span>
-                <span>
-                  <span className="block font-display font-bold">{t.name}</span>
-                  <span className="text-sm text-navy/60">{t.role}</span>
-                </span>
-              </figcaption>
-            </figure>
+              </summary>
+              <p className="mt-3 text-navy/75">{f.a}</p>
+            </details>
           ))}
         </div>
       </div>

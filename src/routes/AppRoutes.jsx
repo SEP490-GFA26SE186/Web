@@ -19,6 +19,8 @@ import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
 const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
 const TopicsPage = lazy(() => import("../pages/moderator/TopicsPage"));
+const PrivacyPolicyPage = lazy(() => import("../pages/legal/PrivacyPolicyPage"));
+const TermsPage = lazy(() => import("../pages/legal/TermsPage"));
 const FamilyCharactersPage = lazy(() => import("../pages/parent/FamilyCharactersPage"));
 const EqJourneyPage = lazy(() => import("../pages/parent/EqJourneyPage"));
 const KeywordsPage = lazy(() => import("../pages/moderator/KeywordsPage"));
@@ -82,11 +84,6 @@ const parentPlaceholders = [
 const moderatorPlaceholders = [
   { path: "backgrounds", title: "Thư viện bối cảnh" },
   { path: "guidelines", title: "Quy chuẩn kiểm duyệt" },
-];
-
-const publicPlaceholders = [
-  { path: "/chinh-sach-bao-mat", title: "Chính sách bảo mật trẻ em" },
-  { path: "/dieu-khoan-dich-vu", title: "Điều khoản dịch vụ" },
 ];
 
 const placeholderRoutes = (items) =>
@@ -182,17 +179,8 @@ function AppRoutes() {
         </Route>
 
         {/* Trang công khai chưa làm (link từ footer Landing) */}
-        {publicPlaceholders.map(({ path, title }) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              <div className="min-h-screen bg-canvas px-4 py-10">
-                <ComingSoonPage title={title} />
-              </div>
-            }
-          />
-        ))}
+        <Route path="/chinh-sach-bao-mat" element={<PrivacyPolicyPage />} />
+        <Route path="/dieu-khoan-dich-vu" element={<TermsPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

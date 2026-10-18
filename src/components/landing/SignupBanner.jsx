@@ -1,7 +1,6 @@
 import { forwardRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, WandSparkles, Zap } from "lucide-react";
-import { SIGNUP_BONUS_CREDITS } from "../../constants/landingContent";
 import { EMAIL_REGEX } from "../../services/authService";
 
 // Banner CTA cuối trang: nhập email → sang trang đăng ký (điền sẵn email)
@@ -31,10 +30,10 @@ const SignupBanner = forwardRef(function SignupBanner(_, inputRef) {
         <div className="relative z-10 flex flex-col items-center justify-between gap-6 lg:flex-row">
           <div className="flex max-w-xl flex-col gap-2 text-center lg:text-left">
             <span className="mx-auto inline-flex w-fit items-center gap-1.5 rounded-full bg-white/20 px-4 py-1 text-xs font-bold backdrop-blur-md lg:mx-0">
-              <Sparkles size={16} className="fill-yellow-300 text-yellow-300" /> Tặng ngay {SIGNUP_BONUS_CREDITS} AI Credits trải nghiệm khi đăng ký
+              <Sparkles size={16} className="fill-yellow-300 text-yellow-300" /> Gói Miễn phí có sẵn credit AI mỗi tháng
             </span>
             <h2 className="text-3xl leading-tight sm:text-4xl">Bắt đầu hành trình nuôi dưỡng cảm xúc cho con ngay hôm nay</h2>
-            <p className="text-lg text-white/90">Đăng ký tài khoản miễn phí chỉ trong 30 giây. Không cần thẻ tín dụng, hoàn toàn an toàn cho trẻ.</p>
+            <p className="text-lg text-white/90">Đăng ký miễn phí, không cần thẻ. Truyện tự viết không tốn credit.</p>
           </div>
 
             <form onSubmit={submit} noValidate className="flex w-full flex-col gap-2 lg:w-auto">
