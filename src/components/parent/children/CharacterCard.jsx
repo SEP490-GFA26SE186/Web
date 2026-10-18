@@ -14,7 +14,7 @@ const PORTRAIT_STATUS = {
 
 /**
  * Nhân vật đại diện của bé (characters.child_id — mỗi bé tối đa 1 nhân vật).
- * Ngoại hình chỉ mô tả bằng chữ; AI vẽ 2 chân dung để ba mẹ chọn 1 làm ảnh tham chiếu. Không upload ảnh.
+ * Ngoại hình chỉ mô tả bằng chữ. Chân dung AI thuộc phần ảnh đang nghiên cứu (chưa bật).
  */
 function CharacterCard({ child, onEdit }) {
   const character = child.character;
@@ -43,18 +43,21 @@ function CharacterCard({ child, onEdit }) {
             <button onClick={onEdit} className="rounded-full bg-surface px-4 py-2 text-sm font-semibold transition hover:bg-outline">
               Sửa mô tả
             </button>
-            <Link
-              to={ROUTES.PARENT.FAMILY_CHARACTERS}
-              className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-sm font-bold text-white shadow-low transition hover:bg-secondary-dark"
+            <span
+              title="Chân dung AI đang được nghiên cứu, sẽ có sau"
+              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full bg-surface px-4 py-2 text-sm font-semibold text-navy/45"
             >
-              <WandSparkles size={15} /> {character.portraitStatus === "ready" ? "Đổi chân dung" : "Vẽ chân dung bằng AI"}
+              <WandSparkles size={15} /> Chân dung AI — sắp có
+            </span>
+            <Link to={ROUTES.PARENT.FAMILY_CHARACTERS} className="inline-flex items-center gap-1 px-2 py-2 text-sm font-bold text-primary-dark hover:gap-2">
+              Nhân vật gia đình <ArrowRight size={15} />
             </Link>
           </div>
         </div>
       ) : (
         <div className="flex flex-col items-start gap-3 rounded-2xl bg-surface p-4">
           <p className="text-sm text-navy/70">
-            Chưa có nhân vật. Thêm mô tả ngoại hình để AI vẽ {child.name} thành nhân vật chính trong truyện.
+            Chưa có nhân vật. Thêm mô tả để AI viết {child.name} thành nhân vật chính trong truyện.
           </p>
           <button onClick={onEdit} className="inline-flex items-center gap-1 text-sm font-bold text-primary-dark hover:gap-2">
             Thêm mô tả ngoại hình <ArrowRight size={15} />

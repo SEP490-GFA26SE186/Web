@@ -89,3 +89,9 @@ export const getCharacters = async () => (await call(api.get("/characters"))).da
 
 /** POST /characters { name, appearance } */
 export const createCharacter = async (payload) => (await call(api.post("/characters", payload))).data.character;
+
+/** PUT /characters/:id { name?, appearance? } — nhân vật của bé không đổi tên ở đây (422) */
+export const updateCharacter = async (id, payload) => (await call(api.put(`/characters/${id}`, payload))).data.character;
+
+/** DELETE /characters/:id — xoá mềm; truyện cũ giữ nguyên nhân vật. Nhân vật của bé → 422 */
+export const deleteCharacter = (id) => call(api.delete(`/characters/${id}`));
