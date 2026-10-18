@@ -25,6 +25,7 @@ const KeywordsPage = lazy(() => import("../pages/moderator/KeywordsPage"));
 const ReportsPage = lazy(() => import("../pages/moderator/ReportsPage"));
 const SuspendedPage = lazy(() => import("../pages/moderator/SuspendedPage"));
 const StrikesPage = lazy(() => import("../pages/moderator/StrikesPage"));
+const AiFlagsPage = lazy(() => import("../pages/moderator/AiFlagsPage"));
 const AuditsPage = lazy(() => import("../pages/moderator/AuditsPage"));
 const AppealsPage = lazy(() => import("../pages/admin/AppealsPage"));
 const AccountsPage = lazy(() => import("../pages/admin/AccountsPage"));
@@ -80,7 +81,6 @@ const parentPlaceholders = [
 
 const moderatorPlaceholders = [
   { path: "backgrounds", title: "Thư viện bối cảnh" },
-  { path: "ai-flags", title: "Cảnh báo AI" },
   { path: "guidelines", title: "Quy chuẩn kiểm duyệt" },
 ];
 
@@ -144,6 +144,7 @@ function AppRoutes() {
           <Route path="suspended" element={<SuspendedPage />} />
           <Route path="strikes" element={<StrikesPage />} />
           <Route path="audits" element={<AuditsPage />} />
+          <Route path="ai-flags" element={<AiFlagsPage />} />
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
           <Route path="seller-applications" element={<SellerApplicationsPage />} />

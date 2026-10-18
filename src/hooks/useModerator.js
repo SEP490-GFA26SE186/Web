@@ -4,6 +4,7 @@ import {
   decideReview,
   decideSeller,
   dismissReport,
+  getAiFlags,
   getAudits,
   getModeratorOverview,
   getReportGroups,
@@ -12,6 +13,7 @@ import {
   hideReview,
   issueStrike,
   runAudits,
+  setAiBlock,
   suspendListing,
   getReview,
   getReviewQueue,
@@ -29,6 +31,7 @@ export const modKeys = {
   restricted: (status) => ["moderator", "restricted", status],
   strikes: (filter) => ["moderator", "strikes", filter],
   audits: ["moderator", "audits"],
+  aiFlags: (f) => ["moderator", "ai-flags", f],
 };
 
 export const useModeratorOverview = () => useQuery({ queryKey: modKeys.overview, queryFn: getModeratorOverview, refetchInterval: 60_000 });
@@ -80,4 +83,6 @@ export const useDismissReport = () => useMonitoringMutation(dismissReport);
 export const useSuspendListing = () => useMonitoringMutation(({ listingId, reason }) => suspendListing(listingId, reason));
 export const useIssueStrike = () => useMonitoringMutation(issueStrike);
 export const useHideReview = () => useMonitoringMutation(hideReview);
+export const useAiFlags = (filter) => useQuery({ queryKey: modKeys.aiFlags(filter), queryFn: () => getAiFlags(filter) });
+export const useSetAiBlock = () => useMonitoringMutation(({ userId, ...body }) => setAiBlock(userId, body));
 export const useRunAudits = () => useMonitoringMutation(runAudits);

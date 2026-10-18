@@ -73,3 +73,8 @@ export const runAudits = (count) => call(api.post("/moderation/audits/run", coun
 
 /** Ẩn đánh giá vi phạm (đóng các báo cáo đang mở của đánh giá, tính lại điểm truyện) */
 export const hideReview = (reviewId) => call(api.post(`/moderation/product-reviews/${reviewId}/hide`));
+
+/** Cảnh báo AI (luồng 7.6): { days, min, flags: [{ userId, fullName, email, total, blocked, failed, blockedRate, lastBlocked, aiBlockedUntil }] } */
+export const getAiFlags = ({ days = 7, min = 2 } = {}) => call(api.get("/moderation/ai-flags", { params: { days, min } }));
+/** Tạm khoá quyền dùng AI `days` ngày; days = 0 → mở khoá */
+export const setAiBlock = (userId, body) => call(api.post(`/moderation/ai-flags/${userId}/block`, body));
