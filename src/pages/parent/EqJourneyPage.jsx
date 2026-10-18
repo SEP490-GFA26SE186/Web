@@ -4,7 +4,7 @@ import { RadarChart } from "../../components/parent/EqRadarCard";
 import NoChildState from "../../components/parent/NoChildState";
 import { CASEL } from "../../constants/casel";
 import { EQ_ADVICE } from "../../constants/eqAdvice";
-import { CHECKPOINT_TYPES } from "../../constants/story";
+import { CHECKPOINT_TYPES, EMOTIONS } from "../../constants/story";
 import { useChildEqJourney, useSelectedChild } from "../../hooks/useChildProfile";
 
 // Màu 5 năng lực trên biểu đồ xu hướng (đủ tách biệt, giữ tương phản trên nền sáng)
@@ -186,6 +186,28 @@ function EqJourneyPage() {
                   ))}
                 </tbody>
               </table>
+              {r.emotions?.length > 0 && (
+                <div className="mt-5 space-y-2 border-t border-outline pt-4">
+                  <h3 className="text-base">Nhận diện cảm xúc</h3>
+                  <p className="text-xs text-navy/55">Ở câu hỏi “nhân vật đang cảm thấy thế nào”, bé gọi đúng tên cảm xúc ngay lần đầu bao nhiêu lần.</p>
+                  <ul className="space-y-2">
+                    {r.emotions.map((e) => {
+                      const pct = Math.round((e.correctFirstTry / e.count) * 100);
+                      return (
+                        <li key={e.emotion} className="grid grid-cols-[88px_1fr_auto] items-center gap-3 text-sm">
+                          <span className="font-semibold">{EMOTIONS[e.emotion] ?? e.emotion}</span>
+                          <span className="h-2.5 overflow-hidden rounded-full bg-surface" role="img" aria-label={`${pct}% đúng ngay lần đầu`}>
+                            <span className="block h-full rounded-full bg-secondary" style={{ width: `${pct}%` }} />
+                          </span>
+                          <span className="text-xs whitespace-nowrap text-navy/65">
+                            {e.correctFirstTry}/{e.count} lần
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
             </section>
             <section className="card p-5">
               <h2 className="mb-3 text-lg">Câu trả lời gần đây</h2>
@@ -195,7 +217,7 @@ function EqJourneyPage() {
                     <p className="font-semibold">{a.question}</p>
                     <p className="text-xs text-navy/60">
                       {a.storyTitle} • {CHECKPOINT_TYPES[a.type]?.short ?? a.type} •{" "}
-                      {a.skipped ? "bỏ qua" : a.score == null ? "không chấm điểm" : a.attempts === 1 ? `đúng ngay (${a.score})` : `cần gợi ý (${a.score})`} • {new Date(a.answeredAt).toLocaleDateString("vi-VN")}
+                      {a.skipped ? "bỏ qua" : a.score == null ? "không chấm điểm" : a.score === 100 ? "đúng ngay" : a.attempts > 1 ? `cần gợi ý (${a.score} điểm)` : `chưa tốt nhất (${a.score} điểm)`} • {new Date(a.answeredAt).toLocaleDateString("vi-VN")}
                     </p>
                   </li>
                 ))}
