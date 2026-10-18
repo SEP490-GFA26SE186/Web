@@ -1,4 +1,6 @@
-import { Bot, FileText, ShoppingCart, Star, Store } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Bot, CheckCircle2, FileText, ShoppingCart, Star, Store } from "lucide-react";
+import { ROUTES } from "../../../constants/routes";
 import { formatNumber, formatVND } from "../../../utils/format";
 import CaselTag from "../library/CaselTag";
 import { coverGradient } from "../library/storyMeta";
@@ -15,7 +17,7 @@ function PriceBadge({ priceVnd }) {
 }
 
 // Thẻ truyện đang bán trên chợ (listing đã được Moderator duyệt)
-function ListingCard({ listing, onAddToCart }) {
+function ListingCard({ listing }) {
   const { topic, priceTier, seller } = listing;
 
   return (
@@ -67,12 +69,20 @@ function ListingCard({ listing, onAddToCart }) {
           <p className="flex items-center gap-1 truncate">
             <Store size={12} className="shrink-0" /> {seller.displayName}
           </p>
-          <button
-            onClick={() => onAddToCart(listing)}
+          <Link
+            to={ROUTES.PARENT.marketplaceListing(listing.id)}
             className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-surface px-4 py-2.5 text-sm font-bold text-navy transition hover:bg-primary hover:text-white"
           >
-            <ShoppingCart size={15} /> {priceTier.priceVnd === 0 ? "Nhận miễn phí" : "Thêm vào giỏ"}
-          </button>
+            {listing.owned ? (
+              <>
+                <CheckCircle2 size={15} /> Đã có — xem truyện
+              </>
+            ) : (
+              <>
+                <ShoppingCart size={15} /> {priceTier.priceVnd === 0 ? "Nhận miễn phí" : "Xem & mua"}
+              </>
+            )}
+          </Link>
         </div>
       </div>
     </article>

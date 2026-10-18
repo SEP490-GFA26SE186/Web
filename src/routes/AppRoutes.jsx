@@ -41,6 +41,9 @@ const StoryReaderPage = lazy(() => import("../pages/kid/StoryReaderPage"));
 const KidBookshelfPage = lazy(() => import("../pages/kid/KidBookshelfPage"));
 const BillingPage = lazy(() => import("../pages/parent/billing/BillingPage"));
 const SellingPage = lazy(() => import("../pages/parent/selling/SellingPage"));
+const WithdrawalsPage = lazy(() => import("../pages/admin/WithdrawalsPage"));
+const ListingDetailPage = lazy(() => import("../pages/parent/marketplace/ListingDetailPage"));
+const PurchaseResultPage = lazy(() => import("../pages/parent/marketplace/PurchaseResultPage"));
 const NewListingPage = lazy(() => import("../pages/parent/selling/NewListingPage"));
 const BillingResultPage = lazy(() => import("../pages/parent/billing/BillingResultPage"));
 const KidReaderIndex = lazy(() =>
@@ -78,7 +81,6 @@ const moderatorPlaceholders = [
 const adminPlaceholders = [
   { path: "accounts", title: "Tài Khoản Phụ Huynh & KDV" },
   { path: "plans", title: "Gói & Định Giá" },
-  { path: "withdrawals", title: "Quản Lý Rút Tiền" },
   { path: "refunds", title: "Yêu Cầu Hoàn Tiền" },
   { path: "revenue", title: "Báo Cáo Doanh Thu" },
   { path: "ai-costs", title: "Chi Phí Vận Hành AI" },
@@ -118,6 +120,8 @@ function AppRoutes() {
           <Route index element={<ParentDashboardPage />} />
           <Route path="library" element={<LibraryPage />} />
           <Route path="marketplace" element={<MarketplacePage />} />
+          <Route path="marketplace/result" element={<PurchaseResultPage />} />
+          <Route path="marketplace/:listingId" element={<ListingDetailPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="children" element={<ChildrenPage />} />
           <Route path="studio" element={<StudioPage />} />
@@ -165,6 +169,7 @@ function AppRoutes() {
         >
           <Route index element={<AdminDashboardPage />} />
           <Route path="ai-config" element={<AiConfigPage />} />
+          <Route path="withdrawals" element={<WithdrawalsPage />} />
           {placeholderRoutes(adminPlaceholders)}
         </Route>
 

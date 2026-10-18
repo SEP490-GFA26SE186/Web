@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BadgeCheck, Clock, Loader2, Store } from "lucide-react";
+import EarningsPanel from "../../../components/parent/selling/EarningsPanel";
 import { ROUTES } from "../../../constants/routes";
 import { applySeller, getMyListings, getMySeller } from "../../../services/sellingService";
 import { toast } from "../../../stores/toastStore";
@@ -92,6 +93,8 @@ function SellingPage() {
           </>
         )}
       </section>
+
+      {status === "approved" && <EarningsPanel />}
 
       {status === "approved" && (
         <section className="card space-y-3 p-6">
