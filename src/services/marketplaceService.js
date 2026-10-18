@@ -31,3 +31,10 @@ export const checkoutListing = (listingId) => call(api.post("/market/checkout", 
 
 /** Báo cáo truyện đang bán: { category, description?, pageId? } → { reportId, suspended }. Đã báo cáo → 409. */
 export const reportListing = (listingId, body) => call(api.post(`/market/listings/${listingId}/reports`, body));
+
+/** Đánh giá của truyện → { reviews, distribution, myReview, canReview, reason, isSeller, tags } */
+export const getReviews = (listingId) => call(api.get(`/market/listings/${listingId}/reviews`));
+/** Tạo / sửa đánh giá của mình: { rating, comment?, tags? } */
+export const saveReview = (listingId, body) => call(api.put(`/market/listings/${listingId}/review`, body));
+export const replyReview = (reviewId, reply) => call(api.post(`/market/reviews/${reviewId}/reply`, { reply }));
+export const reportReview = (reviewId, body) => call(api.post(`/market/reviews/${reviewId}/reports`, body));

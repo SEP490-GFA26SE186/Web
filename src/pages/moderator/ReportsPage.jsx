@@ -4,7 +4,7 @@ import { AlertTriangle, Flag, Loader2, PauseCircle, PenLine, X } from "lucide-re
 import StrikeModal from "../../components/moderator/StrikeModal";
 import { LISTING_STATUS, REPORT_CATEGORIES, REPORT_STATUS, REVIEW_TYPES, formatDateTime } from "../../constants/moderation";
 import { ROUTES } from "../../constants/routes";
-import { useDismissReport, useReportGroups, useSuspendListing } from "../../hooks/useModerator";
+import { useDismissReport, useHideReview, useReportGroups, useSuspendListing } from "../../hooks/useModerator";
 import { toast } from "../../stores/toastStore";
 
 const TABS = [
@@ -49,6 +49,7 @@ function SuspendForm({ listingId, onDone }) {
 function ReportGroup({ group, onStrike }) {
   const [suspending, setSuspending] = useState(false);
   const dismiss = useDismissReport();
+  const hide = useHideReview();
   const { listing, openReview, reports } = group;
   const status = LISTING_STATUS[listing.status];
   const openCount = reports.filter((r) => r.status === "open").length;
@@ -94,6 +95,11 @@ function ReportGroup({ group, onStrike }) {
                   {REPORT_CATEGORIES[r.category] ?? r.category}
                   {r.pageOrder && <span className="font-normal text-navy/60"> • trang {r.pageOrder}</span>}
                 </p>
+                {r.review && (
+                  <p className="rounded-card bg-white px-3 py-2 text-navy/80">
+                    <b>Đánh giá {r.review.rating}★{r.review.hidden ? " (đã ẩn)" : ""}:</b> {r.review.comment || <i className="text-navy/50">không có nhận xét</i>}
+                  </p>
+                )}
                 {r.description && <p className="text-navy/80">“{r.description}”</p>}
                 <p className="text-xs text-navy/50">
                   {r.reporter} • {formatDateTime(r.createdAt)}
@@ -101,6 +107,16 @@ function ReportGroup({ group, onStrike }) {
                 </p>
               </div>
               <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${st?.tone}`}>{st?.label}</span>
+              {r.status === "open" && r.review && !r.review.hidden && (
+                <button
+                  type="button"
+                  disabled={hide.isPending && hide.variables === r.review.id}
+                  onClick={() => hide.mutate(r.review.id, { onSuccess: () => toast.success("Đã ẩn đánh giá"), onError: (e) => toast.error(e.message) })}
+                  className="rounded-full bg-danger px-3 py-1 text-xs font-bold text-white disabled:opacity-60"
+                >
+                  Ẩn đánh giá
+                </button>
+              )}
               {r.status === "open" && (
                 <button
                   type="button"

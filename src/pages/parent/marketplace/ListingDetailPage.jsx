@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BookPlus, Bot, Check, FileText, Loader2, ShieldCheck, ShoppingCart, Store, Type, Volume2 } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
+import ListingReviews from "../../../components/parent/marketplace/ListingReviews";
 import ReportListingButton from "../../../components/parent/marketplace/ReportListingButton";
 import { ROUTES } from "../../../constants/routes";
 import { useCheckoutListing, useListing } from "../../../hooks/useMarketplace";
@@ -119,6 +120,7 @@ function ListingDetailPage() {
           </div>
         )}
       </article>
+      <ListingReviews listing={l} />
     </div>
   );
 }

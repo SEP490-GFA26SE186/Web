@@ -70,3 +70,6 @@ export const issueStrike = (body) => call(api.post("/moderation/strikes", body))
 export const getAudits = async () => (await call(api.get("/moderation/audits"))).audits;
 /** → { created, reviewIds } */
 export const runAudits = (count) => call(api.post("/moderation/audits/run", count ? { count } : {}));
+
+/** Ẩn đánh giá vi phạm (đóng các báo cáo đang mở của đánh giá, tính lại điểm truyện) */
+export const hideReview = (reviewId) => call(api.post(`/moderation/product-reviews/${reviewId}/hide`));

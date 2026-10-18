@@ -9,6 +9,7 @@ import {
   getReportGroups,
   getRestrictedListings,
   getStrikes,
+  hideReview,
   issueStrike,
   runAudits,
   suspendListing,
@@ -78,4 +79,5 @@ export const useAudits = () => useQuery({ queryKey: modKeys.audits, queryFn: get
 export const useDismissReport = () => useMonitoringMutation(dismissReport);
 export const useSuspendListing = () => useMonitoringMutation(({ listingId, reason }) => suspendListing(listingId, reason));
 export const useIssueStrike = () => useMonitoringMutation(issueStrike);
+export const useHideReview = () => useMonitoringMutation(hideReview);
 export const useRunAudits = () => useMonitoringMutation(runAudits);
