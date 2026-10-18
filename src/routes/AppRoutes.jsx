@@ -25,6 +25,11 @@ const SuspendedPage = lazy(() => import("../pages/moderator/SuspendedPage"));
 const StrikesPage = lazy(() => import("../pages/moderator/StrikesPage"));
 const AuditsPage = lazy(() => import("../pages/moderator/AuditsPage"));
 const AppealsPage = lazy(() => import("../pages/admin/AppealsPage"));
+const AccountsPage = lazy(() => import("../pages/admin/AccountsPage"));
+const PlansPage = lazy(() => import("../pages/admin/PlansPage"));
+const RefundsPage = lazy(() => import("../pages/admin/RefundsPage"));
+const FinanceReportPage = lazy(() => import("../pages/admin/FinanceReportPage"));
+const AuditLogsPage = lazy(() => import("../pages/admin/AuditLogsPage"));
 const SellerApplicationsPage = lazy(() => import("../pages/moderator/SellerApplicationsPage"));
 const ModeratorDashboardPage = lazy(
   () => import("../pages/moderator/ModeratorDashboardPage"),
@@ -77,16 +82,6 @@ const moderatorPlaceholders = [
   { path: "backgrounds", title: "Thư viện bối cảnh" },
   { path: "ai-flags", title: "Cảnh báo AI" },
   { path: "guidelines", title: "Quy chuẩn kiểm duyệt" },
-];
-
-const adminPlaceholders = [
-  { path: "accounts", title: "Tài Khoản Phụ Huynh & KDV" },
-  { path: "plans", title: "Gói & Định Giá" },
-  { path: "refunds", title: "Yêu Cầu Hoàn Tiền" },
-  { path: "revenue", title: "Báo Cáo Doanh Thu" },
-  { path: "ai-costs", title: "Chi Phí Vận Hành AI" },
-  { path: "profit-loss", title: "Báo Cáo Lãi Lỗ P&L" },
-  { path: "audit-logs", title: "Nhật Ký Kiểm Toán" },
 ];
 
 const publicPlaceholders = [
@@ -176,7 +171,13 @@ function AppRoutes() {
           <Route path="ai-config" element={<AiConfigPage />} />
           <Route path="withdrawals" element={<WithdrawalsPage />} />
           <Route path="appeals" element={<AppealsPage />} />
-          {placeholderRoutes(adminPlaceholders)}
+          <Route path="accounts" element={<AccountsPage />} />
+          <Route path="plans" element={<PlansPage />} />
+          <Route path="refunds" element={<RefundsPage />} />
+          <Route path="revenue" element={<FinanceReportPage view="revenue" />} />
+          <Route path="ai-costs" element={<FinanceReportPage view="ai-costs" />} />
+          <Route path="profit-loss" element={<FinanceReportPage view="profit-loss" />} />
+          <Route path="audit-logs" element={<AuditLogsPage />} />
         </Route>
 
         {/* Trang công khai chưa làm (link từ footer Landing) */}

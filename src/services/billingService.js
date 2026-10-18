@@ -20,3 +20,8 @@ export const checkoutPlan = (planId) => call(api.post("/payments/plans/checkout"
 
 /** GET /payments/orders/:id → order. BE tự hỏi lại payOS khi đơn còn chờ. */
 export const getOrder = async (orderId) => (await call(api.get(`/payments/orders/${orderId}`))).order;
+
+/** GET /payments/orders → { refundWindowDays, orders: [{ id, totalVnd, paidAt, payosOrderCode, items: [{ id, itemType, title, unitPriceVnd, status, refund, refundable, deadline }] }] } */
+export const getMyOrders = () => call(api.get("/payments/orders"));
+/** Yêu cầu hoàn tiền một mục đã thanh toán (trong thời hạn) */
+export const requestRefund = (itemId, reason) => call(api.post(`/payments/order-items/${itemId}/refund`, { reason }));

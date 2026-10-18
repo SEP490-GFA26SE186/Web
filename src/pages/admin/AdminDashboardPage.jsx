@@ -1,106 +1,104 @@
 import { useState } from "react";
-import { Download, Loader2 } from "lucide-react";
-import ActionQueues from "../../components/admin/ActionQueues";
-import { PipelineSection, PricingSection, RevenueSection } from "../../components/admin/DashboardSections";
-import KpiCards from "../../components/admin/KpiCards";
-import { useAdminDashboard } from "../../hooks/useAdmin";
-import { DATE_RANGES } from "../../mocks/admin";
+import { Link } from "react-router-dom";
+import { ArrowLeftRight, Download, Gavel, Loader2, Wallet } from "lucide-react";
+import FinanceChart from "../../components/admin/FinanceChart";
+import { PageHeader, StatCard, Tabs } from "../../components/admin/AdminUi";
+import { RANGES, money } from "../../components/admin/adminFormat";
+import { ROUTES } from "../../constants/routes";
+import { useAdminOverview, useFinanceSummary } from "../../hooks/useAdmin";
 import { toast } from "../../stores/toastStore";
-import { downloadCsv } from "../../utils/format";
+import { downloadCsv, formatNumber } from "../../utils/format";
 
-// Xuất số liệu kỳ đang xem ra CSV (Excel mở trực tiếp được)
-const exportReport = (data, rangeLabel) => {
-  const k = data.kpis;
-  const rows = [
-    ["Báo cáo điều hành StoryWeaver AI", rangeLabel],
+const exportCsv = (d, label) => {
+  const r = d.revenue;
+  downloadCsv(`storyweaver-tai-chinh-${new Date().toISOString().slice(0, 10)}.csv`, [
+    ["Báo cáo tài chính StoryWeaver AI", label],
     [],
-    ["Chỉ số", "Giá trị"],
-    ["Tổng phụ huynh", k.parents.total],
-    ["Tác giả hoạt động", k.sellers.active],
-    ["Thuê bao Gia Đình", k.subscriptions.total],
-    ["GMV Chợ truyện (VND)", k.gmv.amount],
-    ["Số giao dịch", k.gmv.transactions],
-    ["Hoa hồng nền tảng (VND)", k.commission.amount],
-    ["Chi phí hạ tầng AI (VND)", k.aiCost.amount],
-    ["Lệnh rút tiền chờ duyệt", k.pendingWithdrawals.count],
+    ["Chỉ số", "VND"],
+    ["Doanh thu gói", r.planRevenue],
+    ["Doanh thu truyện (giá bán)", r.listingGross],
+    ["Phần người bán", r.sellerPayable],
+    ["Hoa hồng nền tảng", r.commission],
+    ["Đã hoàn tiền", r.refunded],
+    ["Phần nền tảng giữ", r.platformRevenue],
+    ["Chi phí AI", d.aiCost.totalVnd],
+    ["Lãi gộp", d.pnl.grossProfit],
     [],
-    ["Nguồn thu", "Số tiền (VND)", "Tỷ trọng (%)"],
-    ...data.revenueBreakdown.map((b) => [b.label, b.amount, b.share]),
-    [],
-    ["Tuần", "Doanh thu gộp (triệu VND)", "Chi phí AI (triệu VND)"],
-    ...data.revenueSeries.labels.map((l, i) => [l, data.revenueSeries.revenue[i], data.revenueSeries.aiCost[i]]),
-  ];
-  downloadCsv(`storyweaver-bao-cao-${new Date().toISOString().slice(0, 10)}.csv`, rows);
-  toast.success("Đã xuất báo cáo CSV (mở được bằng Excel)");
+    ["Ngày", "Gói", "Truyện", "Hoa hồng", "Chi phí AI"],
+    ...d.series.map((s) => [s.day, s.plan, s.listing, s.commission, s.aiCost]),
+  ]);
+  toast.success("Đã xuất CSV (mở được bằng Excel)");
 };
 
+// Dashboard điều hành: doanh thu thật từ đơn đã thanh toán, chi phí AI từ ai_requests, việc đang chờ.
 function AdminDashboardPage() {
-  const [range, setRange] = useState("7d");
-  const { data, isLoading, isFetching } = useAdminDashboard(range);
-  const rangeLabel = DATE_RANGES.find((r) => r.value === range).label;
+  const [range, setRange] = useState("30d");
+  const { data: d, isLoading, isFetching, error } = useFinanceSummary(range);
+  const { data: overview } = useAdminOverview();
+  const badges = overview?.navBadges ?? {};
+  const label = RANGES.find((r) => r.value === range).label;
+
+  const queues = [
+    { to: ROUTES.ADMIN.WITHDRAWALS, icon: Wallet, label: "Yêu cầu rút tiền chờ duyệt", count: badges.withdrawals },
+    { to: ROUTES.ADMIN.REFUNDS, icon: ArrowLeftRight, label: "Yêu cầu hoàn tiền chờ xử lý", count: badges.refunds },
+    { to: ROUTES.ADMIN.APPEALS, icon: Gavel, label: "Kháng nghị cảnh cáo chờ xét", count: badges.appeals },
+  ];
 
   return (
-    <div className="flex flex-col gap-6 pb-6">
-      <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
-        <div className="flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
-            <span className="rounded-full bg-primary-tint px-3 py-0.5 tracking-wide text-primary-dark uppercase">Cổng Quản Trị Trung Tâm</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-secondary" />
-            <span className="text-secondary-dark">Dữ liệu thời gian thực</span>
-            {isFetching && !isLoading && <Loader2 size={14} className="animate-spin text-primary" />}
-          </div>
-          <h1 className="text-3xl">Bàn điều hành doanh nghiệp</h1>
-          <p className="max-w-3xl text-navy/70">
-            Giám sát hiệu suất kinh doanh, dòng tiền nền tảng, chi phí vận hành AI và các vụ việc phê duyệt tài chính StoryWeaver AI.
-          </p>
-        </div>
+    <div className="space-y-6 pb-6">
+      <PageHeader title="Dashboard điều hành" description="Số liệu từ đơn đã thanh toán (trừ hoàn tiền) và chi phí AI thực tế. Ngày tính theo giờ Việt Nam.">
+        {isFetching && !isLoading && <Loader2 size={16} className="animate-spin text-primary" />}
+        <Tabs value={range} onChange={setRange} items={RANGES} label="Khoảng thời gian" />
+        <button type="button" onClick={() => d && exportCsv(d, label)} disabled={!d} className="btn-ghost px-4 py-2 text-sm">
+          <Download size={16} /> CSV
+        </button>
+      </PageHeader>
 
-        <div className="flex flex-wrap items-center gap-1.5 self-start rounded-full bg-surface p-1.5 shadow-low xl:self-auto">
-          {DATE_RANGES.map((r) => (
-            <button
-              key={r.value}
-              onClick={() => setRange(r.value)}
-              aria-pressed={range === r.value}
-              className={`rounded-full px-4 py-1.5 text-sm transition ${
-                range === r.value ? "bg-white font-bold text-primary-dark shadow-low" : "font-semibold text-navy/60 hover:text-navy"
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
-          <button
-            disabled={!data}
-            onClick={() => exportReport(data, rangeLabel)}
-            className="ml-1 inline-flex items-center gap-1.5 rounded-full bg-primary-dark px-4 py-2 text-sm font-bold text-white shadow-mid transition hover:bg-primary active:scale-95 disabled:opacity-50"
-          >
-            <Download size={17} /> Xuất báo cáo Excel (CSV)
-          </button>
-        </div>
-      </div>
+      {error && <p className="card p-5 text-danger">{error.message}</p>}
+      {isLoading && <div className="h-96 animate-pulse rounded-stage bg-surface" />}
+      {d && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard label="Khách đã trả" value={money(d.revenue.grossRevenue)} hint={`${formatNumber(d.revenue.orders)} mục thanh toán • hoàn ${money(d.revenue.refunded)}`} />
+            <StatCard label="Phần nền tảng giữ" value={money(d.revenue.platformRevenue)} hint={`Gói ${money(d.revenue.planRevenue)} + hoa hồng ${money(d.revenue.commission)}`} tone="text-primary-dark" />
+            <StatCard label="Chi phí AI" value={money(d.aiCost.totalVnd)} hint={`${formatNumber(d.aiCost.requests)} lượt gọi • ${d.aiCost.failed} lỗi / bị chặn`} />
+            <StatCard
+              label="Lãi gộp"
+              value={money(d.pnl.grossProfit)}
+              hint={d.pnl.margin == null ? "Chưa có doanh thu" : `Biên ${Math.round(d.pnl.margin * 100)}%`}
+              tone={d.pnl.grossProfit >= 0 ? "text-secondary-dark" : "text-danger"}
+            />
+          </div>
 
-      {isLoading || !data ? (
-        <div className="animate-pulse space-y-6">
-          <div className="grid grid-cols-2 gap-3 2xl:grid-cols-7">
-            {Array.from({ length: 7 }).map((_, i) => (
-              <div key={i} className="h-36 rounded-card bg-surface" />
-            ))}
+          <div className="grid gap-6 xl:grid-cols-3">
+            <section className="card space-y-3 p-5 xl:col-span-2">
+              <h2 className="text-lg">Doanh thu & chi phí AI theo ngày</h2>
+              <FinanceChart series={d.series} />
+            </section>
+            <div className="space-y-6">
+              <section className="card space-y-2 p-5">
+                <h2 className="text-lg">Việc đang chờ</h2>
+                {queues.map((q) => (
+                  <Link key={q.to} to={q.to} className="flex items-center gap-3 rounded-card px-2 py-2 hover:bg-surface">
+                    <q.icon size={18} className="text-primary" />
+                    <span className="flex-1 text-sm">{q.label}</span>
+                    <span className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${q.count ? "bg-danger text-white" : "bg-surface text-navy/60"}`}>{q.count ?? "—"}</span>
+                  </Link>
+                ))}
+              </section>
+              <section className="card space-y-2 p-5 text-sm">
+                <h2 className="text-lg">Người dùng & tiền người bán</h2>
+                <p>Phụ huynh mới ({label.toLowerCase()}): <b>{formatNumber(d.newParents)}</b></p>
+                <p>Gói trả phí đang dùng: {d.activePaidSubscriptions.length ? d.activePaidSubscriptions.map((s) => `${s.plan} (${s.count})`).join(", ") : "chưa có"}</p>
+                <p>Doanh thu người bán đang giữ: <b>{money(d.sellerFunds.pendingVnd)}</b></p>
+                <p>Người bán rút được: <b>{money(d.sellerFunds.availableVnd)}</b></p>
+                <p>
+                  Đang rút: <b>{money(d.sellerFunds.lockedVnd)}</b> ({d.sellerFunds.withdrawalsInFlight.count} yêu cầu)
+                </p>
+              </section>
+            </div>
           </div>
-          <div className="grid gap-6 lg:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-96 rounded-stage bg-surface" />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className={`flex flex-col gap-6 transition-opacity ${isFetching ? "opacity-70" : ""}`}>
-          <KpiCards kpis={data.kpis} />
-          <ActionQueues withdrawals={data.withdrawals} appeals={data.appeals} refunds={data.refunds} />
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <RevenueSection series={data.revenueSeries} breakdown={data.revenueBreakdown} />
-            <PricingSection tiers={data.pricingTiers} escrow={data.escrow} />
-          </div>
-          <PipelineSection nodes={data.pipeline} />
-        </div>
+        </>
       )}
     </div>
   );

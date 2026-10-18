@@ -1,70 +1,65 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  approveWithdrawal,
-  getAdminDashboard,
+  createModerator,
+  createPlan,
+  createPriceTier,
+  decideRefund,
+  fixCounters,
+  getAccounts,
   getAdminOverview,
-  getAiConfig,
-  getAuditLog,
-  pingProviders,
-  processRefund,
-  rotateProviderKey,
-  saveAiConfig,
+  getAdminPlans,
+  getAuditLogs,
+  getFinanceSummary,
+  getPriceTiers,
+  getReconciliation,
+  getRefunds,
+  getSettings,
+  setAccountActive,
+  updatePlan,
+  updatePriceTier,
+  updateSetting,
 } from "../services/adminService";
 
 export const adminKeys = {
   all: ["admin"],
   overview: ["admin", "overview"],
-  dashboard: (range) => ["admin", "dashboard", range],
-  aiConfig: ["admin", "ai-config"],
-  auditLog: ["admin", "audit-log"],
+  finance: (range) => ["admin", "finance", range],
+  reconciliation: ["admin", "reconciliation"],
+  accounts: (params) => ["admin", "accounts", params],
+  plans: ["admin", "plans"],
+  tiers: ["admin", "tiers"],
+  settings: ["admin", "settings"],
+  refunds: (status) => ["admin", "refunds", status],
+  auditLogs: (params) => ["admin", "audit-logs", params],
 };
 
-const useInvalidateAdmin = () => {
+/** Mọi thay đổi có thể đổi badge, số liệu, nhật ký → làm mới cả nhóm "admin". */
+const useAdminMutation = (mutationFn) => {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: adminKeys.all });
+  return useMutation({ mutationFn, onSuccess: () => queryClient.invalidateQueries({ queryKey: adminKeys.all }) });
 };
 
-export const useAdminOverview = () => useQuery({ queryKey: adminKeys.overview, queryFn: getAdminOverview });
+export const useAdminOverview = () => useQuery({ queryKey: adminKeys.overview, queryFn: getAdminOverview, refetchInterval: 60_000 });
+export const useFinanceSummary = (range) =>
+  useQuery({ queryKey: adminKeys.finance(range), queryFn: () => getFinanceSummary(range), placeholderData: keepPreviousData });
+export const useReconciliation = () => useQuery({ queryKey: adminKeys.reconciliation, queryFn: getReconciliation });
+export const useFixCounters = () => useAdminMutation(fixCounters);
 
-export const useAdminDashboard = (range) =>
-  useQuery({ queryKey: adminKeys.dashboard(range), queryFn: () => getAdminDashboard(range), placeholderData: keepPreviousData });
+export const useAccounts = (params) => useQuery({ queryKey: adminKeys.accounts(params), queryFn: () => getAccounts(params), placeholderData: keepPreviousData });
+export const useSetAccountActive = () => useAdminMutation(({ userId, isActive }) => setAccountActive(userId, isActive));
+export const useCreateModerator = () => useAdminMutation(createModerator);
 
-export const useApproveWithdrawal = () => {
-  const invalidate = useInvalidateAdmin();
-  return useMutation({ mutationFn: approveWithdrawal, onSuccess: invalidate });
-};
+export const useAdminPlans = () => useQuery({ queryKey: adminKeys.plans, queryFn: getAdminPlans });
+export const useCreatePlan = () => useAdminMutation(createPlan);
+export const useUpdatePlan = () => useAdminMutation(({ id, ...body }) => updatePlan(id, body));
+export const usePriceTiers = () => useQuery({ queryKey: adminKeys.tiers, queryFn: getPriceTiers });
+export const useCreatePriceTier = () => useAdminMutation(createPriceTier);
+export const useUpdatePriceTier = () => useAdminMutation(({ id, ...body }) => updatePriceTier(id, body));
 
-export const useProcessRefund = () => {
-  const invalidate = useInvalidateAdmin();
-  return useMutation({ mutationFn: processRefund, onSuccess: invalidate });
-};
+export const useSettings = () => useQuery({ queryKey: adminKeys.settings, queryFn: getSettings });
+export const useUpdateSetting = () => useAdminMutation(({ key, value }) => updateSetting(key, value));
 
-export const useAiConfig = () => useQuery({ queryKey: adminKeys.aiConfig, queryFn: getAiConfig });
+export const useRefunds = (status) => useQuery({ queryKey: adminKeys.refunds(status), queryFn: () => getRefunds(status) });
+export const useDecideRefund = () => useAdminMutation(({ id, ...body }) => decideRefund(id, body));
 
-export const useSaveAiConfig = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: saveAiConfig,
-    onSuccess: (config) => {
-      queryClient.setQueryData(adminKeys.aiConfig, (old) => (old ? { ...old, config } : old));
-      queryClient.invalidateQueries({ queryKey: adminKeys.auditLog });
-    },
-  });
-};
-
-export const usePingProviders = () => useMutation({ mutationFn: pingProviders });
-
-export const useRotateKey = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: rotateProviderKey,
-    onSuccess: (provider) => {
-      queryClient.setQueryData(adminKeys.aiConfig, (old) =>
-        old ? { ...old, providers: old.providers.map((p) => (p.id === provider.id ? provider : p)) } : old,
-      );
-      queryClient.invalidateQueries({ queryKey: adminKeys.auditLog });
-    },
-  });
-};
-
-export const useAuditLog = (enabled) => useQuery({ queryKey: adminKeys.auditLog, queryFn: getAuditLog, enabled });
+export const useAuditLogs = (params) => useQuery({ queryKey: adminKeys.auditLogs(params), queryFn: () => getAuditLogs(params), placeholderData: keepPreviousData });

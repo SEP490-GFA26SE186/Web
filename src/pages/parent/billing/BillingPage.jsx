@@ -1,4 +1,5 @@
 import { Check, Coins, Crown, Loader2 } from "lucide-react";
+import PaymentHistory from "../../../components/parent/billing/PaymentHistory";
 import { useCheckoutPlan, usePlans } from "../../../hooks/useBilling";
 import { useParentProfile, useSubscription } from "../../../hooks/useParent";
 import { toast } from "../../../stores/toastStore";
@@ -103,6 +104,7 @@ function BillingPage() {
       <p className="text-xs text-navy/50">
         Thanh toán bằng chuyển khoản / quét mã VietQR qua payOS. Gói trả trước, gia hạn thủ công. Đổi gói giữa kỳ: kỳ mới bắt đầu ngay, credit còn lại được giữ.
       </p>
+      <PaymentHistory />
     </div>
   );
 }

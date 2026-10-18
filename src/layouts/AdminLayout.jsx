@@ -9,7 +9,6 @@ import {
   LineChart,
   ReceiptText,
   ScrollText,
-  Settings,
   TrendingUp,
   UserCog,
   Wallet,
@@ -19,6 +18,7 @@ import PortalHeader from "../components/portal/PortalHeader";
 import PortalSidebar from "../components/portal/PortalSidebar";
 import { ROUTES } from "../constants/routes";
 import { useAdminOverview } from "../hooks/useAdmin";
+import InitialAvatar from "../components/common/InitialAvatar";
 
 const R = ROUTES.ADMIN;
 
@@ -26,7 +26,7 @@ function AdminLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { pathname } = useLocation();
   const { data } = useAdminOverview();
-  const badges = data?.status.navBadges ?? {};
+  const badges = data?.navBadges ?? {};
 
   const sections = [
     {
@@ -58,33 +58,18 @@ function AdminLayout() {
   ];
 
   const footer = data && (
-    <div className="space-y-2 text-sm">
-      <p className="flex items-center gap-2 px-1 text-xs font-semibold text-navy/60">
-        <span className={`h-2 w-2 animate-pulse rounded-full ${data.status.aiHealthy ? "bg-secondary" : "bg-danger"}`} />
-        {data.status.uptime}% • AI: {data.status.aiHealthy ? "Hoạt động" : "Gián đoạn"}
-      </p>
-      <div className="flex items-center gap-2">
-        <img src={data.admin.avatar} alt="" className="h-8 w-8 rounded-full object-cover" />
-        <div className="min-w-0 flex-1 leading-tight">
-          <p className="truncate font-bold">{data.admin.name}</p>
-          <p className="text-xs font-bold text-primary-dark">{data.admin.role}</p>
-        </div>
-        <button className="rounded-full p-1 text-navy/60 hover:text-navy" title="Cài đặt" aria-label="Cài đặt">
-          <Settings size={17} />
-        </button>
-        <LogoutButton />
+    <div className="flex items-center gap-2 text-sm">
+      <InitialAvatar name={data.admin.name} className="h-8 w-8 text-sm" />
+      <div className="min-w-0 flex-1 leading-tight">
+        <p className="truncate font-bold">{data.admin.name}</p>
+        <p className="text-xs font-bold text-primary-dark">{data.admin.role}</p>
       </div>
+      <LogoutButton />
     </div>
   );
 
-  const status = data && (
-    <span className="hidden items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-semibold text-navy/70 2xl:flex">
-      <span className="h-2 w-2 rounded-full bg-secondary" />
-      {data.status.env} • {data.status.version}
-    </span>
-  );
-
-  const isAiConfig = pathname.startsWith(R.AI_CONFIG);
+  const segment = pathname.split("/")[2] ?? "";
+  const current = sections.flatMap((sec) => sec.items).find((i) => i.to === `/admin/${segment}` || (!segment && i.end));
 
   return (
     <div className="min-h-screen bg-canvas">
@@ -102,10 +87,9 @@ function AdminLayout() {
           onOpenMenu={() => setMenuOpen(true)}
           breadcrumbs={[
             { label: "Cổng Quản Trị Hệ Thống", to: R.DASHBOARD },
-            { label: isAiConfig ? "Cấu Hình AI Engine" : "Admin Portal" },
+            { label: current?.label ?? "Admin Portal" },
           ]}
           searchPlaceholder="Tìm kiếm tài khoản, GD, log, AI..."
-          status={status}
           links={[
             { to: ROUTES.MODERATOR.DASHBOARD, label: "Cổng KDV" },
             { to: ROUTES.PARENT.DASHBOARD, label: "Cổng Phụ Huynh" },
