@@ -19,6 +19,8 @@ import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
 const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
 const TopicsPage = lazy(() => import("../pages/moderator/TopicsPage"));
+const HelpPage = lazy(() => import("../pages/parent/HelpPage"));
+const GuidelinesPage = lazy(() => import("../pages/moderator/GuidelinesPage"));
 const PrivacyPolicyPage = lazy(() => import("../pages/legal/PrivacyPolicyPage"));
 const TermsPage = lazy(() => import("../pages/legal/TermsPage"));
 const FamilyCharactersPage = lazy(() => import("../pages/parent/FamilyCharactersPage"));
@@ -77,13 +79,8 @@ function PageLoader() {
   );
 }
 
-const parentPlaceholders = [
-  { path: "help", title: "Trợ giúp" },
-];
-
 const moderatorPlaceholders = [
   { path: "backgrounds", title: "Thư viện bối cảnh" },
-  { path: "guidelines", title: "Quy chuẩn kiểm duyệt" },
 ];
 
 const placeholderRoutes = (items) =>
@@ -111,6 +108,7 @@ function AppRoutes() {
           <Route path="library" element={<LibraryPage />} />
           <Route path="eq-journey" element={<EqJourneyPage />} />
           <Route path="family-characters" element={<FamilyCharactersPage />} />
+          <Route path="help" element={<HelpPage />} />
           <Route path="marketplace" element={<MarketplacePage />} />
           <Route path="marketplace/result" element={<PurchaseResultPage />} />
           <Route path="marketplace/:listingId" element={<ListingDetailPage />} />
@@ -123,7 +121,6 @@ function AppRoutes() {
           <Route path="selling" element={<SellingPage />} />
           <Route path="selling/new" element={<NewListingPage />} />
           <Route path="billing/result" element={<BillingResultPage />} />
-          {placeholderRoutes(parentPlaceholders)}
         </Route>
 
         <Route
@@ -142,6 +139,7 @@ function AppRoutes() {
           <Route path="strikes" element={<StrikesPage />} />
           <Route path="audits" element={<AuditsPage />} />
           <Route path="ai-flags" element={<AiFlagsPage />} />
+          <Route path="guidelines" element={<GuidelinesPage />} />
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
           <Route path="seller-applications" element={<SellerApplicationsPage />} />

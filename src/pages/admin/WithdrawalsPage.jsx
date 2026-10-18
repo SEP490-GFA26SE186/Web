@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, RefreshCw, X } from "lucide-react";
+import { PageHeader, Tabs } from "../../components/admin/AdminUi";
 import api, { getErrorMessage } from "../../services/api";
 import { toast } from "../../stores/toastStore";
 import { formatNumber } from "../../utils/format";
@@ -39,15 +40,10 @@ function WithdrawalsPage() {
   });
 
   return (
-    <div className="card space-y-4 p-5">
-      <h1 className="text-xl">Rút tiền người bán</h1>
-      <div className="flex flex-wrap gap-2" role="tablist">
-        {TABS.map((t) => (
-          <button key={t.value} type="button" role="tab" aria-selected={status === t.value} onClick={() => setStatus(t.value)} className={`rounded-full px-4 py-1.5 text-sm font-bold ${status === t.value ? "bg-primary text-white" : "bg-surface text-navy/70"}`}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+    <div className="space-y-5">
+      <PageHeader title="Rút tiền người bán" description="Duyệt → hệ thống tạo lệnh chi hộ payOS chuyển thẳng vào tài khoản ngân hàng của người bán. Từ chối → tiền trả lại số dư người bán." />
+      <Tabs value={status} onChange={setStatus} items={TABS} />
+      <div className="card space-y-4 p-5">
       {isLoading && <Loader2 size={24} className="animate-spin text-primary" />}
       {!isLoading && rows.length === 0 && <p className="text-navy/60">Không có yêu cầu nào.</p>}
       <ul className="divide-y divide-outline">
@@ -84,6 +80,7 @@ function WithdrawalsPage() {
           );
         })}
       </ul>
+      </div>
     </div>
   );
 }

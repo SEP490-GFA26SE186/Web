@@ -19,6 +19,10 @@ function ModeratorDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl">Tổng quan kiểm duyệt</h1>
+        <p className="mt-1 text-navy/70">Hàng chờ gồm truyện nộp bán, hậu kiểm báo cáo và kiểm tra ngẫu nhiên — cũ nhất lên trước.</p>
+      </div>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="card flex items-center gap-4 p-5">
           <BookOpen size={28} className="text-primary" />
@@ -44,15 +48,15 @@ function ModeratorDashboardPage() {
       </div>
 
       <section className="card p-5">
-        <h1 className="mb-4 text-xl">Hàng chờ duyệt truyện</h1>
+        <h2 className="mb-4 text-xl">Hàng chờ duyệt truyện</h2>
         {isLoading && <Loader2 size={28} className="animate-spin text-primary" />}
         {error && <p className="text-danger">{error.message}</p>}
         {!isLoading && !error && queue.length === 0 && <p className="text-navy/60">Không có truyện nào đang chờ duyệt ✨</p>}
         <ul className="divide-y divide-outline">
           {queue.map((q) => (
             <li key={q.reviewId}>
-              <Link to={ROUTES.MODERATOR.workspace(q.reviewId)} className="flex flex-wrap items-center gap-3 py-3 hover:bg-surface">
-                <div className="min-w-0 flex-1">
+              <Link to={ROUTES.MODERATOR.workspace(q.reviewId)} className="-mx-2 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl px-2 py-3 hover:bg-surface">
+                <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
                   <p className="truncate font-bold">{q.title}</p>
                   <p className="text-sm text-navy/60">
                     {q.seller} • {q.pageCount} trang • {q.priceVnd ? `${formatNumber(q.priceVnd)}đ` : "Miễn phí"} •{" "}

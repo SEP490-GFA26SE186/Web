@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Coins, Menu, Search, Smile } from "lucide-react";
-import { Link } from "react-router-dom";
-import InitialAvatar from "../common/InitialAvatar";
-import { ROUTES } from "../../constants/routes";
+import { Check, ChevronDown, Smile } from "lucide-react";
 import { useSelectedChild } from "../../hooks/useChildProfile";
-import { useParentProfile } from "../../hooks/useParent";
 import useParentStore from "../../stores/parentStore";
 import { ageLabel, childEmoji } from "../../utils/child";
 
+// Chọn bé đang xem (dashboard, tủ sách, báo cáo EQ… đều theo bé này). Nhớ qua lần mở sau (parentStore).
 function ChildSwitcher() {
   const { child: current, children, isEmpty } = useSelectedChild();
   const setSelectedChildId = useParentStore((s) => s.setSelectedChildId);
@@ -68,39 +65,4 @@ function ChildSwitcher() {
   );
 }
 
-function ParentTopbar({ onOpenMenu }) {
-  const parent = useParentProfile();
-
-  return (
-    <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-outline/60 bg-canvas/90 px-4 py-3 backdrop-blur md:px-8">
-      <button onClick={onOpenMenu} className="rounded-full p-2 hover:bg-surface lg:hidden" aria-label="Mở menu">
-        <Menu size={22} />
-      </button>
-
-      <label className="relative hidden max-w-md flex-1 md:block">
-        <Search size={18} className="absolute top-1/2 left-4 -translate-y-1/2 text-navy/40" />
-        <input
-          type="search"
-          placeholder="Tìm kiếm truyện, chủ đề EQ, bài học..."
-          className="w-full rounded-full border-[1.5px] border-outline bg-white py-2.5 pr-4 pl-11 text-sm outline-none transition placeholder:text-navy/40 focus:border-secondary focus:ring-[3px] focus:ring-secondary/15"
-        />
-      </label>
-
-      <div className="ml-auto flex items-center gap-2 md:gap-3">
-        <ChildSwitcher />
-        {parent.creditBalance != null && (
-          <Link
-            to={ROUTES.PARENT.BILLING}
-            title="Credit AI còn lại trong tháng"
-            className="hidden items-center gap-1.5 rounded-full border border-outline bg-white px-3 py-2 text-xs font-bold hover:bg-surface sm:flex"
-          >
-            <Coins size={15} className="text-primary" /> {parent.creditBalance} credit
-          </Link>
-        )}
-        <InitialAvatar name={parent.name} className="h-9 w-9 text-sm ring-2 ring-primary-tint" />
-      </div>
-    </header>
-  );
-}
-
-export default ParentTopbar;
+export default ChildSwitcher;

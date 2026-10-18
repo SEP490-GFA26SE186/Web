@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, X } from "lucide-react";
+import { PageHeader, Tabs } from "../../components/admin/AdminUi";
 import api, { getErrorMessage } from "../../services/api";
 import { APPEAL_STATUS, STRIKE_SOURCES, formatDate, formatDateTime } from "../../constants/moderation";
 import { toast } from "../../stores/toastStore";
@@ -39,15 +40,10 @@ function AppealsPage() {
   });
 
   return (
-    <div className="card space-y-4 p-5">
-      <h1 className="text-xl">Kháng nghị cảnh cáo</h1>
-      <div className="flex flex-wrap gap-2" role="tablist">
-        {TABS.map((t) => (
-          <button key={t.value} type="button" role="tab" aria-selected={status === t.value} onClick={() => setStatus(t.value)} className={`rounded-full px-4 py-1.5 text-sm font-bold ${status === t.value ? "bg-primary text-white" : "bg-surface text-navy/70"}`}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+    <div className="space-y-5">
+      <PageHeader title="Kháng nghị cảnh cáo" description="Người bán kháng nghị cảnh cáo từ Kiểm duyệt viên. Chấp nhận → gỡ cảnh cáo (và mở lại quyền bán nếu đủ điều kiện)." />
+      <Tabs value={status} onChange={setStatus} items={TABS} />
+      <div className="card space-y-4 p-5">
       {isLoading && <Loader2 size={24} className="animate-spin text-primary" />}
       {error && <p className="text-danger">{error.message}</p>}
       {!isLoading && !error && appeals.length === 0 && <p className="text-navy/60">Không có kháng nghị nào.</p>}
@@ -96,6 +92,7 @@ function AppealsPage() {
           );
         })}
       </ul>
+      </div>
     </div>
   );
 }

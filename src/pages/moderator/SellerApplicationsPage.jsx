@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Loader2, X } from "lucide-react";
+import { Check, IdCard, Loader2, X } from "lucide-react";
 import { useDecideSeller, useSellerApplications } from "../../hooks/useModerator";
 import { toast } from "../../stores/toastStore";
 
@@ -22,9 +22,15 @@ function SellerApplicationsPage() {
     );
 
   return (
-    <div className="card space-y-4 p-5">
-      <h1 className="text-xl">Hồ sơ người bán</h1>
-      <div className="flex gap-2" role="tablist">
+    <div className="space-y-5">
+      <div>
+        <p className="mb-1 flex items-center gap-1.5 text-sm font-bold text-secondary-dark">
+          <IdCard size={16} /> Kiểm duyệt
+        </p>
+        <h1 className="text-3xl">Hồ sơ người bán</h1>
+        <p className="mt-1 max-w-2xl text-navy/70">Phụ huynh đăng ký bán truyện — duyệt để mở quyền đăng bán trên Chợ truyện.</p>
+      </div>
+      <div className="flex flex-wrap gap-2" role="tablist">
         {TABS.map((t) => (
           <button
             key={t.value}
@@ -38,6 +44,7 @@ function SellerApplicationsPage() {
           </button>
         ))}
       </div>
+      <div className="card space-y-4 p-5">
       {isLoading && <Loader2 size={24} className="animate-spin text-primary" />}
       {!isLoading && sellers.length === 0 && <p className="text-navy/60">Không có hồ sơ nào.</p>}
       <ul className="divide-y divide-outline">
@@ -67,6 +74,7 @@ function SellerApplicationsPage() {
           );
         })}
       </ul>
+      </div>
     </div>
   );
 }

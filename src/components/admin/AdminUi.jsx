@@ -25,8 +25,8 @@ export function PageHeader({ title, description, children }) {
   return (
     <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
       <div>
-        <h1 className="text-2xl">{title}</h1>
-        {description && <p className="mt-1 max-w-3xl text-sm text-navy/65">{description}</p>}
+        <h1 className="text-3xl">{title}</h1>
+        {description && <p className="mt-1 max-w-3xl text-navy/70">{description}</p>}
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </div>

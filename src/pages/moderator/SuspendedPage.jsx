@@ -23,7 +23,7 @@ function SuspendedPage() {
         <p className="mb-1 flex items-center gap-1.5 text-sm font-bold text-danger">
           <PauseCircle size={16} /> Giám sát
         </p>
-        <h1 className="text-3xl">Truyện tạm đình chỉ</h1>
+        <h1 className="text-3xl">Truyện tạm gỡ</h1>
         <p className="mt-1 max-w-2xl text-navy/70">
           Truyện tạm gỡ bị ẩn khỏi Chợ truyện, không mua được, và bé đã mua cũng tạm không đọc được cho tới khi có quyết định.
         </p>
