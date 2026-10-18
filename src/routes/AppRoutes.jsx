@@ -38,6 +38,8 @@ const AiConfigPage = lazy(() => import("../pages/admin/AiConfigPage"));
 const KidLayout = lazy(() => import("../layouts/KidLayout"));
 const StoryReaderPage = lazy(() => import("../pages/kid/StoryReaderPage"));
 const KidBookshelfPage = lazy(() => import("../pages/kid/KidBookshelfPage"));
+const BillingPage = lazy(() => import("../pages/parent/billing/BillingPage"));
+const BillingResultPage = lazy(() => import("../pages/parent/billing/BillingResultPage"));
 const KidReaderIndex = lazy(() =>
   import("../pages/kid/StoryReaderPage").then((m) => ({ default: m.KidReaderIndex })),
 );
@@ -56,7 +58,6 @@ function PageLoader() {
 const parentPlaceholders = [
   { path: "family-characters", title: "Nhân vật gia đình" },
   { path: "eq-journey", title: "Báo cáo EQ" },
-  { path: "billing", title: "Gói dịch vụ & Credit" },
   { path: "help", title: "Trợ giúp" },
 ];
 
@@ -121,6 +122,8 @@ function AppRoutes() {
           <Route path="studio" element={<StudioPage />} />
           <Route path="studio/new" element={<CreateStoryPage />} />
           <Route path="studio/:storyId" element={<StoryEditorPage />} />
+          <Route path="billing" element={<BillingPage />} />
+          <Route path="billing/result" element={<BillingResultPage />} />
           {placeholderRoutes(parentPlaceholders)}
         </Route>
 
