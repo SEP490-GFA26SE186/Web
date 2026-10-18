@@ -4,11 +4,10 @@ import { STORY_LENGTH_LABELS } from "../../constants/casel";
 import { ROUTES } from "../../constants/routes";
 import CaselTag from "./library/CaselTag";
 
-// Truyện riêng đã tạo xong, ba mẹ phải xem lại hết từng trang trước khi đưa lên giá sách của bé
+// Truyện riêng đã tạo xong, ba mẹ phải xem lại hết từng trang trước khi đưa lên giá sách của bé.
+// Schema rev8 chỉ lưu reviewed_at (đã xem xong hay chưa), không lưu đã xem bao nhiêu trang.
 function DraftReviewCard({ draft, moreCount = 0 }) {
-  const remaining = draft ? draft.totalPages - draft.reviewedPages : 0;
-  const percent = draft ? Math.round((draft.reviewedPages / draft.totalPages) * 100) : 0;
-  const reviewUrl = draft ? `${ROUTES.PARENT.STUDIO}?story=${draft.id}` : ROUTES.PARENT.STUDIO;
+  const reviewUrl = draft ? ROUTES.PARENT.studioStory(draft.id) : ROUTES.PARENT.STUDIO;
 
   return (
     <section className="card flex flex-1 flex-col justify-between p-6">
@@ -44,30 +43,16 @@ function DraftReviewCard({ draft, moreCount = 0 }) {
               <div>
                 <h4 className="text-lg">{draft.title}</h4>
                 <p className="mt-1 text-sm text-navy/65">
-                  Bài học: <span className="font-semibold text-navy">{draft.topic.title}</span> · {draft.totalPages} trang (
-                  {STORY_LENGTH_LABELS[draft.length]}) · {draft.checkpointsCount} điểm dừng
+                  Bài học: <span className="font-semibold text-navy">{draft.topic.title}</span> · {draft.pageCount} trang (
+                  {STORY_LENGTH_LABELS[draft.length]}) · {draft.checkpointCount} điểm dừng
                 </p>
-              </div>
-              <div className="space-y-1 pt-1">
-                <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-navy/60">Tiến độ xem lại</span>
-                  <span className="font-bold text-primary-dark">
-                    {draft.reviewedPages}/{draft.totalPages} trang ({percent}%)
-                  </span>
-                </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-outline p-0.5">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-primary to-primary-dark transition-all duration-700"
-                    style={{ width: `${percent}%` }}
-                  />
-                </div>
               </div>
             </article>
 
             <div className="mt-4 flex flex-col gap-2">
               <Link to={reviewUrl} className="btn-primary w-full py-3 hover:shadow-glow">
                 <FilePenLine size={20} />
-                {remaining > 0 ? `Xem lại tiếp (${remaining} trang còn lại)` : "Hoàn tất & đưa lên giá sách"}
+                Xem lại & hoàn tất
               </Link>
               {moreCount > 0 && (
                 <Link

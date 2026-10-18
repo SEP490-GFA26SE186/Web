@@ -1,216 +1,234 @@
-import { useRef, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
-import PageNavigator from "../../components/moderator/workspace/PageNavigator";
-import PagePreview from "../../components/moderator/workspace/PagePreview";
-import ReviewActions, { DecisionModal } from "../../components/moderator/workspace/ReviewActions";
-import ReviewChecklist from "../../components/moderator/workspace/ReviewChecklist";
-import ReviewContextBar from "../../components/moderator/workspace/ReviewContextBar";
+import { Fragment, useState } from "react";
+import { Link, Navigate, useParams } from "react-router-dom";
+import { ArrowLeft, CheckCircle2, Eye, Loader2, Lock } from "lucide-react";
+import CaselTag from "../../components/parent/library/CaselTag";
+import { DECISION_LABELS, LISTING_STATUS, REVIEW_TYPES } from "../../constants/moderation";
+import { CHECKPOINT_TYPES, EMOTIONS } from "../../constants/story";
 import { ROUTES } from "../../constants/routes";
-import { useModeratorOverview, useReviewQueue, useReviewStory, useSavePageReview, useSubmitDecision } from "../../hooks/useModerator";
+import { useClaimReview, useDecideReview, useReview, useViewPage } from "../../hooks/useModerator";
 import { toast } from "../../stores/toastStore";
+import { formatNumber } from "../../utils/format";
 
-const nowTime = () => new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
-
-const DECISION_MESSAGES = {
-  publish: "Đã phê duyệt & xuất bản truyện lên Chợ truyện 🎉",
-  revise: "Đã gửi yêu cầu chỉnh sửa tới tác giả",
-  reject: "Đã từ chối xuất bản và thông báo tới tác giả",
+const DECISIONS = {
+  submission: [
+    { value: "approved", label: "Duyệt & xuất bản", tone: "btn-primary" },
+    { value: "changes_requested", label: "Yêu cầu sửa", tone: "btn-ghost" },
+    { value: "rejected", label: "Từ chối", tone: "btn-ghost text-danger" },
+  ],
+  // Hậu kiểm truyện đã bán: giữ (truyện đang tạm gỡ thì bán lại) hoặc gỡ hẳn (BE tự cảnh cáo tác giả)
+  followup: [
+    { value: "approved", label: "Giữ truyện (bán tiếp)", tone: "btn-primary" },
+    { value: "taken_down", label: "Gỡ hẳn & cảnh cáo tác giả", tone: "btn-ghost text-danger" },
+  ],
 };
+const ROLE_LABELS = { constructive: "Xây dựng", avoidant: "Né tránh", impulsive: "Bốc đồng" };
 
-function Workspace({ story, moderatorName }) {
-  const navigate = useNavigate();
-  const noteRef = useRef(null);
-  const [pages, setPages] = useState(story.pages);
-  const [history, setHistory] = useState(story.history);
-  const [currentNumber, setCurrentNumber] = useState(() => (story.pages.find((p) => p.status === "pending") ?? story.pages[0]).number);
-  const [highlightMissing, setHighlightMissing] = useState(false);
-  const [decision, setDecision] = useState(null);
+/** Chữ dạng token → tên chung người bán đặt (bản đăng bán không có tên thật). */
+const withNames = (text, characters) =>
+  (text ?? "").replace(/\{NV\d+\}/g, (t) => characters.find((c) => c.token === t)?.name ?? t);
 
-  const savePage = useSavePageReview(story.id);
-  const submitDecision = useSubmitDecision(story.id);
-
-  const page = pages.find((p) => p.number === currentNumber);
-  const approvedCount = pages.filter((p) => p.status === "approved").length;
-  const needsFixCount = pages.filter((p) => p.status === "needs_fix").length;
-  const firstPending = pages.find((p) => p.status === "pending")?.number ?? Infinity;
-  // Bắt buộc duyệt tuần tự: không mở được trang nằm sau trang chưa xử lý đầu tiên
-  const isLocked = (n) => n > firstPending;
-
-  const updatePage = (patch) => setPages((ps) => ps.map((p) => (p.number === currentNumber ? { ...p, ...patch } : p)));
-  const addHistory = (type, text) =>
-    setHistory((h) => [...h, { id: `h_${Date.now()}`, time: nowTime(), author: `KDV ${moderatorName}`, type, text }]);
-
-  const goToPage = (n) => {
-    setCurrentNumber(n);
-    setHighlightMissing(false);
-  };
-
-  // Sau khi xử lý xong 1 trang → nhảy tới trang chưa xử lý kế tiếp
-  const goToNextPending = (updatedPages) => {
-    const next = updatedPages.find((p) => p.status === "pending");
-    if (next) goToPage(next.number);
-  };
-
-  const handleApprove = () => {
-    const missing = Object.entries(page.checks).filter(([, v]) => !v).map(([k]) => k);
-    if (missing.length) {
-      setHighlightMissing(true);
-      document.getElementById(`check-${missing[0]}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-      toast.error(`Còn ${missing.length} tiêu chí chưa xác nhận — tích đủ checklist trước khi duyệt trang ${page.number}`);
-      return;
-    }
-    savePage.mutate(
-      { pageNumber: page.number, status: "approved", checks: page.checks, note: page.note },
-      {
-        onSuccess: () => {
-          const updated = pages.map((p) => (p.number === page.number ? { ...p, status: "approved", flagged: false } : p));
-          setPages(updated);
-          addHistory("approve", `Duyệt đạt Trang ${page.number} • ${page.title}`);
-          toast.success(`Trang ${page.number} đạt chuẩn Sư phạm & An toàn`);
-          goToNextPending(updated);
-        },
-      },
-    );
-  };
-
-  const handleRequestFix = () => {
-    if (!page.note.trim()) {
-      noteRef.current?.focus();
-      noteRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-      toast.error("Nhập ghi chú cho tác giả để biết cần sửa gì ở trang này nhé");
-      return;
-    }
-    savePage.mutate(
-      { pageNumber: page.number, status: "needs_fix", checks: page.checks, note: page.note },
-      {
-        onSuccess: () => {
-          const updated = pages.map((p) => (p.number === page.number ? { ...p, status: "needs_fix", flagged: true } : p));
-          setPages(updated);
-          addHistory("fix", `Yêu cầu sửa Trang ${page.number}: ${page.note.trim()}`);
-          toast.info(`Đã gắn cờ Trang ${page.number} cần tác giả chỉnh sửa`);
-          goToNextPending(updated);
-        },
-      },
-    );
-  };
-
-  const reviseSummary = pages
-    .filter((p) => p.status === "needs_fix" || p.flagged)
-    .map((p) => `• Trang ${p.number}: ${p.note.trim() || "(cần chỉnh sửa)"}`)
-    .join("\n");
-
-  const confirmDecision = (note) =>
-    submitDecision.mutate(
-      { decision, note },
-      {
-        onSuccess: () => {
-          toast.success(DECISION_MESSAGES[decision]);
-          navigate(ROUTES.MODERATOR.DASHBOARD);
-        },
-        onError: (err) => toast.error(err.message),
-      },
-    );
-
+function CheckpointBlock({ cp, characters }) {
+  const n = (s) => withNames(s, characters);
   return (
-    <div className="flex flex-col gap-5">
-      <ReviewContextBar story={story} approvedCount={approvedCount} total={pages.length} />
-
-      <div className="grid grid-cols-12 items-start gap-6">
-        <div className="col-span-12 lg:col-span-3">
-          <PageNavigator pages={pages} currentNumber={currentNumber} isLocked={isLocked} onSelect={goToPage} />
-        </div>
-        <div className="col-span-12 lg:col-span-9 xl:col-span-5">
-          <PagePreview page={page} total={pages.length} scanner={story.scanner} />
-        </div>
-        <div className="col-span-12 flex flex-col gap-4 xl:col-span-4">
-          <ReviewChecklist
-            ref={noteRef}
-            page={page}
-            readOnly={page.status !== "pending"}
-            highlightMissing={highlightMissing}
-            history={history}
-            onToggleCheck={(key) => updatePage({ checks: { ...page.checks, [key]: !page.checks[key] } })}
-            onReopen={() => {
-              updatePage({ status: "pending" });
-              addHistory("note", `Mở lại Trang ${page.number} để duyệt lại`);
-            }}
-            onNoteChange={(note) => updatePage({ note })}
-            onFlagChange={(flagged) => updatePage({ flagged })}
-          />
-          <ReviewActions
-            page={page}
-            approvedCount={approvedCount}
-            total={pages.length}
-            needsFixCount={needsFixCount}
-            saving={savePage.isPending}
-            onApprove={handleApprove}
-            onRequestFix={handleRequestFix}
-            onDecision={setDecision}
-          />
-        </div>
-      </div>
-
-      {decision && (
-        <DecisionModal
-          type={decision}
-          defaultNote={decision === "revise" ? reviseSummary : ""}
-          onClose={() => setDecision(null)}
-          onConfirm={confirmDecision}
-          isPending={submitDecision.isPending}
-        />
+    <div className="ml-4 space-y-2 rounded-card border-2 border-dashed border-outline bg-surface p-4 text-sm sm:ml-8">
+      <p className="font-bold text-secondary-dark">Điểm dừng: {CHECKPOINT_TYPES[cp.type]?.label ?? cp.type}</p>
+      <p>
+        <b>Câu hỏi:</b> {n(cp.question)}
+      </p>
+      {cp.answerEmotion && (
+        <p>
+          <b>Đáp án:</b> {EMOTIONS[cp.answerEmotion] ?? cp.answerEmotion}
+        </p>
+      )}
+      {cp.hint && (
+        <p>
+          <b>Gợi ý:</b> {n(cp.hint)}
+        </p>
+      )}
+      {cp.options?.length > 0 && (
+        <ul className="list-disc space-y-1 pl-5">
+          {cp.options.map((o) => (
+            <li key={o.id}>
+              {n(o.text)}
+              {o.isCorrect && <b className="text-secondary-dark"> ✓ đúng</b>}
+              {o.role && <span className="text-navy/60"> ({ROLE_LABELS[o.role]})</span>}
+              {o.feedback && <span className="text-navy/60"> → {n(o.feedback)}</span>}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
 }
 
-function ReviewWorkspacePage() {
-  const { storyId } = useParams();
-  const { data: overview } = useModeratorOverview();
-  const { data: story, isLoading, isError, error } = useReviewStory(storyId);
+// Không gian duyệt một truyện đăng bán: nhận bài → xem từng trang (đánh dấu đã xem, nhận xét) →
+// checklist 7 nguyên tắc → quyết định. BE chỉ cho duyệt khi xem 100% trang và đạt đủ checklist.
+function Workspace({ reviewId }) {
+  const { data, isLoading, error } = useReview(reviewId);
+  const claim = useClaimReview(reviewId);
+  const view = useViewPage(reviewId);
+  const decide = useDecideReview(reviewId);
+  const [checks, setChecks] = useState({});
+  const [comment, setComment] = useState("");
+  const [notes, setNotes] = useState({});
+  const [strike, setStrike] = useState(false);
 
-  if (isLoading || !overview) {
-    return (
-      <div className="animate-pulse space-y-5">
-        <div className="h-24 rounded-stage bg-surface" />
-        <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-3 h-[600px] rounded-stage bg-surface" />
-          <div className="col-span-5 h-[600px] rounded-stage bg-surface" />
-          <div className="col-span-4 h-[600px] rounded-stage bg-surface" />
+  if (isLoading) return <Loader2 size={32} className="animate-spin text-primary" />;
+  if (error) return <p className="card p-6 text-danger">{error.message}</p>;
+
+  const { review, listing, seller, story, checklist, pageViews, progress } = data;
+  const viewed = new Map(pageViews.map((v) => [v.pageId, v]));
+  const cpAfter = new Map(story.checkpoints.map((c) => [c.afterPageId, c]));
+  const decided = !!review.decidedAt;
+  const canAct = review.claimedByMe && !decided;
+  const passedOf = (item) => checks[item.id] ?? item.passed;
+  const isFollowup = review.reviewType !== "submission";
+  const decisions = DECISIONS[isFollowup ? "followup" : "submission"];
+  const type = REVIEW_TYPES[review.reviewType];
+  const status = LISTING_STATUS[listing.status];
+
+  const submit = (decision) =>
+    decide.mutate(
+      {
+        decision,
+        comment: comment.trim() || undefined,
+        checklist: checklist.map((i) => ({ itemId: i.id, passed: passedOf(i) === true })),
+        ...(decision === "rejected" && strike && { issueStrike: true }),
+      },
+      { onSuccess: () => toast.success("Đã lưu quyết định"), onError: (e) => toast.error(e.message) },
+    );
+
+  return (
+    <div className="space-y-5">
+      <Link to={ROUTES.MODERATOR.DASHBOARD} className="inline-flex items-center gap-1 text-sm font-semibold text-navy/60 hover:text-primary">
+        <ArrowLeft size={16} /> Hàng chờ
+      </Link>
+
+      <header className="card flex flex-wrap items-start justify-between gap-4 p-5">
+        <div className="space-y-1">
+          <div className="flex flex-wrap gap-2">
+            {type && <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${type.tone}`}>{type.label}</span>}
+            {isFollowup && status && <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${status.tone}`}>{status.label}</span>}
+            <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" />
+            <span className="tag-theme">{listing.priceVnd ? `${formatNumber(listing.priceVnd)}đ` : "Miễn phí"}</span>
+            {listing.hasAiContent && <span className="tag-eq">Có AI hỗ trợ</span>}
+          </div>
+          <h1 className="text-2xl">{listing.title}</h1>
+          <p className="text-sm text-navy/60">
+            Người bán: <b>{seller}</b> • Bài học: {story.topic?.title} • Nhân vật: {story.characters.map((c) => c.name).join(", ")}
+          </p>
+          {listing.description && <p className="text-sm text-navy/70">{listing.description}</p>}
         </div>
-      </div>
-    );
-  }
+        {decided ? (
+          <span className="rounded-full bg-secondary-tint px-3 py-1 text-sm font-bold text-secondary-dark">Đã quyết định: {DECISION_LABELS[review.decision] ?? review.decision}</span>
+        ) : review.claimedByMe ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-primary-tint px-3 py-1 text-sm font-bold text-primary-dark">
+            <Lock size={14} /> Bạn đang giữ bài đến {new Date(review.claimExpiresAt).toLocaleTimeString("vi-VN")}
+          </span>
+        ) : (
+          <button type="button" onClick={() => claim.mutate(undefined, { onError: (e) => toast.error(e.message) })} disabled={claim.isPending} className="btn-primary">
+            {claim.isPending && <Loader2 size={16} className="animate-spin" />} Nhận bài để duyệt
+          </button>
+        )}
+      </header>
 
-  if (isError) {
-    return (
-      <div className="card mx-auto mt-16 max-w-md p-8 text-center">
-        <p className="font-display text-lg font-bold">{error.message}</p>
-        <Link to={ROUTES.MODERATOR.DASHBOARD} className="btn-primary mt-4">
-          Về hàng chờ
-        </Link>
-      </div>
-    );
-  }
+      <p className="text-sm font-semibold text-navy/70" aria-live="polite">
+        Đã xem {progress.pagesViewed}/{progress.pagesTotal} trang • Checklist đạt {progress.checklistPassed}/{progress.checklistTotal}
+      </p>
 
-  return <Workspace key={story.id} story={story} moderatorName={overview.moderator.name} />;
+      {story.pages.map((page) => {
+        const seen = viewed.get(page.id);
+        const cp = cpAfter.get(page.id);
+        return (
+          <Fragment key={page.id}>
+            <article className={`card space-y-3 p-5 ${seen ? "border-secondary/40" : ""}`}>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-lg">Trang {page.pageOrder}</h2>
+                {seen ? (
+                  <span className="inline-flex items-center gap-1 text-sm font-bold text-secondary-dark">
+                    <CheckCircle2 size={16} /> Đã xem
+                  </span>
+                ) : null}
+              </div>
+              <p className="whitespace-pre-line">{withNames(page.contentText, story.characters)}</p>
+              {page.audioUrl && <audio controls preload="none" src={page.audioUrl} className="h-9 w-full max-w-md" aria-label={`Giọng đọc trang ${page.pageOrder}`} />}
+              {canAct && (
+                <div className="flex flex-wrap items-end gap-2">
+                  <input
+                    value={notes[page.id] ?? seen?.comment ?? ""}
+                    onChange={(e) => setNotes((m) => ({ ...m, [page.id]: e.target.value }))}
+                    placeholder="Nhận xét cho trang này (không bắt buộc)"
+                    aria-label={`Nhận xét trang ${page.pageOrder}`}
+                    className="min-w-56 flex-1 rounded-card border-2 border-outline px-3 py-2 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => view.mutate({ pageId: page.id, comment: notes[page.id] })}
+                    disabled={view.isPending}
+                    className="btn-ghost px-4 py-2 text-sm"
+                  >
+                    <Eye size={16} /> {seen ? "Lưu nhận xét" : "Đánh dấu đã xem"}
+                  </button>
+                </div>
+              )}
+              {!canAct && seen?.comment && <p className="text-sm text-navy/60">Nhận xét: {seen.comment}</p>}
+            </article>
+            {cp && <CheckpointBlock cp={cp} characters={story.characters} />}
+          </Fragment>
+        );
+      })}
+
+      <section className="card space-y-3 p-5">
+        <h2 className="text-lg">Checklist 7 nguyên tắc</h2>
+        {checklist.map((item) => (
+          <label key={item.id} className="flex items-start gap-3 text-sm">
+            <input
+              type="checkbox"
+              disabled={!canAct}
+              checked={passedOf(item) === true}
+              onChange={(e) => setChecks((m) => ({ ...m, [item.id]: e.target.checked }))}
+              className="mt-1 h-4 w-4"
+            />
+            {item.description}
+          </label>
+        ))}
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          disabled={!canAct}
+          rows={3}
+          placeholder={isFollowup ? "Nhận xét chung (bắt buộc khi gỡ hẳn — người bán thấy đây là lý do cảnh cáo)" : "Nhận xét chung (bắt buộc khi yêu cầu sửa / từ chối)"}
+          aria-label="Nhận xét chung"
+          className="w-full rounded-card border-2 border-outline p-3 text-sm"
+        />
+        {!isFollowup && (
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" disabled={!canAct} checked={strike} onChange={(e) => setStrike(e.target.checked)} className="h-4 w-4" />
+            Khi từ chối: cảnh cáo tác giả (vi phạm nghiêm trọng, cố ý)
+          </label>
+        )}
+        <div className="flex flex-wrap gap-2">
+          {decisions.map((d) => (
+            <button key={d.value} type="button" disabled={!canAct || decide.isPending} onClick={() => submit(d.value)} className={`${d.tone} disabled:opacity-50`}>
+              {decide.isPending && decide.variables?.decision === d.value && <Loader2 size={16} className="animate-spin" />}
+              {d.label}
+            </button>
+          ))}
+        </div>
+        {decided && review.comment && <p className="text-sm text-navy/60">Nhận xét đã gửi: {review.comment}</p>}
+      </section>
+    </div>
+  );
 }
 
-// /moderator/workspace (không có id) → mở truyện đầu tiên trong hàng chờ
+function ReviewWorkspacePage() {
+  const { storyId: reviewId } = useParams();
+  return <Workspace key={reviewId} reviewId={reviewId} />;
+}
+
+/** /moderator/workspace → về hàng chờ để chọn bài. */
 export function WorkspaceIndexRedirect() {
-  const { data, isLoading } = useReviewQueue();
-  if (isLoading) return <div className="h-64 animate-pulse rounded-stage bg-surface" />;
-  const first = data?.items[0];
-  if (!first) {
-    return (
-      <div className="card mx-auto mt-16 max-w-md p-8 text-center">
-        <p className="font-display text-lg font-bold">Hàng chờ đang trống 🎉</p>
-        <Link to={ROUTES.MODERATOR.DASHBOARD} className="btn-primary mt-4">
-          Về Tổng quan
-        </Link>
-      </div>
-    );
-  }
-  return <Navigate to={ROUTES.MODERATOR.workspace(first.id)} replace />;
+  return <Navigate to={ROUTES.MODERATOR.DASHBOARD} replace />;
 }
 
 export default ReviewWorkspacePage;

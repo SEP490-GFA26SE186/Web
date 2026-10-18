@@ -10,31 +10,22 @@ function Avatar({ child, className }) {
   );
 }
 
-// Thời lượng đã dùng hôm nay so với giới hạn — GET /children/:id/usage
+// Thời gian đọc hôm nay (tính từ các lượt đọc) — GET /children/:id/usage. Rev8 không giới hạn phút.
 function TodayUsage({ childId }) {
   const { data: usage, isLoading } = useChildUsage(childId);
 
   if (isLoading || !usage) return <div className="mt-3 h-8 w-full max-w-sm animate-pulse rounded-full bg-surface" />;
 
-  const percent = Math.min(100, Math.round((usage.usedMinutes / usage.dailyLimitMinutes) * 100));
   return (
-    <div className="mt-3 flex w-full max-w-sm items-center gap-3 rounded-full bg-surface px-3 py-1.5">
+    <div className="mt-3 flex w-full max-w-sm items-center gap-2 rounded-full bg-surface px-3 py-1.5 text-xs font-bold text-navy/60">
       <Timer size={15} className="shrink-0 text-primary" />
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-outline">
-        <div
-          className={`h-full rounded-full transition-all duration-700 ${usage.isLimitReached ? "bg-danger" : "bg-primary"}`}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-      <span className="shrink-0 text-xs font-bold text-navy/60">
-        Hôm nay {usage.usedMinutes} / {usage.dailyLimitMinutes} phút
-      </span>
+      {usage.sessionsCount ? `Hôm nay đọc ${usage.usedMinutes} phút • ${usage.sessionsCount} lượt` : "Hôm nay chưa đọc truyện nào"}
     </div>
   );
 }
 
 // Thẻ lớn của bé đang được chọn
-export function ActiveChildCard({ child, onEdit, onDelete }) {
+export function ActiveChildCard({ child, onEdit, onDelete, action }) {
   return (
     <div className="relative h-full overflow-hidden rounded-card bg-white p-6 shadow-mid">
       <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
@@ -65,6 +56,7 @@ export function ActiveChildCard({ child, onEdit, onDelete }) {
           </div>
           {child.character?.appearance && <p className="mt-0.5 line-clamp-2 text-sm text-navy/60">{child.character.appearance}</p>}
           <TodayUsage childId={child.id} />
+          {action && <div className="mt-3">{action}</div>}
         </div>
 
         <div className="flex gap-2 sm:flex-col">
@@ -99,9 +91,6 @@ export function OtherChildCard({ child, onSelect }) {
           <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs font-bold">
             <span className="flex items-center gap-1 text-secondary-dark">
               <BookOpen size={15} /> {child.booksCount} truyện trong tủ
-            </span>
-            <span className="flex items-center gap-1 text-primary-dark">
-              <Timer size={15} /> {child.dailyScreenTimeMinutes} phút/ngày
             </span>
           </div>
         </div>

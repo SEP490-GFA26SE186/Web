@@ -1,32 +1,39 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { completeStory, getKidStory, saveReadingProgress, submitStoryChoice, verifyParentPin } from "../services/kidService";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  answerCheckpoint,
+  completeReading,
+  enterKidMode,
+  exitKidMode,
+  getKidShelf,
+  getUiAudio,
+  saveProgress,
+  startReading,
+} from "../services/kidService";
 
-export const kidKeys = { story: (id) => ["kid", "story", id] };
-
-export const useKidStory = (storyId) =>
-  useQuery({ queryKey: kidKeys.story(storyId), queryFn: () => getKidStory(storyId), enabled: !!storyId, staleTime: Infinity });
-
-export const useSaveProgress = (storyId) => useMutation({ mutationFn: (page) => saveReadingProgress(storyId, page) });
-
-export const useSubmitChoice = (storyId) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ pageNumber, choice }) => submitStoryChoice(storyId, pageNumber, choice),
-    onSuccess: (_, { pageNumber, choice }) =>
-      queryClient.setQueryData(kidKeys.story(storyId), (old) =>
-        old
-          ? {
-              ...old,
-              progress: {
-                ...old.progress,
-                choices: { ...old.progress.choices, [pageNumber]: choice.id },
-              },
-            }
-          : old,
-      ),
-  });
+export const kidKeys = {
+  shelf: ["kid", "shelf"],
+  uiAudio: ["kid", "ui-audio"],
+  reading: (storyId) => ["kid", "reading", storyId],
 };
 
-export const useCompleteStory = (storyId) => useMutation({ mutationFn: () => completeStory(storyId) });
+export const useKidShelf = () => useQuery({ queryKey: kidKeys.shelf, queryFn: getKidShelf });
 
-export const useVerifyParentPin = () => useMutation({ mutationFn: verifyParentPin });
+export const useUiAudio = () => useQuery({ queryKey: kidKeys.uiAudio, queryFn: getUiAudio, staleTime: Infinity });
+
+/** Bắt đầu / tiếp tục lượt đọc — một lần mỗi lần mở truyện (không tự gọi lại). */
+export const useReading = (storyId) =>
+  useQuery({
+    queryKey: kidKeys.reading(storyId),
+    queryFn: () => startReading(storyId),
+    enabled: !!storyId,
+    staleTime: Infinity,
+    gcTime: 0,
+    retry: false,
+  });
+
+export const useSaveProgress = (sessionId) => useMutation({ mutationFn: (pageId) => saveProgress(sessionId, pageId) });
+export const useAnswer = (sessionId) => useMutation({ mutationFn: (body) => answerCheckpoint(sessionId, body) });
+export const useCompleteReading = (sessionId) => useMutation({ mutationFn: () => completeReading(sessionId) });
+
+export const useEnterKidMode = () => useMutation({ mutationFn: enterKidMode });
+export const useExitKidMode = () => useMutation({ mutationFn: exitKidMode });

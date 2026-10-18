@@ -1,4 +1,4 @@
-// Ảnh bìa truyện. Khi chưa có ảnh thật từ BE thì hiển thị gradient + emoji minh họa.
+// Ảnh bìa truyện. Khi chưa có ảnh thật từ BE thì hiển thị gradient + emoji minh họa (mặc định 📖).
 function StoryCover({ cover, emoji, gradient, alt, className = "", children }) {
   return (
     <div className={`relative overflow-hidden ${className}`}>
@@ -7,7 +7,7 @@ function StoryCover({ cover, emoji, gradient, alt, className = "", children }) {
       ) : (
         <div className={`grid h-full w-full place-items-center bg-gradient-to-br ${gradient}`}>
           <span className="text-7xl drop-shadow-lg select-none" role="img" aria-label={alt}>
-            {emoji}
+            {emoji ?? "📖"}
           </span>
           <span className="absolute top-4 left-6 text-lg text-white/80">✦</span>
           <span className="absolute right-8 bottom-10 text-sm text-white/70">✦</span>

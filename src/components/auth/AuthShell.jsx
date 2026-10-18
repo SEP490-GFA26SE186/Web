@@ -5,7 +5,6 @@ import { ROUTES } from "../../constants/routes";
 const FOOTER_LINKS = [
   { to: "/chinh-sach-bao-mat", label: "Chính sách bảo mật" },
   { to: "/dieu-khoan-dich-vu", label: "Điều khoản sử dụng" },
-  { to: "/huong-dan-phu-huynh", label: "Hướng dẫn phụ huynh" },
 ];
 
 // Khung chung cho các trang xác thực (đăng nhập, đăng ký, quên mật khẩu...)

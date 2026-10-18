@@ -1,48 +1,38 @@
-// Nội dung tĩnh của Landing page — chỉnh câu chữ / số liệu marketing tại đây.
+// Nội dung tĩnh của Landing page. Chỉ ghi điều sản phẩm làm thật (rev8, 2026-10-18) — không số liệu marketing,
+// không lời khen giả. Đổi tính năng thì sửa ở đây.
 
 export const LANDING_NAV = [
   { id: "gioi-thieu", label: "Giới thiệu" },
   { id: "cach-hoat-dong", label: "Cách hoạt động" },
   { id: "mo-hinh-casel", label: "Mô hình CASEL" },
-  { id: "danh-cho-gia-dinh", label: "Dành cho Gia đình & Bé" },
-  { id: "cong-dong", label: "Cộng đồng Tác giả" },
+  { id: "danh-cho-gia-dinh", label: "Gia đình & Người bán" },
+  { id: "cau-hoi", label: "Câu hỏi thường gặp" },
 ];
 
 export const TRUST_BADGES = [
-  {
-    icon: "star",
-    title: "14,000+ Gia đình",
-    desc: "Tin tưởng sử dụng",
-    tone: "primary",
-  },
-  // { icon: "shield", title: "Chuẩn COPPA", desc: "100% Không quảng cáo", tone: "secondary" },
-  {
-    icon: "school",
-    title: "Khung CASEL",
-    desc: "Khoa học sư phạm Hoa Kỳ",
-    tone: "primaryDark",
-  },
+  { icon: "school", title: "Khung CASEL", desc: "5 năng lực cảm xúc – xã hội", tone: "primaryDark" },
+  { icon: "shield", title: "Không quảng cáo", desc: "Không cần ảnh của bé", tone: "secondary" },
+  { icon: "star", title: "Duyệt từng trang", desc: "Truyện trên Chợ đều qua kiểm duyệt", tone: "primary" },
 ];
 
+// Mô phỏng một điểm dừng "Giải quyết tình huống" trong Kid Mode (bé nghe câu hỏi, chạm chọn, nghe phản hồi).
 export const HERO_DEMO = {
-  chapter: "Chương 2: Cơn giận của Khủng long Roco",
-  level: "EQ Level 2",
-  narrator: "Giọng đọc Mẹ Ổi ấm áp",
-  text: "Roco dẫm chân thật mạnh. Bé cảm thấy lồng ngực như có một ngọn núi lửa nhỏ đang sôi sục! Lúc này, Roco nên làm gì?",
+  chapter: "Bài học: Khi con nổi giận",
+  level: "5–8 tuổi",
+  narrator: "Giọng đọc kể truyện tiếng Việt",
+  text: "Lâu đài khối gỗ của Bin đổ sập. Bin thấy mặt nóng bừng, tay nắm chặt. Lúc này Bin nên làm gì?",
   choices: [
     {
       id: "A",
-      text: "Hít thật sâu đếm đến 3 rồi xếp lại",
+      text: "Hít thật sâu, đếm đến 3 rồi xếp lại",
       tone: "secondary",
-      feedback:
-        "Roco thở phù một hơi… núi lửa nguội dần. Bé đã rèn luyện Tự quản lý! 🌿",
+      feedback: "Bin thở chậm… cơn giận dịu dần. Bin xếp lại lâu đài còn cao hơn lúc nãy! 🌿",
     },
     {
       id: "B",
-      text: "Nhờ mẹ gấu hướng dẫn cách giữ thăng bằng",
+      text: "Nhờ bà giúp giữ khối gỗ cho vững",
       tone: "primary",
-      feedback:
-        "Mẹ gấu ôm Roco và cùng xếp lại. Biết nhờ giúp đỡ cũng là một kỹ năng tuyệt vời! 🐻",
+      feedback: "Bà cùng Bin xếp lại. Biết nhờ người lớn giúp cũng là một cách giỏi! 🧱",
     },
   ],
   skillBadge: "Rèn luyện Tự quản lý (Self-Management)",
@@ -52,41 +42,35 @@ export const MISSION_PILLARS = [
   {
     icon: "sad",
     iconTone: "danger",
-    eyebrow: "Thực trạng hiện nay",
+    eyebrow: "Điều ba mẹ hay gặp",
     eyebrowTone: "danger",
-    title: "Thiếu nhận thức cảm xúc cơ bản",
-    problem:
-      "Trẻ thường biểu hiện giận dữ, khóc lóc hoặc thu mình vì chưa được dạy cách gọi tên chính xác cảm xúc đang diễn ra bên trong cơ thể.",
+    title: "Bé chưa biết gọi tên cảm xúc",
+    problem: "Trẻ 5–8 tuổi hay giận dữ, khóc hoặc thu mình vì chưa biết nói ra mình đang cảm thấy gì.",
     solutionIcon: "verified",
     solutionTone: "secondary",
-    solution:
-      "Bé nhận diện & phân biệt rõ cơn giận, nỗi sợ, sự đồng cảm qua 200+ nhân vật muông thú gần gũi và gương soi cảm xúc.",
+    solution: "Trong truyện, bé được hỏi “nhân vật đang cảm thấy thế nào?” và chọn cảm xúc. Chọn chưa đúng thì có gợi ý để thử lại.",
   },
   {
     icon: "tvOff",
     iconTone: "neutral",
-    eyebrow: "Thực trạng hiện nay",
+    eyebrow: "Điều ba mẹ hay gặp",
     eyebrowTone: "muted",
-    title: "Tiếp xúc thụ động với màn hình",
-    problem:
-      "Xem video ngắn ngắt quãng làm suy giảm khả năng tập trung sâu và khiến trẻ mất dần phản xạ tư duy phản biện khi gặp khó khăn ngoài đời.",
+    title: "Xem màn hình một cách thụ động",
+    problem: "Video ngắn nối tiếp nhau khiến trẻ chỉ xem, ít phải nghĩ xem mình sẽ làm gì khi gặp chuyện tương tự.",
     solutionIcon: "lightbulb",
     solutionTone: "primary",
-    solution:
-      "Tương tác chủ động: Bé đóng vai nhân vật chính, tự đưa ra lựa chọn tại ngã rẽ cốt truyện và chứng kiến hệ quả hành động một cách trực quan.",
+    solution: "Truyện dừng lại ở những điểm quan trọng để bé tự chọn cách xử lý, rồi nghe xem chuyện gì xảy ra tiếp theo.",
   },
   {
     icon: "hourglass",
     iconTone: "neutral",
-    eyebrow: "Thực trạng hiện nay",
+    eyebrow: "Điều ba mẹ hay gặp",
     eyebrowTone: "muted",
-    title: "Khoảng cách trò chuyện gia đình",
-    problem:
-      "Phụ huynh bận rộn sau ngày dài làm việc, khó mở lời hỏi han sâu sắc hoặc không biết bắt đầu câu chuyện tâm tình cùng con từ đâu.",
+    title: "Khó biết con đang tiến bộ ở đâu",
+    problem: "Ba mẹ bận rộn, khó theo dõi con đã hiểu cảm xúc của mình và của người khác đến đâu.",
     solutionIcon: "family",
     solutionTone: "secondary",
-    solution:
-      "Gia đình đồng hành: Ba mẹ cá nhân hóa truyện với tên con, nhận gợi ý 3 câu hỏi đối thoại mở sau mỗi chương để gắn kết bền chặt.",
+    solution: "Báo cáo EQ tổng hợp câu trả lời của bé theo 5 năng lực CASEL, kèm gợi ý hoạt động để ba mẹ cùng con luyện tập.",
   },
 ];
 
@@ -94,81 +78,65 @@ export const PRINCIPLES = [
   {
     icon: "check",
     tone: "secondary",
-    title: "100% Nội dung kiểm duyệt sư phạm",
-    desc: "Mọi kịch bản cốt truyện đều qua bộ lọc an toàn trẻ em và chuyên gia giáo dục sớm thẩm định trước khi hiển thị cho bé.",
+    title: "Ba mẹ duyệt trước, bé mới đọc",
+    desc: "Chữ do AI viết đi qua bộ lọc từ khoá do kiểm duyệt viên quản lý. Truyện chỉ lên giá sách của bé khi ba mẹ đã xem và bấm hoàn tất. Truyện trên Chợ được kiểm duyệt viên đọc từng trang theo checklist.",
   },
   {
     icon: "noCamera",
     tone: "primary",
-    title: "Bảo mật danh tính & Không quét khuôn mặt",
-    desc: "Hệ thống hoàn toàn không thu thập hình ảnh thật hay dữ liệu sinh trắc học của trẻ. Mọi nhân vật đều là hình vẽ cách điệu nghệ thuật.",
+    title: "Không cần ảnh, không lộ tên thật",
+    desc: "Nhân vật được mô tả bằng chữ. Tên thật của bé và người thân được thay bằng mã trước khi gửi cho AI, và được thay bằng tên chung khi đăng bán.",
   },
   {
     icon: "lock",
     tone: "neutral",
-    title: "Quyền kiểm soát trọn vẹn trong tay phụ huynh",
-    desc: "Ba mẹ có thể chỉnh sửa lời thoại, cài đặt giới hạn thời gian đọc hoặc thay đổi ngã rẽ cốt truyện bất cứ lúc nào.",
+    title: "Ba mẹ giữ quyền kiểm soát",
+    desc: "Sửa từng trang, từng câu hỏi bất cứ lúc nào. Chế độ Trẻ Em khoá các nút ra ngoài; thoát ra cần mã PIN của ba mẹ.",
   },
 ];
 
 export const WORKFLOW = [
-  {
-    title: "AI Trợ Lý Đề Xuất Cốt Truyện",
-    desc: "Dựa trên tình huống trẻ gặp phải (sợ bóng tối, ghen tị khi có em nhỏ, chia sẻ đồ chơi).",
-    tone: "primary",
-  },
-  {
-    title: "Phụ Huynh Tùy Biến & Phê Duyệt",
-    desc: "Ba mẹ chỉnh sửa tính cách nhân vật, thêm biệt danh thân thương của con và duyệt bài học cuối.",
-    tone: "secondary",
-  },
-  {
-    title: "Hệ Thống Phục Vụ Kid Mode An Toàn",
-    desc: "Khóa các đường dẫn ra ngoài, phát âm thanh giọng đọc ấm áp, hiển thị tương tác tối giản dịu mắt.",
-    tone: "navy",
-  },
+  { title: "AI viết theo tình huống thật", desc: "Ba mẹ kể chuyện bé vừa gặp, chọn bài học — AI viết truyện kèm câu hỏi.", tone: "primary" },
+  { title: "Ba mẹ sửa & hoàn tất", desc: "Chỉnh câu chữ, câu hỏi cho hợp với con rồi bấm hoàn tất.", tone: "secondary" },
+  { title: "Bé đọc an toàn trong Kid Mode", desc: "Giọng đọc kể truyện, chạm để trả lời, không có đường dẫn ra ngoài.", tone: "navy" },
 ];
 
+// 5 năng lực CASEL — mỗi bài học (do kiểm duyệt viên soạn) gắn đúng một năng lực.
 export const CASEL_SKILLS = [
   {
     icon: "brain",
     tone: "primary",
     title: "Tự nhận thức",
     en: "Self-Awareness",
-    desc: "Giúp bé nhận biết nhịp tim đập nhanh khi sợ hãi, nụ cười rạng rỡ khi vui mừng và hiểu được sở thích riêng.",
-    stories: 48,
+    desc: "Nhận ra mình đang vui, buồn, giận hay sợ — và vì sao.",
   },
   {
     icon: "calm",
     tone: "secondary",
     title: "Tự quản lý",
     en: "Self-Management",
-    desc: "Rèn luyện kỹ thuật thở sâu “bong bóng xà phòng”, kiên nhẫn xếp hàng chờ đến lượt và kiềm chế bốc đồng.",
-    stories: 56,
+    desc: "Bình tĩnh lại khi giận, kiên nhẫn chờ đến lượt, kiềm chế hành động bốc đồng.",
   },
   {
     icon: "heart",
     tone: "navy",
-    title: "Đồng cảm",
+    title: "Nhận thức xã hội",
     en: "Social Awareness",
-    desc: "Đặt mình vào góc nhìn của bạn bè, thấu hiểu khi thấy bạn buồn bã và tôn trọng sự khác biệt của những người xung quanh.",
-    stories: 42,
+    desc: "Đặt mình vào vị trí người khác, hiểu khi bạn buồn hay ông bà mệt.",
   },
   {
     icon: "users",
     tone: "primary",
-    title: "Kết nối",
+    title: "Kỹ năng quan hệ",
     en: "Relationship Skills",
-    desc: "Biết cách nói lời cảm ơn & xin lỗi chân thành, chia sẻ đồ chơi cùng nhóm bạn và giải quyết mâu thuẫn trong hòa bình.",
-    stories: 50,
+    desc: "Nói lời cảm ơn, xin lỗi, chia sẻ đồ chơi và giải quyết mâu thuẫn nhẹ nhàng.",
   },
   {
     icon: "scale",
     tone: "secondary",
-    title: "Trách nhiệm",
+    title: "Ra quyết định có trách nhiệm",
     en: "Responsible Decisions",
-    desc: "Tập cân nhắc hậu quả trước khi hành động, giữ lời hứa và tự tin chọn điều đúng đắn dù xung quanh chưa ai làm.",
-    stories: 64,
+    desc: "Nghĩ đến điều sẽ xảy ra trước khi làm, giữ lời hứa, chọn điều đúng.",
   },
 ];
 
@@ -176,26 +144,26 @@ export const STEPS = [
   {
     tone: "primary",
     icon: "search",
-    scene: ["📱", "🌙", "🧸"],
+    scene: ["🧒", "😤", "🧱"],
     gradient: "from-orange-200 via-amber-100 to-rose-100",
-    title: "Chọn tình huống hoặc chủ đề cảm xúc",
-    desc: "Lựa chọn từ ngân hàng 50+ tình huống thực tế mà bé đang gặp: sợ bóng tối, ghen tị với bạn bè, khó ăn rau, hay chuẩn bị vào lớp 1.",
+    title: "Chọn bài học & kể tình huống của con",
+    desc: "Chọn một bài học theo 5 năng lực CASEL, kể chuyện bé vừa gặp (ví dụ: nổi giận khi đồ chơi đổ) và chọn nhân vật — bé, ông bà, anh chị, thú cưng.",
   },
   {
     tone: "secondary",
     icon: "tune",
-    scene: ["🧒", "🌳", "💡"],
+    scene: ["✍️", "📖", "💡"],
     gradient: "from-teal-200 via-emerald-100 to-lime-100",
-    title: "Cá nhân hóa nhân vật & ngã rẽ cốt truyện",
-    desc: "Nhập tên con, người bạn thân yêu hoặc thú cưng. AI gợi ý các ngã rẽ tình huống đạo đức tương ứng với khung CASEL để rèn luyện tư duy.",
+    title: "AI viết giúp — hoặc ba mẹ tự viết",
+    desc: "AI viết truyện 6–10 trang kèm các câu hỏi cảm xúc và tình huống; ba mẹ sửa thoải mái. Muốn tự viết từ đầu cũng được.",
   },
   {
     tone: "navy",
     icon: "book",
-    scene: ["👩‍👧", "📖", "✨"],
+    scene: ["👩‍👧", "🔊", "✨"],
     gradient: "from-indigo-200 via-violet-100 to-pink-100",
-    title: "Cùng con đọc tương tác trong Kid Mode",
-    desc: "Bật chế độ đọc an toàn, nghe giọng đọc ấm áp và để con tự tay chạm chọn hành động giải quyết xung đột, sau đó cùng đàm thoại câu hỏi mở.",
+    title: "Bé nghe truyện và trả lời trong Kid Mode",
+    desc: "Giọng đọc kể truyện cho bé chưa biết chữ. Bé chạm để chọn câu trả lời, nghe phản hồi; câu trả lời được tổng hợp vào Báo cáo EQ.",
   },
 ];
 
@@ -203,66 +171,54 @@ export const AUDIENCES = [
   {
     icon: "baby",
     tone: "primary",
-    title: "Dành cho Cha Mẹ & Bé",
-    desc: "Tủ sách tương tác gia đình không giới hạn. Nhận báo cáo tiến trình trưởng thành cảm xúc (EQ Growth Radar) sau mỗi tháng.",
+    title: "Dành cho ba mẹ & bé",
+    desc: "Truyện riêng cho con dựa trên tình huống thật, giọng đọc tiếng Việt và báo cáo tiến bộ cảm xúc.",
     bullets: [
-      "Tùy biến tên & hình mẫu nhân vật",
-      "Chế độ đọc ngủ dịu êm không ánh sáng xanh",
-      "Gợi ý chủ đề đối thoại mở cha mẹ – con cái",
+      "Nhân vật gia đình mô tả bằng chữ, dùng lại cho mọi truyện",
+      "Giọng đọc kể truyện cho bé chưa biết chữ",
+      "Báo cáo EQ theo 5 năng lực, kèm gợi ý hoạt động",
     ],
-    cta: "Bắt đầu tủ sách gia đình",
+    cta: "Tạo tài khoản miễn phí",
     to: "signup",
   },
   {
     icon: "pen",
     tone: "secondary",
-    title: "Dành cho Tác giả & Giáo viên",
-    desc: "Sáng tác truyện phân nhánh dễ dàng trên thư viện mẫu sư phạm chuẩn CASEL. Mở bán truyện trên Chợ truyện văn minh.",
+    title: "Dành cho ba mẹ muốn bán truyện",
+    desc: "Truyện ba mẹ đã viết có thể đăng lên Chợ truyện để các gia đình khác cùng dùng (cần gói Gia đình và hồ sơ người bán được duyệt).",
     bullets: [
-      "Bộ công cụ biên tập phân nhánh trực quan",
-      "Chia sẻ doanh thu 80/20 minh bạch, tức thì",
-      "Cộng đồng 500+ nhà giáo dục thẩm định",
+      "Tên thật của gia đình được thay bằng tên chung trước khi đăng",
+      "Kiểm duyệt viên đọc từng trang theo checklist trước khi lên Chợ",
+      "Nhận 80% giá bán; tiền giữ 3 ngày rồi rút về tài khoản ngân hàng",
     ],
-    cta: "Gia nhập Mạng lưới Tác giả",
+    cta: "Bắt đầu viết truyện",
     to: "signup",
   },
-  {
-    icon: "school2",
-    tone: "navy",
-    title: "Dành cho Trường học & Trung tâm",
-    desc: "Thư viện câu chuyện tình huống phục vụ giờ sinh hoạt lớp, tiết học kỹ năng sống và các buổi thảo luận nhóm cho học sinh mầm non & tiểu học.",
-    bullets: [
-      "Giáo án tương tác tích hợp máy chiếu lớp học",
-      "Khảo sát đo lường chỉ số đồng cảm tập thể",
-      "Hỗ trợ tập huấn giáo viên phương pháp EQ",
-    ],
-    cta: "Tìm hiểu gói School Solution",
-    to: "contact",
-  },
 ];
 
-export const TESTIMONIALS = [
+export const FAQS = [
   {
-    name: "Chị Hoàng Yến",
-    role: "Mẹ bé Bơ (6 tuổi) – Hà Nội",
-    avatar: "👩",
-    quote:
-      "Bé Bơ nhà mình 6 tuổi, trước đây mỗi khi tức giận thường hay ném đồ. Từ ngày cùng mẹ đọc truyện Khủng long Roco, mỗi lần thấy khó chịu bé lại tự giác nói: 'Mẹ ơi con đang như núi lửa, con hít sâu 3 lần đây'. Thực sự rất xúc động!",
+    q: "Bé chưa biết chữ có dùng được không?",
+    a: "Được. Truyện có giọng đọc kể truyện tiếng Việt; câu hỏi và các lựa chọn cũng được đọc to, bé chỉ cần chạm để trả lời. Truyện ba mẹ tắt giọng đọc sẽ hiện nhãn “Chỉ có chữ”.",
   },
   {
-    name: "Cô Minh Thư",
-    role: "Giáo viên Mầm non Họa Mi – TP.HCM",
-    avatar: "👩‍🏫",
-    quote:
-      "Với tư cách giáo viên mầm non, tôi đánh giá rất cao việc nền tảng bám sát 5 tiêu chí của CASEL. Những ngã rẽ lựa chọn hành vi giúp các con hiểu được nguyên nhân – kết quả tốt hơn nhiều so với việc chỉ nghe giảng giải suông.",
+    q: "AI có biết tên thật của con tôi không?",
+    a: "Không. Trước khi gửi cho AI, tên của bé và người thân được thay bằng mã như {NV1}. Tên thật chỉ ghép lại khi hiển thị cho gia đình và khi đọc giọng.",
   },
   {
-    name: "Anh Tuấn Nam",
-    role: "Kỹ sư & Phụ huynh bé Sóc (7 tuổi) – Đà Nẵng",
-    avatar: "👨",
-    quote:
-      "Điều khiến tôi an tâm tuyệt đối là ứng dụng không có bất kỳ quảng cáo linh tinh nào, cũng không đòi hỏi ảnh chụp của con. AI chỉ đóng vai trò gợi ý cốt truyện, còn ba mẹ vẫn là người nắm toàn quyền quyết định.",
+    q: "Ai kiểm tra nội dung trước khi bé đọc?",
+    a: "Truyện của gia đình: ba mẹ đọc lại và bấm hoàn tất. Truyện mua trên Chợ: kiểm duyệt viên đọc 100% số trang theo checklist sư phạm. Phụ huynh có thể báo cáo truyện không phù hợp; đủ nhiều báo cáo, truyện tự tạm gỡ chờ xem lại.",
+  },
+  {
+    q: "Credit là gì, có mất phí không?",
+    a: "Credit dùng cho các lần AI viết truyện. Gói Miễn phí cấp credit mỗi tháng; gói Gia đình cấp nhiều hơn và mở tính năng bán truyện. Truyện tự viết không tốn credit. Thanh toán qua payOS (chuyển khoản / VietQR).",
+  },
+  {
+    q: "Điểm EQ của con được tính thế nào?",
+    a: "Từ câu trả lời ở lượt đọc đầu tiên của mỗi truyện, theo năng lực CASEL của bài học. Mỗi năng lực cần ít nhất 5 câu trả lời mới hiện điểm, để tránh kết luận vội.",
+  },
+  {
+    q: "Mua truyện rồi không hài lòng thì sao?",
+    a: "Ba mẹ gửi yêu cầu hoàn tiền trong 3 ngày kể từ lúc thanh toán, ở mục Lịch sử thanh toán. Quản trị viên xem xét và chuyển trả vào tài khoản đã thanh toán.",
   },
 ];
-
-export const SIGNUP_BONUS_CREDITS = 10;

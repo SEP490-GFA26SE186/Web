@@ -1,7 +1,6 @@
 import api, { getErrorMessage } from "./api";
 import useAuthStore from "../stores/authStore";
 
-const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 // Khớp auth.validation.js của BE
@@ -124,10 +123,3 @@ export const changeKidPin = ({ newPin, currentPin, password }) =>
 
 // ---- Chưa có API ở BE → vẫn dùng mock ----
 
-/** Đăng ký nhanh từ Landing page: gửi link kích hoạt tới email phụ huynh */
-export const requestSignup = async (email) => {
-  await delay(700);
-  if (!EMAIL_REGEX.test(email)) throw new Error("Email chưa đúng định dạng");
-  if (email.toLowerCase().endsWith("@test.com")) throw new Error("Email này đã được đăng ký, ba mẹ đăng nhập nhé");
-  return { email, sent: true };
-};

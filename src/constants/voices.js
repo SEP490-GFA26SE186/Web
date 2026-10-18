@@ -6,5 +6,3 @@ export const VOICES = [
   { value: "vi-south-female", label: "Giọng nữ miền Nam" },
   { value: "vi-south-male", label: "Giọng nam miền Nam" },
 ];
-
-export const voiceLabel = (value) => VOICES.find((v) => v.value === value)?.label ?? "Giọng mặc định";

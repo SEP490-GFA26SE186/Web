@@ -64,13 +64,13 @@ function LandingHeader() {
 
         <div className="flex items-center gap-2">
           <Link
-            to={ROUTES.KID.story("s_101")}
+            to={ROUTES.LOGIN}
             className="hidden rounded-full bg-secondary-tint px-4 py-2 text-sm font-bold text-secondary-dark transition hover:bg-secondary hover:text-white sm:inline-flex"
           >
-            Dùng thử Kid Mode
+            Đăng nhập
           </Link>
-          <Link to={ROUTES.LOGIN} className="btn-primary px-5 py-2 text-sm">
-            Đăng nhập / Đăng ký
+          <Link to={ROUTES.REGISTER} className="btn-primary px-5 py-2 text-sm">
+            Đăng ký miễn phí
           </Link>
           <button onClick={() => setMenuOpen((v) => !v)} className="rounded-full p-2 hover:bg-surface xl:hidden" aria-label="Mở menu" aria-expanded={menuOpen}>
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -89,8 +89,8 @@ function LandingHeader() {
               {n.label}
             </button>
           ))}
-          <Link to={ROUTES.KID.story("s_101")} className="mt-1 block rounded-2xl px-4 py-3 font-bold text-secondary-dark hover:bg-secondary-tint sm:hidden">
-            Dùng thử Kid Mode
+          <Link to={ROUTES.LOGIN} className="mt-1 block rounded-2xl px-4 py-3 font-bold text-secondary-dark hover:bg-secondary-tint sm:hidden">
+            Đăng nhập
           </Link>
         </nav>
       )}

@@ -5,6 +5,8 @@ import CharacterCard from "../../components/parent/children/CharacterCard";
 import { ActiveChildCard, AddChildCard, OtherChildCard } from "../../components/parent/children/ChildCards";
 import ChildFormModal from "../../components/parent/children/ChildFormModal";
 import KidPinCard from "../../components/parent/children/KidPinCard";
+import EnterKidModeButton from "../../components/parent/children/EnterKidModeButton";
+import useAuthStore from "../../stores/authStore";
 import ReadingSettingsCard from "../../components/parent/children/ReadingSettingsCard";
 import { useCreateChild, useDeleteChild, useSelectedChild, useUpdateChild } from "../../hooks/useChildProfile";
 import useParentStore from "../../stores/parentStore";
@@ -12,6 +14,7 @@ import { toast as notify } from "../../stores/toastStore";
 
 function ChildrenPage() {
   const setSelectedChildId = useParentStore((s) => s.setSelectedChildId);
+  const hasKidPin = useAuthStore((s) => !!s.user?.hasKidPin);
   const { child: active, children, isLoading, isEmpty } = useSelectedChild();
   const [modal, setModal] = useState(null); // "create" | "edit" | "delete" | null
 
@@ -68,7 +71,7 @@ function ChildrenPage() {
             Quản lý hồ sơ từng bé, nhân vật đại diện trong truyện và giới hạn thời gian dùng Chế độ Trẻ Em.
           </p>
         </div>
-        <button onClick={() => openModal("create")} className="btn-primary self-start shadow-glow md:self-auto">
+        <button onClick={() => openModal("create")} className="btn-primary shrink-0 self-start whitespace-nowrap shadow-glow md:self-auto">
           <PlusCircle size={20} /> Thêm hồ sơ bé mới
         </button>
       </div>
@@ -86,7 +89,12 @@ function ChildrenPage() {
         <>
           <section className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="lg:col-span-7">
-              <ActiveChildCard child={active} onEdit={() => openModal("edit")} onDelete={() => setModal("delete")} />
+              <ActiveChildCard
+                child={active}
+                onEdit={() => openModal("edit")}
+                onDelete={() => setModal("delete")}
+                action={<EnterKidModeButton child={active} hasPin={hasKidPin} />}
+              />
             </div>
             <div className="flex flex-col gap-4 lg:col-span-5">
               {others.map((c) => (

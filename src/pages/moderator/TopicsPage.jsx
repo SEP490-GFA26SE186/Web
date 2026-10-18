@@ -41,6 +41,8 @@ function TopicFormModal({ topic, skills, onClose }) {
   const create = useCreateTopic();
   const update = useUpdateTopic();
   const pending = create.isPending || update.isPending;
+  // BE khoá năng lực khi bài học đã có truyện (điểm EQ của truyện cũ phải giữ nguyên nghĩa)
+  const skillLocked = topic?.storiesCount > 0;
 
   const set = (key, numeric) => (e) => {
     setForm((f) => ({ ...f, [key]: numeric ? Number(e.target.value) : e.target.value }));
@@ -52,6 +54,7 @@ function TopicFormModal({ topic, skills, onClose }) {
     const message = validateTopic(form);
     if (message) return setError(message);
     const payload = { ...form, title: form.title.trim(), guidance: form.guidance.trim() };
+    if (skillLocked) delete payload.skillId;
     const options = {
       onSuccess: () => {
         toast.success(topic ? "Đã cập nhật bài học" : "Đã tạo bài học mới");
@@ -87,7 +90,12 @@ function TopicFormModal({ topic, skills, onClose }) {
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Năng lực CASEL</span>
-          <select value={form.skillId} onChange={set("skillId")} className={`${inputClass} cursor-pointer`}>
+          <select
+            value={form.skillId}
+            onChange={set("skillId")}
+            disabled={skillLocked}
+            className={`${inputClass} cursor-pointer disabled:cursor-not-allowed disabled:bg-surface disabled:text-navy/60`}
+          >
             <option value="">— Chọn năng lực —</option>
             {skills.map((s) => (
               <option key={s.id} value={s.id}>
@@ -95,6 +103,11 @@ function TopicFormModal({ topic, skills, onClose }) {
               </option>
             ))}
           </select>
+          {skillLocked && (
+            <span className="mt-1 block text-xs text-navy/50">
+              Đã có {topic.storiesCount} truyện dùng nên không đổi được năng lực. Cần năng lực khác thì tạo bài học mới.
+            </span>
+          )}
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Hướng dẫn sư phạm</span>
@@ -153,7 +166,7 @@ function TopicsPage() {
   const confirmDelete = () =>
     remove.mutate(deleting.id, {
       onSuccess: ({ message }) => {
-        toast.info(message); // BE: xóa hẳn, hoặc chuyển ngưng dùng nếu đã có truyện
+        toast.success(message); // BE: xóa hẳn, hoặc chuyển ngưng dùng nếu đã có truyện
         setDeleting(null);
       },
       onError: (err) => toast.error(err.message),
@@ -171,7 +184,7 @@ function TopicsPage() {
             Mỗi bài học gắn đúng một năng lực CASEL. Phụ huynh chọn bài học khi tạo truyện cho con.
           </p>
         </div>
-        <button onClick={() => setEditing("new")} disabled={!skills.length} className="btn-primary self-start disabled:opacity-60 md:self-auto">
+        <button onClick={() => setEditing("new")} disabled={!skills.length} className="btn-primary shrink-0 self-start whitespace-nowrap disabled:opacity-60 md:self-auto">
           <Plus size={20} /> Thêm bài học
         </button>
       </div>
@@ -183,7 +196,7 @@ function TopicsPage() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Tìm theo tên bài học hoặc hướng dẫn..."
+            placeholder="Tìm theo tên bài học..."
             className={`${inputClass} rounded-full pl-11`}
           />
         </label>

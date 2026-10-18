@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, AtSign, Eye, EyeOff, Loader2, Lock, Mail, Phone, ShieldCheck, UserRound } from "lucide-react";
 import AuthShell from "../../components/auth/AuthShell";
@@ -39,7 +39,8 @@ function RegisterPage() {
   const navigate = useNavigate();
   const { isAuthenticated, user, login: saveSession } = useAuthStore();
 
-  const [form, setForm] = useState({ fullName: "", username: "", email: "", phone: "", password: "", confirmPassword: "" });
+  const location = useLocation();
+  const [form, setForm] = useState({ fullName: "", username: "", email: location.state?.email ?? "", phone: "", password: "", confirmPassword: "" });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [redirecting, setRedirecting] = useState(false);

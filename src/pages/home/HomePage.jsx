@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import HeroSection from "../../components/landing/HeroSection";
 import LandingFooter from "../../components/landing/LandingFooter";
 import LandingHeader from "../../components/landing/LandingHeader";
@@ -7,15 +7,20 @@ import {
   CaselSection,
   MissionSection,
   PrinciplesSection,
+  FaqSection,
   StepsSection,
-  TestimonialsSection,
 } from "../../components/landing/LandingSections";
 import SignupBanner from "../../components/landing/SignupBanner";
-import { toast } from "../../stores/toastStore";
 
 // Landing page (trang chủ công khai)
 function HomePage() {
   const emailRef = useRef(null);
+
+  // Vào từ trang khác với #muc (vd. menu ở trang Chính sách) → cuộn tới mục đó sau khi trang vẽ xong
+  useEffect(() => {
+    const id = window.location.hash.slice(1);
+    if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+  }, []);
 
   // Các nút CTA đăng ký đều đưa về ô nhập email ở banner cuối trang
   const focusSignup = () => {
@@ -24,13 +29,6 @@ function HomePage() {
     setTimeout(() => input?.focus({ preventScroll: true }), 500);
   };
 
-  const handleAudienceCta = (audience) => {
-    if (audience.to === "contact") {
-      toast.info("Đội ngũ StoryWeaver sẽ liên hệ trường học trong 24h — form liên hệ sẽ có ở bản sau");
-      return;
-    }
-    focusSignup();
-  };
 
   return (
     <div className="min-h-screen bg-canvas">
@@ -41,8 +39,8 @@ function HomePage() {
         <PrinciplesSection />
         <CaselSection />
         <StepsSection />
-        <AudienceSection onCta={handleAudienceCta} />
-        <TestimonialsSection />
+        <AudienceSection onCta={focusSignup} />
+        <FaqSection />
         <SignupBanner ref={emailRef} />
       </main>
       <LandingFooter />

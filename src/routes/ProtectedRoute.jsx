@@ -2,6 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { ROLE_HOME } from "../constants/roles";
 import { ROUTES } from "../constants/routes";
 import useAuthStore from "../stores/authStore";
+import useKidSessionStore from "../stores/kidSessionStore";
 
 /**
  * Bảo vệ route theo đăng nhập + vai trò.
@@ -11,7 +12,10 @@ import useAuthStore from "../stores/authStore";
 function ProtectedRoute({ roles, children }) {
   const location = useLocation();
   const { isAuthenticated, user } = useAuthStore();
+  const inKidMode = useKidSessionStore((s) => !!s.token);
 
+  // Đang ở Kid Mode: máy đang ở tay bé → không mở trang của người lớn cho tới khi nhập PIN.
+  if (inKidMode) return <Navigate to={ROUTES.KID.BOOKSHELF} replace />;
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.LOGIN} replace state={{ from: location }} />;
   }

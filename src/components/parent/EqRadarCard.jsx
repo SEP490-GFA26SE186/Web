@@ -21,7 +21,7 @@ const pointAt = (i, total, ratio) => {
 const toPath = (points) => points.map((p) => p.join(",")).join(" ");
 
 // skills: [{ caselCode, score: 0–100 | null }] — null = chưa đủ dữ liệu, vẽ ở tâm
-function RadarChart({ skills }) {
+export function RadarChart({ skills }) {
   const n = skills.length;
   const ratio = (s) => (s.score ?? 0) / 100;
 

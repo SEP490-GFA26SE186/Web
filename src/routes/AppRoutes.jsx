@@ -12,10 +12,32 @@ import LibraryPage from "../pages/parent/LibraryPage";
 import MarketplacePage from "../pages/parent/MarketplacePage";
 import SettingsPage from "../pages/parent/SettingsPage";
 import ChildrenPage from "../pages/parent/ChildrenPage";
+import StudioPage from "../pages/parent/studio/StudioPage";
+import CreateStoryPage from "../pages/parent/studio/CreateStoryPage";
+import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
 const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
 const TopicsPage = lazy(() => import("../pages/moderator/TopicsPage"));
+const HelpPage = lazy(() => import("../pages/parent/HelpPage"));
+const GuidelinesPage = lazy(() => import("../pages/moderator/GuidelinesPage"));
+const PrivacyPolicyPage = lazy(() => import("../pages/legal/PrivacyPolicyPage"));
+const TermsPage = lazy(() => import("../pages/legal/TermsPage"));
+const FamilyCharactersPage = lazy(() => import("../pages/parent/FamilyCharactersPage"));
+const EqJourneyPage = lazy(() => import("../pages/parent/EqJourneyPage"));
+const KeywordsPage = lazy(() => import("../pages/moderator/KeywordsPage"));
+const ReportsPage = lazy(() => import("../pages/moderator/ReportsPage"));
+const SuspendedPage = lazy(() => import("../pages/moderator/SuspendedPage"));
+const StrikesPage = lazy(() => import("../pages/moderator/StrikesPage"));
+const AiFlagsPage = lazy(() => import("../pages/moderator/AiFlagsPage"));
+const AuditsPage = lazy(() => import("../pages/moderator/AuditsPage"));
+const AppealsPage = lazy(() => import("../pages/admin/AppealsPage"));
+const AccountsPage = lazy(() => import("../pages/admin/AccountsPage"));
+const PlansPage = lazy(() => import("../pages/admin/PlansPage"));
+const RefundsPage = lazy(() => import("../pages/admin/RefundsPage"));
+const FinanceReportPage = lazy(() => import("../pages/admin/FinanceReportPage"));
+const AuditLogsPage = lazy(() => import("../pages/admin/AuditLogsPage"));
+const SellerApplicationsPage = lazy(() => import("../pages/moderator/SellerApplicationsPage"));
 const ModeratorDashboardPage = lazy(
   () => import("../pages/moderator/ModeratorDashboardPage"),
 );
@@ -34,6 +56,14 @@ const AdminDashboardPage = lazy(
 const AiConfigPage = lazy(() => import("../pages/admin/AiConfigPage"));
 const KidLayout = lazy(() => import("../layouts/KidLayout"));
 const StoryReaderPage = lazy(() => import("../pages/kid/StoryReaderPage"));
+const KidBookshelfPage = lazy(() => import("../pages/kid/KidBookshelfPage"));
+const BillingPage = lazy(() => import("../pages/parent/billing/BillingPage"));
+const SellingPage = lazy(() => import("../pages/parent/selling/SellingPage"));
+const WithdrawalsPage = lazy(() => import("../pages/admin/WithdrawalsPage"));
+const ListingDetailPage = lazy(() => import("../pages/parent/marketplace/ListingDetailPage"));
+const PurchaseResultPage = lazy(() => import("../pages/parent/marketplace/PurchaseResultPage"));
+const NewListingPage = lazy(() => import("../pages/parent/selling/NewListingPage"));
+const BillingResultPage = lazy(() => import("../pages/parent/billing/BillingResultPage"));
 const KidReaderIndex = lazy(() =>
   import("../pages/kid/StoryReaderPage").then((m) => ({ default: m.KidReaderIndex })),
 );
@@ -49,48 +79,8 @@ function PageLoader() {
   );
 }
 
-const parentPlaceholders = [
-  { path: "family-characters", title: "Nhân vật gia đình" },
-  { path: "studio", title: "Sáng tác truyện" },
-  { path: "eq-journey", title: "Báo cáo EQ" },
-  { path: "billing", title: "Gói dịch vụ & Credit" },
-  { path: "help", title: "Trợ giúp" },
-];
-
 const moderatorPlaceholders = [
-  { path: "seller-applications", title: "Duyệt đơn Seller" },
-  { path: "queue", title: "Hàng chờ duyệt truyện" },
   { path: "backgrounds", title: "Thư viện bối cảnh" },
-  { path: "reports", title: "Báo cáo vi phạm" },
-  { path: "suspended", title: "Truyện tạm đình chỉ" },
-  { path: "strikes", title: "Cảnh cáo tác giả" },
-  { path: "audits", title: "Kiểm định ngẫu nhiên" },
-  { path: "ai-flags", title: "Cảnh báo AI" },
-  { path: "keywords", title: "Từ khóa chặn" },
-  { path: "guidelines", title: "Quy chuẩn kiểm duyệt" },
-];
-
-const adminPlaceholders = [
-  { path: "accounts", title: "Tài Khoản Phụ Huynh & KDV" },
-  { path: "plans", title: "Gói & Định Giá" },
-  { path: "withdrawals", title: "Quản Lý Rút Tiền" },
-  { path: "refunds", title: "Yêu Cầu Hoàn Tiền" },
-  { path: "revenue", title: "Báo Cáo Doanh Thu" },
-  { path: "ai-costs", title: "Chi Phí Vận Hành AI" },
-  { path: "profit-loss", title: "Báo Cáo Lãi Lỗ P&L" },
-  { path: "appeals", title: "Kháng Nghị Cảnh Cáo" },
-  { path: "audit-logs", title: "Nhật Ký Kiểm Toán" },
-];
-
-const kidPlaceholders = [
-  { path: "bookshelf", title: "Tủ Sách Bé Ngoan" },
-];
-
-const publicPlaceholders = [
-  { path: "/chinh-sach-bao-mat", title: "Chính sách bảo mật trẻ em" },
-  { path: "/dieu-khoan-dich-vu", title: "Điều khoản dịch vụ" },
-  { path: "/goc-chuyen-gia", title: "Góc chuyên gia EQ" },
-  { path: "/huong-dan-phu-huynh", title: "Hướng dẫn phụ huynh" },
 ];
 
 const placeholderRoutes = (items) =>
@@ -116,10 +106,21 @@ function AppRoutes() {
         >
           <Route index element={<ParentDashboardPage />} />
           <Route path="library" element={<LibraryPage />} />
+          <Route path="eq-journey" element={<EqJourneyPage />} />
+          <Route path="family-characters" element={<FamilyCharactersPage />} />
+          <Route path="help" element={<HelpPage />} />
           <Route path="marketplace" element={<MarketplacePage />} />
+          <Route path="marketplace/result" element={<PurchaseResultPage />} />
+          <Route path="marketplace/:listingId" element={<ListingDetailPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="children" element={<ChildrenPage />} />
-          {placeholderRoutes(parentPlaceholders)}
+          <Route path="studio" element={<StudioPage />} />
+          <Route path="studio/new" element={<CreateStoryPage />} />
+          <Route path="studio/:storyId" element={<StoryEditorPage />} />
+          <Route path="billing" element={<BillingPage />} />
+          <Route path="selling" element={<SellingPage />} />
+          <Route path="selling/new" element={<NewListingPage />} />
+          <Route path="billing/result" element={<BillingResultPage />} />
         </Route>
 
         <Route
@@ -132,17 +133,26 @@ function AppRoutes() {
         >
           <Route index element={<ModeratorDashboardPage />} />
           <Route path="topics" element={<TopicsPage />} />
+          <Route path="keywords" element={<KeywordsPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="suspended" element={<SuspendedPage />} />
+          <Route path="strikes" element={<StrikesPage />} />
+          <Route path="audits" element={<AuditsPage />} />
+          <Route path="ai-flags" element={<AiFlagsPage />} />
+          <Route path="guidelines" element={<GuidelinesPage />} />
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
+          <Route path="seller-applications" element={<SellerApplicationsPage />} />
+          <Route path="queue" element={<Navigate to="/moderator" replace />} />
           {placeholderRoutes(moderatorPlaceholders)}
         </Route>
 
-        {/* Chế độ Trẻ Em — để mở cho bản demo "Dùng thử Kid Mode" ở Landing; thoát ra ngoài phải qua cổng PIN của ba mẹ */}
+        {/* Chế độ Trẻ Em: cần phiên Kid Mode (ba mẹ mở ở trang Bé nhà mình); thoát ra phải qua cổng PIN */}
         <Route path="/kid" element={<KidLayout />}>
-          <Route index element={<Navigate to="story" replace />} />
+          <Route index element={<Navigate to="bookshelf" replace />} />
+          <Route path="bookshelf" element={<KidBookshelfPage />} />
           <Route path="story" element={<KidReaderIndex />} />
           <Route path="story/:storyId" element={<StoryReaderPage />} />
-          {placeholderRoutes(kidPlaceholders)}
         </Route>
 
         <Route
@@ -155,21 +165,20 @@ function AppRoutes() {
         >
           <Route index element={<AdminDashboardPage />} />
           <Route path="ai-config" element={<AiConfigPage />} />
-          {placeholderRoutes(adminPlaceholders)}
+          <Route path="withdrawals" element={<WithdrawalsPage />} />
+          <Route path="appeals" element={<AppealsPage />} />
+          <Route path="accounts" element={<AccountsPage />} />
+          <Route path="plans" element={<PlansPage />} />
+          <Route path="refunds" element={<RefundsPage />} />
+          <Route path="revenue" element={<FinanceReportPage view="revenue" />} />
+          <Route path="ai-costs" element={<FinanceReportPage view="ai-costs" />} />
+          <Route path="profit-loss" element={<FinanceReportPage view="profit-loss" />} />
+          <Route path="audit-logs" element={<AuditLogsPage />} />
         </Route>
 
         {/* Trang công khai chưa làm (link từ footer Landing) */}
-        {publicPlaceholders.map(({ path, title }) => (
-          <Route
-            key={path}
-            path={path}
-            element={
-              <div className="min-h-screen bg-canvas px-4 py-10">
-                <ComingSoonPage title={title} />
-              </div>
-            }
-          />
-        ))}
+        <Route path="/chinh-sach-bao-mat" element={<PrivacyPolicyPage />} />
+        <Route path="/dieu-khoan-dich-vu" element={<TermsPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

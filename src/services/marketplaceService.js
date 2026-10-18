@@ -1,49 +1,40 @@
-// import api from "./api";
-import { mockListings, PRICE_TIERS } from "../mocks/marketplace";
+import api, { getErrorMessage } from "./api";
 
-// TODO: BE chưa có API chợ truyện → dùng mock theo schema listings / price_tiers.
-const USE_MOCK = true;
-const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
-
-const SORTERS = {
-  best_selling: (a, b) => b.purchaseCount - a.purchaseCount,
-  rating: (a, b) => b.ratingAvg - a.ratingAvg,
-  newest: (a, b) => b.publishedAt.localeCompare(a.publishedAt),
-  price_asc: (a, b) => a.priceTier.priceVnd - b.priceTier.priceVnd,
-};
-
-export const getPriceTiers = async () => {
-  if (USE_MOCK) {
-    await delay(150);
-    return PRICE_TIERS;
+// Chợ truyện (rev8): truyện đã được Moderator duyệt, mua qua payOS (0đ nhận ngay).
+// Người mua dùng bản đăng bán nguyên trạng (tên chung) — quyền đọc là entitlement.
+const call = async (request) => {
+  try {
+    const { data } = await request;
+    return data.data;
+  } catch (error) {
+    const err = new Error(getErrorMessage(error), { cause: error });
+    err.status = error.response?.status;
+    throw err;
   }
-  // const { data } = await api.get("/price-tiers");
-  // return data.data;
 };
+
+export const getPriceTiers = async () => (await call(api.get("/listings/price-tiers"))).priceTiers;
 
 /**
- * Tìm và lọc truyện đang bán.
  * params: { search, competency, age, priceTierId, sort: best_selling | rating | newest | price_asc, page, limit }
- * trả về: { items, pagination }
+ * → { items: [{ id, title, description, topic{title, competency, ageMin, ageMax}, totalPages, priceTier, seller, purchaseCount, ratingAvg, ratingCount, hasAiContent, owned, publishedStoryId }], pagination }
  */
-export const getListings = async ({ search = "", competency = "all", age = "all", priceTierId = "all", sort = "best_selling", page = 1, limit = 8 } = {}) => {
-  if (USE_MOCK) {
-    await delay();
-    const keyword = search.trim().toLowerCase();
-    const items = mockListings
-      .filter(
-        (l) =>
-          (!keyword || `${l.title} ${l.description} ${l.topic.title} ${l.seller.displayName}`.toLowerCase().includes(keyword)) &&
-          (competency === "all" || l.topic.competency === competency) &&
-          (age === "all" || (l.topic.ageMin <= Number(age) && Number(age) <= l.topic.ageMax)) &&
-          (priceTierId === "all" || l.priceTier.id === priceTierId),
-      )
-      .sort(SORTERS[sort] ?? SORTERS.best_selling);
-    return {
-      items: items.slice((page - 1) * limit, page * limit),
-      pagination: { page, limit, total: items.length, totalPages: Math.max(1, Math.ceil(items.length / limit)) },
-    };
-  }
-  // const { data } = await api.get("/listings", { params });
-  // return data.data;
-};
+export const getListings = (params) =>
+  call(api.get("/market/listings", { params: Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v != null)) }));
+
+/** → listing (+ preview: chữ trang đầu, isMine) */
+export const getListing = async (listingId) => (await call(api.get(`/market/listings/${listingId}`))).listing;
+
+
+/** POST /market/checkout { listingId } → { order, checkoutUrl } (null với truyện miễn phí) */
+export const checkoutListing = (listingId) => call(api.post("/market/checkout", { listingId }));
+
+/** Báo cáo truyện đang bán: { category, description?, pageId? } → { reportId, suspended }. Đã báo cáo → 409. */
+export const reportListing = (listingId, body) => call(api.post(`/market/listings/${listingId}/reports`, body));
+
+/** Đánh giá của truyện → { reviews, distribution, myReview, canReview, reason, isSeller, tags } */
+export const getReviews = (listingId) => call(api.get(`/market/listings/${listingId}/reviews`));
+/** Tạo / sửa đánh giá của mình: { rating, comment?, tags? } */
+export const saveReview = (listingId, body) => call(api.put(`/market/listings/${listingId}/review`, body));
+export const replyReview = (reviewId, reply) => call(api.post(`/market/reviews/${reviewId}/reply`, { reply }));
+export const reportReview = (reviewId, body) => call(api.post(`/market/reviews/${reviewId}/reports`, body));

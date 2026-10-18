@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, Delete, Loader2, Lock, X } from "lucide-react";
-import { useVerifyParentPin } from "../../hooks/useKid";
+import { useExitKidMode } from "../../hooks/useKid";
 
 // Khung hộp thoại to, bo tròn, thân thiện với bé
 function KidDialog({ children, onClose, labelledBy }) {
@@ -18,21 +18,6 @@ function KidDialog({ children, onClose, labelledBy }) {
       </div>
     </div>,
     document.body,
-  );
-}
-
-export function ChoiceResultDialog({ childName, feedback, onNext, isLast }) {
-  return (
-    <KidDialog onClose={onNext} labelledBy="choice-title">
-      <span className="mb-4 grid h-20 w-20 animate-bounce place-items-center rounded-full bg-primary-tint text-4xl">🌟</span>
-      <h4 id="choice-title" className="text-2xl">
-        Cảm ơn {childName} đã chọn!
-      </h4>
-      <p className="mt-2 text-navy/70">{feedback}</p>
-      <button onClick={onNext} autoFocus className="btn-primary mt-6 w-full py-3.5 font-display text-lg">
-        {isLast ? "Xem kết thúc câu chuyện 🎉" : "Xem trang tiếp theo ➡️"}
-      </button>
-    </KidDialog>
   );
 }
 
@@ -63,22 +48,16 @@ export function StoryCompleteDialog({ childName, onReadAgain, onBookshelf }) {
 const PIN_MIN = 4;
 const PIN_MAX = 6;
 
-// Cổng Ba Mẹ: nhập mã PIN để thoát chế độ trẻ em
+// Cổng Ba Mẹ: nhập mã PIN để thoát chế độ trẻ em (POST /auth/kid-mode/exit — BE kiểm PIN, trả token phụ huynh)
 export function ParentGateDialog({ onClose, onUnlock }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
-  const verify = useVerifyParentPin();
+  const verify = useExitKidMode();
 
   const submit = (value = pin) => {
     if (verify.isPending || value.length < PIN_MIN) return;
     verify.mutate(value, {
-      onSuccess: ({ ok }) => {
-        if (ok) onUnlock();
-        else {
-          setError(true);
-          setPin("");
-        }
-      },
+      onSuccess: (result) => onUnlock(result.tokens),
       onError: () => {
         setError(true);
         setPin("");

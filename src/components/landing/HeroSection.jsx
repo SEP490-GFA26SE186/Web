@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { ArrowRight, Brain, CheckCircle2, ChevronRight, GraduationCap, Pause, Play, PlayCircle, ShieldCheck, Sparkles, Star, Flower2 } from "lucide-react";
 import { HERO_DEMO, TRUST_BADGES } from "../../constants/landingContent";
-import { ROUTES } from "../../constants/routes";
 import { speak, speechSupported, stopSpeaking } from "../../utils/speech";
 
 const TRUST_ICONS = { star: Star, shield: ShieldCheck, school: GraduationCap };
@@ -131,7 +129,7 @@ function HeroSection({ onSignupClick }) {
         <div className="flex flex-col gap-5 lg:col-span-7">
           <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-outline/60 px-4 py-1.5 shadow-low">
             <Sparkles size={17} className="shrink-0 text-primary" />
-            <span className="text-xs font-bold text-primary-dark">Nền tảng Giáo dục Cảm xúc CASEL & Truyện AI tương tác đầu tiên tại Việt Nam</span>
+            <span className="text-xs font-bold text-primary-dark">Truyện tương tác giúp trẻ 5–8 tuổi học về cảm xúc, theo khung CASEL</span>
           </span>
           <h1 className="text-4xl leading-tight tracking-tight sm:text-5xl">
             Cùng con nuôi dưỡng <br />
@@ -139,19 +137,19 @@ function HeroSection({ onSignupClick }) {
             qua từng trang truyện diệu kỳ
           </h1>
           <p className="max-w-xl text-lg text-navy/70 sm:text-xl">
-            StoryWeaver AI đồng hành cùng cha mẹ kiến tạo những câu chuyện tương tác cá nhân hóa, giúp trẻ 5–8 tuổi thấu hiểu cảm xúc, rèn luyện kỹ năng
-            giải quyết tình huống và gắn kết gia đình bền chặt.
+            Ba mẹ kể tình huống con vừa gặp, AI viết thành truyện có bé và người thân làm nhân vật. Bé nghe giọng đọc, trả lời câu hỏi về cảm xúc
+            và cách xử lý — ba mẹ xem con tiến bộ qua Báo cáo EQ.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <button onClick={onSignupClick} className="btn-primary px-8 py-4 font-display text-lg shadow-mid hover:shadow-high">
               Khám phá miễn phí ngay <ArrowRight size={22} />
             </button>
-            <Link
-              to={ROUTES.KID.story("s_101")}
+            <a
+              href="#cach-hoat-dong"
               className="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-4 font-bold text-secondary-dark transition hover:bg-secondary-tint"
             >
-              <PlayCircle size={22} /> Trải nghiệm Kid Mode (1 phút)
-            </Link>
+              <PlayCircle size={22} /> Xem cách hoạt động
+            </a>
           </div>
           <div className="grid grid-cols-1 gap-2 pt-3 sm:grid-cols-3">
             {TRUST_BADGES.map((b) => {

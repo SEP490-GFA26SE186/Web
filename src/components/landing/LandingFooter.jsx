@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Ban, ShieldCheck } from "lucide-react";
 import { ROUTES } from "../../constants/routes";
 import { scrollToSection } from "./scroll";
 
@@ -10,15 +9,14 @@ const COLUMNS = [
       { label: "Giới thiệu chung", section: "gioi-thieu" },
       { label: "Cách hoạt động", section: "cach-hoat-dong" },
       { label: "Khung chuẩn CASEL", section: "mo-hinh-casel" },
-      { label: "Trải nghiệm Kid Mode", to: ROUTES.KID.story("s_101") },
+      { label: "Câu hỏi thường gặp", section: "cau-hoi" },
     ],
   },
   {
     title: "Dành cho bạn",
     links: [
       { label: "Phụ huynh & Gia đình", section: "danh-cho-gia-dinh" },
-      { label: "Cộng đồng Tác giả", section: "cong-dong" },
-      { label: "Góc chuyên gia EQ", to: "/goc-chuyen-gia" },
+      { label: "Đăng ký", to: ROUTES.REGISTER },
       { label: "Chợ truyện", to: ROUTES.PARENT.MARKETPLACE },
     ],
   },
@@ -36,9 +34,9 @@ function LandingFooter() {
               StoryWeaver <span className="text-primary">AI</span>
             </span>
             <p className="max-w-md text-navy/70">
-              Bảo vệ & nuôi dưỡng trí tuệ cảm xúc cho trẻ thông qua những câu
-              chuyện tương tác cá nhân hóa, đồng hành cùng phụ huynh và nhà giáo
-              dục xây dựng nền tảng vững chắc cho tương lai.
+              Truyện tương tác cá nhân hoá giúp trẻ 5–8 tuổi học gọi tên cảm
+              xúc và cách xử lý tình huống, theo khung CASEL — ba mẹ viết cùng
+              AI, duyệt trước khi bé nghe.
             </p>
             {/* <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-outline/70 px-4 py-1 text-xs font-bold text-secondary-dark">
@@ -78,8 +76,8 @@ function LandingFooter() {
           <div className="flex flex-col gap-2 md:col-span-3">
             <span className="font-bold">Cam kết An toàn</span>
             <p className="text-sm text-navy/65">
-              Môi trường không quảng cáo, không thu thập dữ liệu nhạy cảm, bảo
-              vệ quyền riêng tư tuyệt đối cho trẻ thơ.
+              Không quảng cáo, không cần ảnh của bé. Tên thật được thay bằng mã
+              trước khi gửi cho AI.
             </p>
             <Link to="/chinh-sach-bao-mat" className={`${linkClass} mt-1`}>
               Chính sách bảo mật trẻ em
@@ -91,8 +89,7 @@ function LandingFooter() {
         </div>
         <div className="flex flex-col items-center justify-between gap-3 border-t border-outline pt-6 text-center text-sm text-navy/60 sm:flex-row sm:text-left">
           <p>
-            © {new Date().getFullYear()} StoryWeaver AI. Nền tảng kể chuyện nuôi
-            dưỡng EQ thông minh cho trẻ em. Tất cả quyền được bảo lưu.
+            © {new Date().getFullYear()} StoryWeaver AI — đồ án SEP490.
           </p>
           <span className="text-xs font-bold text-secondary-dark">
             Warm Modern Guardian

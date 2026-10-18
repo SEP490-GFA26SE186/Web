@@ -1,56 +1,88 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  getModeratorDashboard,
+  claimReview,
+  decideReview,
+  decideSeller,
+  dismissReport,
+  getAiFlags,
+  getAudits,
   getModeratorOverview,
+  getReportGroups,
+  getRestrictedListings,
+  getStrikes,
+  hideReview,
+  issueStrike,
+  runAudits,
+  setAiBlock,
+  suspendListing,
+  getReview,
   getReviewQueue,
-  getReviewStory,
-  resolveReport,
-  sampleRandomAudits,
-  savePageReview,
-  submitReviewDecision,
+  getSellerApplications,
+  viewPage,
 } from "../services/moderatorService";
 
 export const modKeys = {
   all: ["moderator"],
   overview: ["moderator", "overview"],
-  dashboard: ["moderator", "dashboard"],
-  queue: (params) => ["moderator", "queue", params],
+  queue: ["moderator", "queue"],
+  sellers: (status) => ["moderator", "sellers", status],
   review: (id) => ["moderator", "review", id],
+  reports: (status) => ["moderator", "reports", status],
+  restricted: (status) => ["moderator", "restricted", status],
+  strikes: (filter) => ["moderator", "strikes", filter],
+  audits: ["moderator", "audits"],
+  aiFlags: (f) => ["moderator", "ai-flags", f],
 };
 
-export const useModeratorOverview = () => useQuery({ queryKey: modKeys.overview, queryFn: getModeratorOverview });
+export const useModeratorOverview = () => useQuery({ queryKey: modKeys.overview, queryFn: getModeratorOverview, refetchInterval: 60_000 });
+export const useReviewQueue = () => useQuery({ queryKey: modKeys.queue, queryFn: getReviewQueue });
+export const useSellerApplications = (status = "pending") =>
+  useQuery({ queryKey: modKeys.sellers(status), queryFn: () => getSellerApplications(status) });
+export const useReview = (reviewId) => useQuery({ queryKey: modKeys.review(reviewId), queryFn: () => getReview(reviewId), enabled: !!reviewId });
 
-export const useModeratorDashboard = () => useQuery({ queryKey: modKeys.dashboard, queryFn: getModeratorDashboard });
-
-export const useReviewQueue = (params = {}) =>
-  useQuery({ queryKey: modKeys.queue(params), queryFn: () => getReviewQueue(params), placeholderData: keepPreviousData });
-
-// Sau mỗi thao tác xử lý, làm mới số liệu tổng quan + badge sidebar
-const useInvalidateModerator = () => {
+/** Mọi thao tác trả lại chi tiết lượt duyệt → ghi thẳng vào cache; làm mới hàng đợi + badge. */
+const useReviewMutation = (reviewId, fn) => {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: modKeys.all });
-};
-
-export const useResolveReport = () => {
-  const invalidate = useInvalidateModerator();
-  return useMutation({ mutationFn: ({ id, action }) => resolveReport(id, action), onSuccess: invalidate });
-};
-
-export const useSampleAudits = () => {
-  const invalidate = useInvalidateModerator();
-  return useMutation({ mutationFn: sampleRandomAudits, onSuccess: invalidate });
-};
-
-export const useReviewStory = (storyId) =>
-  useQuery({ queryKey: modKeys.review(storyId), queryFn: () => getReviewStory(storyId), enabled: !!storyId, retry: false });
-
-export const useSavePageReview = (storyId) =>
-  useMutation({ mutationFn: ({ pageNumber, ...payload }) => savePageReview(storyId, pageNumber, payload) });
-
-export const useSubmitDecision = (storyId) => {
-  const invalidate = useInvalidateModerator();
   return useMutation({
-    mutationFn: ({ decision, note }) => submitReviewDecision(storyId, decision, note),
-    onSuccess: invalidate,
+    mutationFn: fn,
+    onSuccess: (detail) => {
+      queryClient.setQueryData(modKeys.review(reviewId), detail);
+      queryClient.invalidateQueries({ queryKey: modKeys.queue });
+      queryClient.invalidateQueries({ queryKey: modKeys.overview });
+    },
   });
 };
+
+export const useClaimReview = (reviewId) => useReviewMutation(reviewId, () => claimReview(reviewId));
+export const useViewPage = (reviewId) => useReviewMutation(reviewId, ({ pageId, comment }) => viewPage(reviewId, pageId, comment));
+export const useDecideReview = (reviewId) => useReviewMutation(reviewId, (body) => decideReview(reviewId, body));
+
+export const useDecideSeller = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, approve }) => decideSeller(userId, approve),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["moderator", "sellers"] });
+      queryClient.invalidateQueries({ queryKey: modKeys.overview });
+    },
+  });
+};
+
+// Giám sát: mỗi thao tác có thể đổi hàng đợi, báo cáo, truyện tạm gỡ, cảnh cáo → làm mới cả nhóm "moderator".
+const useMonitoringMutation = (mutationFn) => {
+  const queryClient = useQueryClient();
+  return useMutation({ mutationFn, onSuccess: () => queryClient.invalidateQueries({ queryKey: modKeys.all }) });
+};
+
+export const useReportGroups = (status) => useQuery({ queryKey: modKeys.reports(status), queryFn: () => getReportGroups(status) });
+export const useRestrictedListings = (status) => useQuery({ queryKey: modKeys.restricted(status), queryFn: () => getRestrictedListings(status) });
+export const useStrikes = (filter = {}) => useQuery({ queryKey: modKeys.strikes(filter), queryFn: () => getStrikes(filter) });
+export const useAudits = () => useQuery({ queryKey: modKeys.audits, queryFn: getAudits });
+
+export const useDismissReport = () => useMonitoringMutation(dismissReport);
+export const useSuspendListing = () => useMonitoringMutation(({ listingId, reason }) => suspendListing(listingId, reason));
+export const useIssueStrike = () => useMonitoringMutation(issueStrike);
+export const useHideReview = () => useMonitoringMutation(hideReview);
+export const useAiFlags = (filter) => useQuery({ queryKey: modKeys.aiFlags(filter), queryFn: () => getAiFlags(filter) });
+export const useSetAiBlock = () => useMonitoringMutation(({ userId, ...body }) => setAiBlock(userId, body));
+export const useRunAudits = () => useMonitoringMutation(runAudits);

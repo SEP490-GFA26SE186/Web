@@ -6,10 +6,15 @@ import ListingCard from "../../components/parent/marketplace/ListingCard";
 import { CASEL, CASEL_OPTIONS } from "../../constants/casel";
 import useDebounce from "../../hooks/useDebounce";
 import { useListings, usePriceTiers } from "../../hooks/useMarketplace";
-import { toast } from "../../stores/toastStore";
 
 const PAGE_SIZE = 8;
-const DEFAULT_FILTERS = { competency: "all", age: "all", priceTierId: "all", sort: "best_selling" };
+const DEFAULT_FILTERS = { competency: "all", age: "all", priceTierId: "all", narration: "all", sort: "best_selling" };
+
+const NARRATION_OPTIONS = [
+  { value: "all", label: "Tất cả" },
+  { value: "with", label: "Có giọng đọc" },
+  { value: "without", label: "Chỉ có chữ" },
+];
 
 // Truyện dành cho trẻ 5–8 tuổi (topics.age_min / age_max)
 const AGE_OPTIONS = [{ value: "all", label: "Tất cả" }, ...[5, 6, 7, 8].map((a) => ({ value: String(a), label: `${a} tuổi` }))];
@@ -47,8 +52,6 @@ function MarketplacePage() {
 
   const priceOptions = [{ value: "all", label: "Tất cả" }, ...priceTiers.map((t) => ({ value: t.id, label: t.label }))];
 
-  // TODO: giỏ hàng & thanh toán payOS chưa làm
-  const handleAddToCart = (listing) => toast.info(`Giỏ hàng đang được hoàn thiện — "${listing.title}"`);
 
   return (
     <div className="space-y-8">
@@ -80,6 +83,7 @@ function MarketplacePage() {
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect label="Độ tuổi" value={filters.age} onChange={setFilter("age")} options={AGE_OPTIONS} />
             <FilterSelect label="Giá" value={filters.priceTierId} onChange={setFilter("priceTierId")} options={priceOptions} />
+            <FilterSelect label="Giọng đọc" value={filters.narration} onChange={setFilter("narration")} options={NARRATION_OPTIONS} />
             <FilterSelect label="Sắp xếp" value={filters.sort} onChange={setFilter("sort")} options={SORT_OPTIONS} highlight icon={ArrowDownUp} />
           </div>
         </div>
@@ -137,7 +141,7 @@ function MarketplacePage() {
         ) : (
           <div className={`grid grid-cols-1 gap-5 transition-opacity md:grid-cols-2 xl:grid-cols-4 ${isFetching ? "opacity-60" : ""}`}>
             {data.items.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} onAddToCart={handleAddToCart} />
+              <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
         )}

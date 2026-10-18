@@ -54,7 +54,7 @@ function LibraryHero({ childName, counts, search, onSearchChange, competency, on
         <FilterSelect label="Năng lực" value={competency} onChange={onCompetencyChange} options={COMPETENCY_OPTIONS} />
       </div>
 
-      <div className="relative -mx-1 mt-5 flex items-center gap-2 overflow-x-auto px-1 pb-1">
+      <div className="relative -mx-1 mt-5 flex items-center gap-2 scrollbar-none overflow-x-auto px-1 pb-1">
         {TABS.map(({ value, label }) => (
           <button
             key={value}
