@@ -19,6 +19,7 @@ import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
 const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
 const TopicsPage = lazy(() => import("../pages/moderator/TopicsPage"));
+const KeywordsPage = lazy(() => import("../pages/moderator/KeywordsPage"));
 const SellerApplicationsPage = lazy(() => import("../pages/moderator/SellerApplicationsPage"));
 const ModeratorDashboardPage = lazy(
   () => import("../pages/moderator/ModeratorDashboardPage"),
@@ -74,7 +75,6 @@ const moderatorPlaceholders = [
   { path: "strikes", title: "Cảnh cáo tác giả" },
   { path: "audits", title: "Kiểm định ngẫu nhiên" },
   { path: "ai-flags", title: "Cảnh báo AI" },
-  { path: "keywords", title: "Từ khóa chặn" },
   { path: "guidelines", title: "Quy chuẩn kiểm duyệt" },
 ];
 
@@ -144,6 +144,7 @@ function AppRoutes() {
         >
           <Route index element={<ModeratorDashboardPage />} />
           <Route path="topics" element={<TopicsPage />} />
+          <Route path="keywords" element={<KeywordsPage />} />
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
           <Route path="seller-applications" element={<SellerApplicationsPage />} />

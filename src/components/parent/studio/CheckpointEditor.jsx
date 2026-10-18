@@ -52,7 +52,7 @@ function Field({ label, children }) {
   );
 }
 
-function CheckpointEditor({ checkpoint: cp, characters, disabled, gap, onSave, saving, onDelete, deleting }) {
+function CheckpointEditor({ checkpoint: cp, characters, disabled, gap, warning, onSave, saving, onDelete, deleting }) {
   const [form, setForm] = useState(() => initialForm(cp, characters));
   const [dirty, setDirty] = useState(false);
   const meta = CHECKPOINT_TYPES[cp.type];
@@ -181,6 +181,7 @@ function CheckpointEditor({ checkpoint: cp, characters, disabled, gap, onSave, s
       )}
 
       {gap && <p className="text-sm font-semibold text-danger">{gap}</p>}
+      {!gap && warning && <p className="text-sm font-semibold text-amber-700">{warning}</p>}
       <div className="flex justify-end">
         <button
           type="button"

@@ -8,7 +8,7 @@ export const fieldClass =
 const wordCount = (text) => text.trim().split(/\s+/).filter(Boolean).length;
 
 /** Sửa chữ một trang. Hiện tên thật thay token; lưu gửi chữ có tên, BE tự đổi lại thành token. */
-function PageEditor({ page, characters, disabled, gap, onSave, saving, onDelete, deleting }) {
+function PageEditor({ page, characters, disabled, gap, warning, onSave, saving, onDelete, deleting }) {
   const original = fillNames(page.contentText, characters);
   const [text, setText] = useState(original);
   const dirty = text !== original;
@@ -46,6 +46,7 @@ function PageEditor({ page, characters, disabled, gap, onSave, saving, onDelete,
         className={fieldClass}
       />
       {gap && <p className="text-sm font-semibold text-danger">{gap}</p>}
+      {!gap && warning && <p className="text-sm font-semibold text-amber-700">{warning}</p>}
       <div className="flex justify-end">
         <button
           type="button"

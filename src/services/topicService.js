@@ -31,7 +31,7 @@ export const createTopic = async (payload) => (await call(api.post("/topics", pa
 export const updateTopic = async (id, payload) => (await call(api.put(`/topics/${id}`, payload))).data;
 
 /**
- * DELETE /topics/:id → { message }
- * Bài học đã có truyện dùng thì BE không xóa mà chuyển sang ngưng kích hoạt.
+ * DELETE /topics/:id → { deleted, deactivated, message }
+ * Bài học đã có truyện dùng thì BE không xóa mà chuyển sang ngưng dùng.
  */
-export const deleteTopic = (id) => call(api.delete(`/topics/${id}`));
+export const deleteTopic = async (id) => (await call(api.delete(`/topics/${id}`))).data;

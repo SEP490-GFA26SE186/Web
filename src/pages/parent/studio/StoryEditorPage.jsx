@@ -23,6 +23,13 @@ import { toast } from "../../../stores/toastStore";
 // Lỗi theo đường dẫn của BE: "pages.<id>" / "checkpoints.<id>" → câu báo, để tô đỏ đúng chỗ
 const gapsByPath = (errors) => Object.fromEntries(errors.map((e) => [e.path, e.message]));
 // "pages.<id>" → id phần tử "page-<id>" (PageEditor), "checkpoints.<id>" → "checkpoint-<id>"
+// Từ `warn` (Moderator đặt) vẫn lưu được → nhắc phụ huynh cân nhắc; từ `block` BE trả 422 như một chỗ thiếu
+const warningsByPath = (warnings = []) => {
+  const byPath = {};
+  for (const w of warnings) (byPath[w.path] ??= []).push(`“${w.keyword}”`);
+  return Object.fromEntries(Object.entries(byPath).map(([path, kws]) => [path, `Có từ nên cân nhắc với bé: ${kws.join(", ")}. Ba mẹ xem diễn đạt nhẹ nhàng hơn nhé.`]));
+};
+const isKeywordBlock = (e) => e.message?.startsWith("Có từ không phù hợp");
 const elementIdOf = (path = "") => path.replace(/^pages\./, "page-").replace(/^checkpoints\./, "checkpoint-");
 
 /** Thêm điểm dừng sau một trang (chỉ truyện tự viết). BE kiểm luật: không sau trang 1, reflection chỉ ở cuối… */
@@ -134,6 +141,7 @@ function StoryEditorPage() {
   const failedEmpty = ["failed", "blocked"].includes(generation.data?.status) && allEmpty;
   // Truyện AI chưa có chữ (chưa sinh / sinh lỗi) → chỉ hiện khung sinh truyện, chưa hiện editor
   const showEditor = !busy && !neverGenerated && !failedEmpty;
+  const warnings = warningsByPath(story.keywordWarnings);
   const checkpointAfter = new Map(story.checkpoints.map((c) => [c.afterPageId, c]));
 
   const run = (mutation, args, { success, after } = {}) =>
@@ -159,7 +167,10 @@ function StoryEditorPage() {
         setGaps(found);
         const first = err.errors?.[0]?.path;
         if (first) document.getElementById(elementIdOf(first))?.scrollIntoView({ behavior: "smooth", block: "center" });
-        toast.error(err.errors?.length ? `Còn ${err.errors.length} chỗ chưa viết xong` : err.message);
+        const blocked = (err.errors ?? []).filter(isKeywordBlock).length;
+        toast.error(
+          blocked ? `Còn ${blocked} chỗ có từ không phù hợp cho bé, ba mẹ sửa giúp nhé` : err.errors?.length ? `Còn ${err.errors.length} chỗ chưa viết xong` : err.message,
+        );
       },
     });
 
@@ -235,6 +246,7 @@ function StoryEditorPage() {
                   characters={characters}
                   disabled={busy}
                   gap={gaps[`pages.${page.id}`]}
+                  warning={warnings[`pages.${page.id}`]}
                   saving={editor.updatePage.isPending && editor.updatePage.variables?.pageId === page.id}
                   onSave={(contentText) =>
                     run(editor.updatePage, { pageId: page.id, contentText }, {
@@ -252,6 +264,7 @@ function StoryEditorPage() {
                     characters={characters}
                     disabled={busy}
                     gap={gaps[`checkpoints.${cp.id}`]}
+                    warning={warnings[`checkpoints.${cp.id}`]}
                     saving={editor.updateCheckpoint.isPending && editor.updateCheckpoint.variables?.checkpointId === cp.id}
                     onSave={(body, done) =>
                       run(editor.updateCheckpoint, { checkpointId: cp.id, body }, {
