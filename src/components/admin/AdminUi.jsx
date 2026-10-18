@@ -28,7 +28,7 @@ export function PageHeader({ title, description, children }) {
         <h1 className="text-3xl">{title}</h1>
         {description && <p className="mt-1 max-w-3xl text-navy/70">{description}</p>}
       </div>
-      {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
+      {children && <div className="flex flex-wrap items-center gap-2 whitespace-nowrap">{children}</div>}
     </div>
   );
 }

@@ -88,7 +88,7 @@ function FamilyCharactersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end md:gap-8">
         <div>
           <p className="mb-1 flex items-center gap-1.5 text-sm font-bold text-secondary-dark">
             <UsersRound size={16} /> Nhân vật gia đình
@@ -98,9 +98,13 @@ function FamilyCharactersPage() {
             Thêm ông bà, anh chị, bạn thân hay thú cưng một lần, dùng lại cho mọi truyện. Nhân vật của chính bé được tạo cùng hồ sơ bé.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {limit != null && <span className="text-sm font-semibold text-navy/60">{characters.length}/{limit} nhân vật</span>}
-          <button type="button" onClick={() => setEditing("new")} disabled={full} title={full ? "Đã đủ số nhân vật của gói" : undefined} className="btn-primary disabled:opacity-50">
+        <div className="flex shrink-0 items-center gap-3 self-start md:self-auto">
+          {limit != null && (
+            <span className="rounded-full bg-surface px-3 py-1.5 text-sm font-bold whitespace-nowrap text-navy/65" title="Số nhân vật / giới hạn của gói">
+              {characters.length}/{limit} nhân vật
+            </span>
+          )}
+          <button type="button" onClick={() => setEditing("new")} disabled={full} title={full ? "Đã đủ số nhân vật của gói" : undefined} className="btn-primary whitespace-nowrap disabled:opacity-50">
             <Plus size={18} /> Thêm nhân vật
           </button>
         </div>

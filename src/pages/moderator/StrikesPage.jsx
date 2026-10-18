@@ -32,7 +32,7 @@ function StrikesPage() {
             Cảnh cáo hiệu lực 90 ngày. Đủ <b>{data?.strikeLimit ?? 3}</b> cảnh cáo còn hiệu lực thì tài khoản bán bị khoá. Người bán được kháng nghị, Admin xét.
           </p>
         </div>
-        <button type="button" onClick={() => setIssuing(true)} className="btn-primary self-start">
+        <button type="button" onClick={() => setIssuing(true)} className="btn-primary shrink-0 self-start whitespace-nowrap">
           <Plus size={18} /> Ra cảnh cáo
         </button>
       </div>

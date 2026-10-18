@@ -184,7 +184,7 @@ function TopicsPage() {
             Mỗi bài học gắn đúng một năng lực CASEL. Phụ huynh chọn bài học khi tạo truyện cho con.
           </p>
         </div>
-        <button onClick={() => setEditing("new")} disabled={!skills.length} className="btn-primary self-start disabled:opacity-60 md:self-auto">
+        <button onClick={() => setEditing("new")} disabled={!skills.length} className="btn-primary shrink-0 self-start whitespace-nowrap disabled:opacity-60 md:self-auto">
           <Plus size={20} /> Thêm bài học
         </button>
       </div>

@@ -71,7 +71,7 @@ function ChildrenPage() {
             Quản lý hồ sơ từng bé, nhân vật đại diện trong truyện và giới hạn thời gian dùng Chế độ Trẻ Em.
           </p>
         </div>
-        <button onClick={() => openModal("create")} className="btn-primary self-start shadow-glow md:self-auto">
+        <button onClick={() => openModal("create")} className="btn-primary shrink-0 self-start whitespace-nowrap shadow-glow md:self-auto">
           <PlusCircle size={20} /> Thêm hồ sơ bé mới
         </button>
       </div>

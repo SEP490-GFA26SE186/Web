@@ -31,7 +31,7 @@ function AuditsPage() {
             Mỗi tuần hệ thống tự chọn vài truyện đang bán để xem lại theo checklist, kể cả truyện chưa ai báo cáo. Truyện vẫn bán bình thường trong lúc kiểm.
           </p>
         </div>
-        <div className="flex items-center gap-2 self-start">
+        <div className="flex shrink-0 items-center gap-2 self-start whitespace-nowrap">
           <input
             type="number"
             min={1}
