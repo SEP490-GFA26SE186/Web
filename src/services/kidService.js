@@ -1,64 +1,50 @@
-// import api from "./api";
-import { MOCK_PARENT_PIN, mockKidProgress, mockKidStory } from "../mocks/kidStory";
+import axios from "axios";
+import api from "./api";
+import useKidSessionStore from "../stores/kidSessionStore";
 
-// TODO: bỏ mock khi BE hoàn thiện API — thay bằng các lời gọi api đã comment bên dưới.
-const USE_MOCK = true;
-const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
+const baseURL = import.meta.env.VITE_API_URL || "/api/v1";
 
-const progressDb = structuredClone(mockKidProgress);
-const getProgress = (storyId) =>
-  (progressDb[storyId] ??= { currentPage: 1, choices: {}, completed: false });
+// Client riêng cho Kid Mode: gắn token của bé, KHÔNG refresh bằng token phụ huynh.
+// Phiên bé hết hạn / bị đóng (401) → bỏ phiên, Kid Mode hiện hướng dẫn nhờ ba mẹ mở lại.
+const kidApi = axios.create({ baseURL, headers: { "Content-Type": "application/json" } });
+kidApi.interceptors.request.use((config) => {
+  const { token } = useKidSessionStore.getState();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+kidApi.interceptors.response.use(
+  (res) => res,
+  (error) => {
+    if (error.response?.status === 401) useKidSessionStore.getState().end();
+    return Promise.reject(error);
+  },
+);
 
-export const getKidStory = async (storyId) => {
-  if (USE_MOCK) {
-    await delay(500);
-    // Mock chỉ có 1 truyện mẫu — các id khác dùng chung nội dung này
-    return structuredClone({ story: { ...mockKidStory, id: storyId }, progress: getProgress(storyId) });
-  }
-  // const { data } = await api.get(`/kid/stories/${storyId}`);
-  // return data;
+const data = async (promise) => (await promise).data.data;
+
+// ---- Phía ba mẹ (token phụ huynh) ----
+
+/** POST /auth/kid-mode/enter { childId } → { child, session: { kidSessionToken } }. Cần đặt PIN trước. */
+export const enterKidMode = (childId) => data(api.post("/auth/kid-mode/enter", { childId }));
+
+/** POST /auth/kid-mode/exit { pin, kidSessionToken } → { tokens } (token phụ huynh mới). Sai PIN → 401. */
+export const exitKidMode = async (pin) => {
+  const { token } = useKidSessionStore.getState();
+  return data(axios.post(`${baseURL}/auth/kid-mode/exit`, { pin, kidSessionToken: token }));
 };
 
-export const saveReadingProgress = async (storyId, currentPage) => {
-  if (USE_MOCK) {
-    await delay(150);
-    getProgress(storyId).currentPage = currentPage;
-    return { storyId, currentPage };
-  }
-  // const { data } = await api.put(`/kid/stories/${storyId}/progress`, { currentPage });
-  // return data;
-};
+// ---- Phía bé (token Kid Mode) ----
 
-/** Ghi nhận lựa chọn EQ của bé ở điểm rẽ — BE dùng để tính biểu đồ CASEL cho phụ huynh */
-export const submitStoryChoice = async (storyId, pageNumber, choice) => {
-  if (USE_MOCK) {
-    await delay(350);
-    const p = getProgress(storyId);
-    // Chỉ lần chọn đầu được ghi nhận (BE chấm EQ theo lần chọn đầu của lần chơi đầu)
-    p.choices[pageNumber] ??= choice.id;
-    return { choiceId: p.choices[pageNumber] };
-  }
-  // const { data } = await api.post(`/kid/stories/${storyId}/choices`, { pageNumber, choiceId: choice.id });
-  // return data;
-};
+export const getKidShelf = async () => (await data(kidApi.get("/kid/bookshelf"))).items;
+export const getUiAudio = async () => (await data(kidApi.get("/kid/ui-audio"))).assets;
 
-export const completeStory = async (storyId) => {
-  if (USE_MOCK) {
-    await delay(400);
-    const p = getProgress(storyId);
-    p.completed = true;
-    return { storyId, completed: true };
-  }
-  // const { data } = await api.post(`/kid/stories/${storyId}/complete`);
-  // return data;
-};
+/** POST /kid/sessions { storyId } → { session, story }. 422: truyện chưa sẵn sàng (chưa đủ giọng đọc). */
+export const startReading = (storyId) => data(kidApi.post("/kid/sessions", { storyId }));
 
-/** Xác thực PIN phụ huynh để thoát chế độ trẻ em. PIN không được lưu ở FE. */
-export const verifyParentPin = async (pin) => {
-  if (USE_MOCK) {
-    await delay(400);
-    return { ok: pin === MOCK_PARENT_PIN };
-  }
-  // const { data } = await api.post("/parents/me/verify-pin", { pin });
-  // return data;
-};
+export const saveProgress = (sessionId, pageId) => data(kidApi.put(`/kid/sessions/${sessionId}/progress`, { pageId }));
+
+/** → { result: { checkpointId, done, correct, attempts, hint?, hintAudioUrl?, answer?, feedback?, feedbackAudioUrl? } } */
+export const answerCheckpoint = async (sessionId, body) =>
+  (await data(kidApi.post(`/kid/sessions/${sessionId}/answers`, body))).result;
+
+export const completeReading = (sessionId) => data(kidApi.post(`/kid/sessions/${sessionId}/complete`));

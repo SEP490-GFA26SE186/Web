@@ -64,7 +64,7 @@ function LandingHeader() {
 
         <div className="flex items-center gap-2">
           <Link
-            to={ROUTES.KID.story("s_101")}
+            to={ROUTES.KID.BOOKSHELF}
             className="hidden rounded-full bg-secondary-tint px-4 py-2 text-sm font-bold text-secondary-dark transition hover:bg-secondary hover:text-white sm:inline-flex"
           >
             Dùng thử Kid Mode
@@ -89,7 +89,7 @@ function LandingHeader() {
               {n.label}
             </button>
           ))}
-          <Link to={ROUTES.KID.story("s_101")} className="mt-1 block rounded-2xl px-4 py-3 font-bold text-secondary-dark hover:bg-secondary-tint sm:hidden">
+          <Link to={ROUTES.KID.BOOKSHELF} className="mt-1 block rounded-2xl px-4 py-3 font-bold text-secondary-dark hover:bg-secondary-tint sm:hidden">
             Dùng thử Kid Mode
           </Link>
         </nav>

@@ -147,7 +147,7 @@ function HeroSection({ onSignupClick }) {
               Khám phá miễn phí ngay <ArrowRight size={22} />
             </button>
             <Link
-              to={ROUTES.KID.story("s_101")}
+              to={ROUTES.KID.BOOKSHELF}
               className="inline-flex items-center gap-2 rounded-full bg-surface px-6 py-4 font-bold text-secondary-dark transition hover:bg-secondary-tint"
             >
               <PlayCircle size={22} /> Trải nghiệm Kid Mode (1 phút)

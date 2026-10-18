@@ -4,15 +4,27 @@ import { ArrowLeft, BookOpen, Lock, Sparkles, UserRound, Volume2, VolumeX } from
 import logo from "../assets/logo.png";
 import { ParentGateDialog } from "../components/kid/KidDialogs";
 import { ROUTES } from "../constants/routes";
-import { useSelectedChild } from "../hooks/useChildProfile";
+import useAuthStore from "../stores/authStore";
+import useKidSessionStore from "../stores/kidSessionStore";
 import useKidStore from "../stores/kidStore";
 import { childEmoji } from "../utils/child";
 import { stopSpeaking } from "../utils/speech";
 
-const NAV = [
-  { to: ROUTES.KID.READER, label: "Khu Vườn Phép Thuật" },
-  { to: ROUTES.KID.BOOKSHELF, label: "Tủ Sách Bé Ngoan" },
-];
+const NAV = [{ to: ROUTES.KID.BOOKSHELF, label: "Tủ Sách Bé Ngoan" }];
+
+/** Chưa có phiên Kid Mode (mở link trực tiếp / phiên hết hạn): ba mẹ mở Kid Mode từ trang Bé nhà mình. */
+function NoKidSession() {
+  return (
+    <div className="card mx-auto mt-16 max-w-md p-8 text-center">
+      <p className="text-5xl">🦉</p>
+      <h1 className="mt-3 text-xl">Chưa mở Chế độ Trẻ Em</h1>
+      <p className="mt-2 text-navy/65">Ba mẹ đăng nhập, vào trang “Bé nhà mình” rồi bấm “Vào Kid Mode” cho bé nhé.</p>
+      <Link to={ROUTES.PARENT.CHILDREN} className="btn-primary mt-5">
+        Đến trang của ba mẹ
+      </Link>
+    </div>
+  );
+}
 
 const iconBtn = "grid h-11 w-11 place-items-center rounded-full bg-surface shadow-low transition hover:bg-outline";
 
@@ -20,7 +32,8 @@ const iconBtn = "grid h-11 w-11 place-items-center rounded-full bg-surface shado
 function KidLayout() {
   const navigate = useNavigate();
   const { muted, toggleMuted, parentGateOpen, setParentGateOpen } = useKidStore();
-  const { child } = useSelectedChild();
+  const { child, token, end } = useKidSessionStore();
+  const setTokens = useAuthStore((s) => s.setTokens);
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
@@ -50,7 +63,7 @@ function KidLayout() {
             </nav>
             {child && (
               <span className="hidden items-center gap-1.5 rounded-full bg-secondary-tint px-4 py-1.5 text-sm font-bold text-secondary-dark lg:flex">
-                <BookOpen size={17} className="text-secondary" /> {child.completedSessionsCount} truyện đã đọc xong
+                <BookOpen size={17} className="text-secondary" /> Bé {child.name}
               </span>
             )}
           </div>
@@ -79,7 +92,7 @@ function KidLayout() {
 
       <main className="flex w-full flex-1 flex-col pt-20">
         <Suspense fallback={<div className="mx-auto mt-6 h-96 w-full max-w-7xl animate-pulse rounded-stage bg-surface" />}>
-          <Outlet />
+          {token ? <Outlet /> : <NoKidSession />}
         </Suspense>
       </main>
 
@@ -95,8 +108,10 @@ function KidLayout() {
       {parentGateOpen && (
         <ParentGateDialog
           onClose={() => setParentGateOpen(false)}
-          onUnlock={() => {
+          onUnlock={(tokens) => {
             stopSpeaking();
+            if (tokens) setTokens(tokens);
+            end();
             setParentGateOpen(false);
             navigate(ROUTES.PARENT.DASHBOARD);
           }}

@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Ban, ShieldCheck } from "lucide-react";
 import { ROUTES } from "../../constants/routes";
 import { scrollToSection } from "./scroll";
 
@@ -10,7 +9,7 @@ const COLUMNS = [
       { label: "Giới thiệu chung", section: "gioi-thieu" },
       { label: "Cách hoạt động", section: "cach-hoat-dong" },
       { label: "Khung chuẩn CASEL", section: "mo-hinh-casel" },
-      { label: "Trải nghiệm Kid Mode", to: ROUTES.KID.story("s_101") },
+      { label: "Trải nghiệm Kid Mode", to: ROUTES.KID.BOOKSHELF },
     ],
   },
   {

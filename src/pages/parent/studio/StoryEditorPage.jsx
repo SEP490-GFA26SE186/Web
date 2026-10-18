@@ -5,6 +5,7 @@ import CaselTag from "../../../components/parent/library/CaselTag";
 import CheckpointEditor from "../../../components/parent/studio/CheckpointEditor";
 import GenerationPanel from "../../../components/parent/studio/GenerationPanel";
 import NarrationPanel from "../../../components/parent/studio/NarrationPanel";
+import ShelfPanel from "../../../components/parent/studio/ShelfPanel";
 import PageEditor, { fieldClass } from "../../../components/parent/studio/PageEditor";
 import { CHECKPOINT_TYPES, NEEDS_TARGET, STORY_STATUS_LABELS } from "../../../constants/story";
 import { STORY_LENGTH_LABELS } from "../../../constants/casel";
@@ -215,6 +216,7 @@ function StoryEditorPage() {
           onRetry={() => run(editor.retryNarration, undefined, { success: "Đang tạo lại giọng đọc" })}
         />
       )}
+      {showEditor && <ShelfPanel story={story} />}
 
       {showEditor && (
         <>

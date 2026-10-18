@@ -42,6 +42,16 @@ export const updateStory = async (id, payload) => (await call(api.put(`/stories/
 
 export const deleteStory = (id) => call(api.delete(`/stories/${id}`));
 
+// ---- Giá sách của bé ----
+
+/** GET /bookshelf/check/:storyId → { storyId, children: [{ childId, name, inBookshelf, addedAt }] } */
+export const getShelfStatus = async (storyId) => (await call(api.get(`/bookshelf/check/${storyId}`))).data;
+
+/** POST /bookshelf { childId, storyId }. 422 khi truyện chưa sẵn sàng (chưa hoàn tất / thiếu giọng đọc). */
+export const addToShelf = (childId, storyId) => call(api.post("/bookshelf", { childId, storyId }));
+
+export const removeFromShelf = (childId, storyId) => call(api.delete(`/bookshelf/${storyId}`, { params: { childId } }));
+
 /** POST /stories/:id/narration/retry → story. Chỉ đọc lại các đoạn lỗi / thiếu; 422 khi chưa hoàn tất. */
 export const retryNarration = async (id) => (await call(api.post(`/stories/${id}/narration/retry`))).data.story;
 

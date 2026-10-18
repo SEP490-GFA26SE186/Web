@@ -14,6 +14,9 @@ import {
   getStory,
   retryNarration,
   reviewStory,
+  addToShelf,
+  getShelfStatus,
+  removeFromShelf,
   updateCheckpoint,
   updatePage,
 } from "../services/storyService";
@@ -104,6 +107,21 @@ export const useGenerateStory = (id) => {
       queryClient.invalidateQueries({ queryKey: studioKeys.generation(id) });
       queryClient.invalidateQueries({ queryKey: studioKeys.story(id) });
       refreshCredit(queryClient); // credit bị giữ
+    },
+  });
+};
+
+export const useShelfStatus = (storyId, { enabled = true } = {}) =>
+  useQuery({ queryKey: ["studio", "shelf", storyId], queryFn: () => getShelfStatus(storyId), enabled: !!storyId && enabled });
+
+/** Thêm / bỏ truyện trên giá sách của một bé. */
+export const useToggleShelf = (storyId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ childId, add }) => (add ? addToShelf(childId, storyId) : removeFromShelf(childId, storyId)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["studio", "shelf", storyId] });
+      queryClient.invalidateQueries({ queryKey: ["children"] });
     },
   });
 };

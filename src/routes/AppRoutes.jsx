@@ -37,6 +37,7 @@ const AdminDashboardPage = lazy(
 const AiConfigPage = lazy(() => import("../pages/admin/AiConfigPage"));
 const KidLayout = lazy(() => import("../layouts/KidLayout"));
 const StoryReaderPage = lazy(() => import("../pages/kid/StoryReaderPage"));
+const KidBookshelfPage = lazy(() => import("../pages/kid/KidBookshelfPage"));
 const KidReaderIndex = lazy(() =>
   import("../pages/kid/StoryReaderPage").then((m) => ({ default: m.KidReaderIndex })),
 );
@@ -82,10 +83,6 @@ const adminPlaceholders = [
   { path: "profit-loss", title: "Báo Cáo Lãi Lỗ P&L" },
   { path: "appeals", title: "Kháng Nghị Cảnh Cáo" },
   { path: "audit-logs", title: "Nhật Ký Kiểm Toán" },
-];
-
-const kidPlaceholders = [
-  { path: "bookshelf", title: "Tủ Sách Bé Ngoan" },
 ];
 
 const publicPlaceholders = [
@@ -142,12 +139,12 @@ function AppRoutes() {
           {placeholderRoutes(moderatorPlaceholders)}
         </Route>
 
-        {/* Chế độ Trẻ Em — để mở cho bản demo "Dùng thử Kid Mode" ở Landing; thoát ra ngoài phải qua cổng PIN của ba mẹ */}
+        {/* Chế độ Trẻ Em: cần phiên Kid Mode (ba mẹ mở ở trang Bé nhà mình); thoát ra phải qua cổng PIN */}
         <Route path="/kid" element={<KidLayout />}>
-          <Route index element={<Navigate to="story" replace />} />
+          <Route index element={<Navigate to="bookshelf" replace />} />
+          <Route path="bookshelf" element={<KidBookshelfPage />} />
           <Route path="story" element={<KidReaderIndex />} />
           <Route path="story/:storyId" element={<StoryReaderPage />} />
-          {placeholderRoutes(kidPlaceholders)}
         </Route>
 
         <Route

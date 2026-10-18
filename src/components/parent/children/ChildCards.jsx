@@ -34,7 +34,7 @@ function TodayUsage({ childId }) {
 }
 
 // Thẻ lớn của bé đang được chọn
-export function ActiveChildCard({ child, onEdit, onDelete }) {
+export function ActiveChildCard({ child, onEdit, onDelete, action }) {
   return (
     <div className="relative h-full overflow-hidden rounded-card bg-white p-6 shadow-mid">
       <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
@@ -65,6 +65,7 @@ export function ActiveChildCard({ child, onEdit, onDelete }) {
           </div>
           {child.character?.appearance && <p className="mt-0.5 line-clamp-2 text-sm text-navy/60">{child.character.appearance}</p>}
           <TodayUsage childId={child.id} />
+          {action && <div className="mt-3">{action}</div>}
         </div>
 
         <div className="flex gap-2 sm:flex-col">
