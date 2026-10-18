@@ -12,6 +12,7 @@ import {
   getGeneration,
   getStories,
   getStory,
+  retryNarration,
   reviewStory,
   updateCheckpoint,
   updatePage,
@@ -47,7 +48,14 @@ export const isGenerating = (generation) => !!generation && ACTIVE.has(generatio
 
 export const useStories = (params) => useQuery({ queryKey: studioKeys.list(params), queryFn: () => getStories(params) });
 
-export const useStory = (id) => useQuery({ queryKey: studioKeys.story(id), queryFn: () => getStory(id), enabled: !!id });
+/** Đang tạo giọng đọc (story.narration.pending > 0) thì tải lại mỗi 5 s để cập nhật tiến độ. */
+export const useStory = (id) =>
+  useQuery({
+    queryKey: studioKeys.story(id),
+    queryFn: () => getStory(id),
+    enabled: !!id,
+    refetchInterval: (query) => (query.state.data?.narration?.pending > 0 ? 5000 : false),
+  });
 
 /** Tiến độ AI viết: hỏi lại mỗi 3 s khi job đang chạy; xong thì tải lại truyện và số credit. */
 export const useGeneration = (id, { enabled = true } = {}) => {
@@ -134,4 +142,5 @@ export const useStoryEditor = (storyId) => ({
   createCheckpoint: useEditorMutation(storyId, (body) => createCheckpoint(storyId, body)),
   deleteCheckpoint: useEditorMutation(storyId, (checkpointId) => deleteCheckpoint(storyId, checkpointId)),
   review: useEditorMutation(storyId, () => reviewStory(storyId)),
+  retryNarration: useEditorMutation(storyId, () => retryNarration(storyId)),
 });

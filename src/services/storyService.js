@@ -42,6 +42,9 @@ export const updateStory = async (id, payload) => (await call(api.put(`/stories/
 
 export const deleteStory = (id) => call(api.delete(`/stories/${id}`));
 
+/** POST /stories/:id/narration/retry → story. Chỉ đọc lại các đoạn lỗi / thiếu; 422 khi chưa hoàn tất. */
+export const retryNarration = async (id) => (await call(api.post(`/stories/${id}/narration/retry`))).data.story;
+
 /** POST /stories/:id/generate → { aiRequestId }. Giữ credit; 402 khi không đủ credit. */
 export const generateStory = async (id) => (await call(api.post(`/stories/${id}/generate`))).data;
 

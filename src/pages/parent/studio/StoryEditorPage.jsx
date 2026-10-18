@@ -4,6 +4,7 @@ import { ArrowLeft, Bot, CheckCircle2, Loader2, PenLine, Plus, Trash2 } from "lu
 import CaselTag from "../../../components/parent/library/CaselTag";
 import CheckpointEditor from "../../../components/parent/studio/CheckpointEditor";
 import GenerationPanel from "../../../components/parent/studio/GenerationPanel";
+import NarrationPanel from "../../../components/parent/studio/NarrationPanel";
 import PageEditor, { fieldClass } from "../../../components/parent/studio/PageEditor";
 import { CHECKPOINT_TYPES, NEEDS_TARGET, STORY_STATUS_LABELS } from "../../../constants/story";
 import { STORY_LENGTH_LABELS } from "../../../constants/casel";
@@ -148,9 +149,9 @@ function StoryEditorPage() {
 
   const finish = () =>
     editor.review.mutate(undefined, {
-      onSuccess: () => {
+      onSuccess: (updated) => {
         setGaps({});
-        toast.success("Đã hoàn tất truyện");
+        toast.success(updated?.narration?.pending > 0 ? "Đã hoàn tất — đang tạo giọng đọc" : "Đã hoàn tất truyện");
       },
       onError: (err) => {
         const found = gapsByPath(err.errors ?? []);
@@ -204,6 +205,14 @@ function StoryEditorPage() {
           onStart={() => run(generate)}
           starting={generate.isPending}
           startError={generate.error?.status === 402 ? "Ba mẹ không đủ credit để AI viết truyện." : generate.error?.message}
+        />
+      )}
+
+      {showEditor && (
+        <NarrationPanel
+          story={story}
+          retrying={editor.retryNarration.isPending}
+          onRetry={() => run(editor.retryNarration, undefined, { success: "Đang tạo lại giọng đọc" })}
         />
       )}
 
