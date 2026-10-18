@@ -19,6 +19,7 @@ import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
 const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
 const TopicsPage = lazy(() => import("../pages/moderator/TopicsPage"));
+const SellerApplicationsPage = lazy(() => import("../pages/moderator/SellerApplicationsPage"));
 const ModeratorDashboardPage = lazy(
   () => import("../pages/moderator/ModeratorDashboardPage"),
 );
@@ -39,6 +40,8 @@ const KidLayout = lazy(() => import("../layouts/KidLayout"));
 const StoryReaderPage = lazy(() => import("../pages/kid/StoryReaderPage"));
 const KidBookshelfPage = lazy(() => import("../pages/kid/KidBookshelfPage"));
 const BillingPage = lazy(() => import("../pages/parent/billing/BillingPage"));
+const SellingPage = lazy(() => import("../pages/parent/selling/SellingPage"));
+const NewListingPage = lazy(() => import("../pages/parent/selling/NewListingPage"));
 const BillingResultPage = lazy(() => import("../pages/parent/billing/BillingResultPage"));
 const KidReaderIndex = lazy(() =>
   import("../pages/kid/StoryReaderPage").then((m) => ({ default: m.KidReaderIndex })),
@@ -62,8 +65,6 @@ const parentPlaceholders = [
 ];
 
 const moderatorPlaceholders = [
-  { path: "seller-applications", title: "Duyệt đơn Seller" },
-  { path: "queue", title: "Hàng chờ duyệt truyện" },
   { path: "backgrounds", title: "Thư viện bối cảnh" },
   { path: "reports", title: "Báo cáo vi phạm" },
   { path: "suspended", title: "Truyện tạm đình chỉ" },
@@ -123,6 +124,8 @@ function AppRoutes() {
           <Route path="studio/new" element={<CreateStoryPage />} />
           <Route path="studio/:storyId" element={<StoryEditorPage />} />
           <Route path="billing" element={<BillingPage />} />
+          <Route path="selling" element={<SellingPage />} />
+          <Route path="selling/new" element={<NewListingPage />} />
           <Route path="billing/result" element={<BillingResultPage />} />
           {placeholderRoutes(parentPlaceholders)}
         </Route>
@@ -139,6 +142,8 @@ function AppRoutes() {
           <Route path="topics" element={<TopicsPage />} />
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
+          <Route path="seller-applications" element={<SellerApplicationsPage />} />
+          <Route path="queue" element={<ModeratorDashboardPage />} />
           {placeholderRoutes(moderatorPlaceholders)}
         </Route>
 

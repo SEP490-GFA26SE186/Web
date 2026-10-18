@@ -21,6 +21,7 @@ import PortalHeader from "../components/portal/PortalHeader";
 import PortalSidebar from "../components/portal/PortalSidebar";
 import { ROUTES } from "../constants/routes";
 import { useModeratorOverview } from "../hooks/useModerator";
+import InitialAvatar from "../components/common/InitialAvatar";
 
 const R = ROUTES.MODERATOR;
 
@@ -83,15 +84,9 @@ function ModeratorLayout() {
       <Link to={R.GUIDELINES} className="flex items-center gap-2 px-1 font-semibold text-navy/70 hover:text-navy">
         <ClipboardList size={17} /> Quy chuẩn kiểm duyệt
       </Link>
-      <div className="flex items-center justify-between px-1 text-xs">
-        <span className="flex items-center gap-2 font-semibold text-navy/60">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-secondary" /> Trực ban an toàn
-        </span>
-        <span className="font-bold text-secondary-dark">{data?.shift.name ?? "…"}</span>
-      </div>
       {data && (
         <div className="flex items-center gap-2 pt-1">
-          <img src={data.moderator.avatar} alt="" className="h-8 w-8 rounded-full object-cover" />
+          <InitialAvatar name={data.moderator.name} className="h-8 w-8 text-sm" />
           <div className="min-w-0 flex-1 leading-tight">
             <p className="truncate font-bold">{data.moderator.name}</p>
             <p className="truncate text-[11px] text-navy/60">{data.moderator.title}</p>
@@ -103,18 +98,10 @@ function ModeratorLayout() {
   );
 
   const status = data && (
-    <>
-      <span className="hidden items-center gap-2 rounded-full bg-secondary-tint px-3 py-1 text-xs text-secondary-dark 2xl:flex">
-        <Gauge size={15} />
-        <b>Xử lý hôm nay: {data.shift.processedPercent}%</b>
-        <span className="text-secondary-dark/40">•</span>
-        {data.shift.onlineModerators} KDV trực tuyến
-      </span>
-      <span className="hidden items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-semibold sm:flex">
-        <span className={`h-2 w-2 rounded-full ${data.shift.aiGuardEnabled ? "bg-secondary" : "bg-danger"}`} />
-        AI Guard: {data.shift.aiGuardEnabled ? "Bật" : "Tắt"}
-      </span>
-    </>
+    <span className="hidden items-center gap-2 rounded-full bg-secondary-tint px-3 py-1 text-xs text-secondary-dark 2xl:flex">
+      <Gauge size={15} />
+      <b>Chờ duyệt: {data.navBadges.storyQueue ?? 0} truyện • {data.navBadges.sellerApplications ?? 0} hồ sơ</b>
+    </span>
   );
 
   return (

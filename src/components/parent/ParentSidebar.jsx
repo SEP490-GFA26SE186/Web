@@ -10,8 +10,7 @@ import {
   Store,
   TrendingUp,
   UsersRound,
-  X,
-} from "lucide-react";
+  X, BadgeDollarSign } from "lucide-react";
 import logo from "../../assets/logo.png";
 import { ROUTES } from "../../constants/routes";
 import InitialAvatar from "../common/InitialAvatar";
@@ -26,6 +25,7 @@ const mainNav = [
   { to: ROUTES.PARENT.STUDIO, label: "Sáng tác truyện", icon: PenTool },
   { to: ROUTES.PARENT.EQ_JOURNEY, label: "Báo cáo EQ", icon: TrendingUp },
   { to: ROUTES.PARENT.MARKETPLACE, label: "Chợ truyện", icon: Store },
+  { to: ROUTES.PARENT.SELLING, label: "Bán truyện", icon: BadgeDollarSign },
   { to: ROUTES.PARENT.BILLING, label: "Gói dịch vụ & Credit", icon: CreditCard },
 ];
 

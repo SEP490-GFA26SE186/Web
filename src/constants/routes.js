@@ -14,6 +14,8 @@ export const ROUTES = {
     EQ_JOURNEY: "/parent/eq-journey",
     MARKETPLACE: "/parent/marketplace",
     BILLING: "/parent/billing",
+    SELLING: "/parent/selling",
+    sellingNew: (storyId) => `/parent/selling/new?storyId=${storyId}`,
     HELP: "/parent/help",
     SETTINGS: "/parent/settings",
   },

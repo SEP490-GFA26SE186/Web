@@ -1,5 +1,6 @@
 import { Bell, ChevronDown, ChevronRight, Menu, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+import InitialAvatar from "../common/InitialAvatar";
 
 // Header dùng chung cho cổng Kiểm duyệt & Admin
 function PortalHeader({ onOpenMenu, breadcrumbs = [], searchPlaceholder, status, links, user }) {
@@ -55,7 +56,11 @@ function PortalHeader({ onOpenMenu, breadcrumbs = [], searchPlaceholder, status,
         </button>
         {user && (
           <button className="flex items-center gap-1 rounded-full p-0.5 hover:bg-surface" aria-label="Tài khoản">
-            <img src={user.avatar} alt="" className="h-8 w-8 rounded-full object-cover" />
+            {user.avatar ? (
+              <img src={user.avatar} alt="" className="h-8 w-8 rounded-full object-cover" />
+            ) : (
+              <InitialAvatar name={user.name} className="h-8 w-8 text-sm" />
+            )}
             <ChevronDown size={16} className="text-navy/50" />
           </button>
         )}

@@ -29,9 +29,10 @@ function LoginPage() {
 
   // Sau khi đăng nhập: quay lại trang đang định vào (nếu đúng vai trò), không thì về trang chủ của vai trò
   const redirectAfterLogin = (session) => {
-    const from = location.state?.from?.pathname;
+    const from = location.state?.from;
     const home = ROLE_HOME[session.user.role] ?? ROUTES.HOME;
-    const target = from && from.startsWith(`/${home.split("/")[1]}`) ? from : home;
+    // Giữ cả query string (vd. /parent/selling/new?storyId=…, /parent/billing/result?orderId=…)
+    const target = from?.pathname?.startsWith(`/${home.split("/")[1]}`) ? `${from.pathname}${from.search ?? ""}` : home;
     toast.success(`Chào mừng ${session.user.fullName || session.user.username} trở lại ✨`);
     navigate(target, { replace: true });
   };

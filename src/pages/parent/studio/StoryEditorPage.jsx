@@ -1,6 +1,6 @@
 import { Fragment, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Bot, CheckCircle2, Loader2, PenLine, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Bot, CheckCircle2, Loader2, PenLine, Plus, Store, Trash2 } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
 import CheckpointEditor from "../../../components/parent/studio/CheckpointEditor";
 import GenerationPanel from "../../../components/parent/studio/GenerationPanel";
@@ -183,6 +183,11 @@ function StoryEditorPage() {
           Bài học: <span className="font-semibold text-navy">{story.topic?.title}</span> · Nhân vật:{" "}
           {characters.map((c) => c.name).filter(Boolean).join(", ")}
         </p>
+        {story.reviewedAt && story.kind !== "published" && (
+          <Link to={ROUTES.PARENT.sellingNew(story.id)} className="mr-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+            <Store size={15} /> Đăng bán truyện này
+          </Link>
+        )}
         <DeleteStoryButton
           disabled={busy}
           deleting={removeStory.isPending}
