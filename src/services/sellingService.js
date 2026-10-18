@@ -28,3 +28,7 @@ export const getMyListings = async () => (await call(api.get("/listings/mine")))
 
 /** { storyId, title, description?, priceTierId, aliases: [{ token, aliasName }] } → { listing } */
 export const createListing = (payload) => call(api.post("/listings", payload));
+
+/** → { sellerStatus, strikeLimit, activeStrikes, strikes: [{ id, source, reason, issuedAt, expiresAt, revokedAt, active, appeal }] } */
+export const getMyStrikes = () => call(api.get("/sellers/me/strikes"));
+export const appealStrike = (strikeId, reason) => call(api.post(`/sellers/me/strikes/${strikeId}/appeal`, { reason }));

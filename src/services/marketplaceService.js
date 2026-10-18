@@ -29,3 +29,6 @@ export const getOwnedListings = async () => (await call(api.get("/market/owned")
 
 /** POST /market/checkout { listingId } → { order, checkoutUrl } (null với truyện miễn phí) */
 export const checkoutListing = (listingId) => call(api.post("/market/checkout", { listingId }));
+
+/** Báo cáo truyện đang bán: { category, description?, pageId? } → { reportId, suspended }. Đã báo cáo → 409. */
+export const reportListing = (listingId, body) => call(api.post(`/market/listings/${listingId}/reports`, body));

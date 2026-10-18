@@ -72,7 +72,7 @@ function ModeratorLayout() {
         { to: R.REPORTS, label: "Báo cáo vi phạm", icon: Flag, badge: badges.reports, badgeTone: "danger" },
         { to: R.SUSPENDED, label: "Truyện tạm đình chỉ", icon: PauseCircle },
         { to: R.STRIKES, label: "Cảnh cáo tác giả", icon: AlertTriangle },
-        { to: R.AUDITS, label: "Kiểm định ngẫu nhiên", icon: ListChecks },
+        { to: R.AUDITS, label: "Kiểm định ngẫu nhiên", icon: ListChecks, badge: badges.audits },
         { to: R.AI_FLAGS, label: "Cảnh báo AI", icon: Bot },
         { to: R.KEYWORDS, label: "Từ khóa chặn", icon: Ban },
       ],

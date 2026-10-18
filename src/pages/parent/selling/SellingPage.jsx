@@ -1,22 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, Clock, Loader2, Store } from "lucide-react";
+import { BadgeCheck, Ban, Clock, Loader2, Store } from "lucide-react";
 import EarningsPanel from "../../../components/parent/selling/EarningsPanel";
+import StrikesPanel from "../../../components/parent/selling/StrikesPanel";
+import { LISTING_STATUS } from "../../../constants/moderation";
 import { ROUTES } from "../../../constants/routes";
 import { applySeller, getMyListings, getMySeller } from "../../../services/sellingService";
 import { toast } from "../../../stores/toastStore";
 import { formatNumber } from "../../../utils/format";
 
-const LISTING_STATUS = {
-  submitted: { label: "Chờ duyệt", tone: "bg-navy-tint text-navy" },
-  in_review: { label: "Đang duyệt", tone: "bg-primary-tint text-primary-dark" },
-  changes_requested: { label: "Cần sửa", tone: "bg-danger-tint text-danger" },
-  rejected: { label: "Bị từ chối", tone: "bg-danger-tint text-danger" },
-  published: { label: "Đang bán", tone: "bg-secondary-tint text-secondary-dark" },
-  suspended: { label: "Tạm gỡ", tone: "bg-danger-tint text-danger" },
-  archived: { label: "Đã lưu trữ", tone: "bg-navy-tint text-navy" },
-};
 
 const field = "w-full rounded-card border-2 border-outline px-4 py-2.5 focus:border-primary focus:outline-none";
 
@@ -55,8 +48,9 @@ function ApplyForm({ onDone }) {
 function SellingPage() {
   const queryClient = useQueryClient();
   const { data: me, isLoading } = useQuery({ queryKey: ["selling", "me"], queryFn: getMySeller });
-  const { data: listings = [] } = useQuery({ queryKey: ["selling", "listings"], queryFn: getMyListings, enabled: me?.seller?.status === "approved" });
+  const { data: listings = [] } = useQuery({ queryKey: ["selling", "listings"], queryFn: getMyListings, enabled: ["approved", "suspended"].includes(me?.seller?.status) });
   const status = me?.seller?.status;
+  const isSeller = status === "approved" || status === "suspended";
 
   if (isLoading) return <Loader2 size={32} className="animate-spin text-primary" />;
 
@@ -80,6 +74,15 @@ function SellingPage() {
           <p className="flex items-center gap-2 font-bold text-secondary-dark">
             <BadgeCheck size={20} /> Ba mẹ là người bán: {me.seller.displayName}
           </p>
+        ) : status === "suspended" ? (
+          <div className="space-y-1">
+            <p className="flex items-center gap-2 font-bold text-danger">
+              <Ban size={20} /> Tài khoản bán “{me.seller.displayName}” đang bị khoá
+            </p>
+            <p className="text-sm text-navy/70">
+              Do có đủ cảnh cáo còn hiệu lực. Truyện của ba mẹ tạm ẩn khỏi Chợ truyện và chưa đăng bán mới được. Ba mẹ có thể kháng nghị từng cảnh cáo bên dưới; doanh thu đã có vẫn rút được.
+            </p>
+          </div>
         ) : status === "pending" ? (
           <p className="flex items-center gap-2 font-semibold text-primary-dark">
             <Clock size={20} /> Hồ sơ “{me.seller.displayName}” đang chờ Moderator duyệt.
@@ -94,9 +97,11 @@ function SellingPage() {
         )}
       </section>
 
-      {status === "approved" && <EarningsPanel />}
+      {isSeller && <StrikesPanel />}
 
-      {status === "approved" && (
+      {isSeller && <EarningsPanel />}
+
+      {isSeller && (
         <section className="card space-y-3 p-6">
           <h2 className="text-lg">Truyện đã đăng bán</h2>
           <p className="text-sm text-navy/60">Mở một truyện đã hoàn tất trong “Sáng tác truyện” rồi bấm “Đăng bán”.</p>

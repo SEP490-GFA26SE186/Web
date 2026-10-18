@@ -20,6 +20,11 @@ import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
 const TopicsPage = lazy(() => import("../pages/moderator/TopicsPage"));
 const KeywordsPage = lazy(() => import("../pages/moderator/KeywordsPage"));
+const ReportsPage = lazy(() => import("../pages/moderator/ReportsPage"));
+const SuspendedPage = lazy(() => import("../pages/moderator/SuspendedPage"));
+const StrikesPage = lazy(() => import("../pages/moderator/StrikesPage"));
+const AuditsPage = lazy(() => import("../pages/moderator/AuditsPage"));
+const AppealsPage = lazy(() => import("../pages/admin/AppealsPage"));
 const SellerApplicationsPage = lazy(() => import("../pages/moderator/SellerApplicationsPage"));
 const ModeratorDashboardPage = lazy(
   () => import("../pages/moderator/ModeratorDashboardPage"),
@@ -70,10 +75,6 @@ const parentPlaceholders = [
 
 const moderatorPlaceholders = [
   { path: "backgrounds", title: "Thư viện bối cảnh" },
-  { path: "reports", title: "Báo cáo vi phạm" },
-  { path: "suspended", title: "Truyện tạm đình chỉ" },
-  { path: "strikes", title: "Cảnh cáo tác giả" },
-  { path: "audits", title: "Kiểm định ngẫu nhiên" },
   { path: "ai-flags", title: "Cảnh báo AI" },
   { path: "guidelines", title: "Quy chuẩn kiểm duyệt" },
 ];
@@ -85,7 +86,6 @@ const adminPlaceholders = [
   { path: "revenue", title: "Báo Cáo Doanh Thu" },
   { path: "ai-costs", title: "Chi Phí Vận Hành AI" },
   { path: "profit-loss", title: "Báo Cáo Lãi Lỗ P&L" },
-  { path: "appeals", title: "Kháng Nghị Cảnh Cáo" },
   { path: "audit-logs", title: "Nhật Ký Kiểm Toán" },
 ];
 
@@ -145,6 +145,10 @@ function AppRoutes() {
           <Route index element={<ModeratorDashboardPage />} />
           <Route path="topics" element={<TopicsPage />} />
           <Route path="keywords" element={<KeywordsPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="suspended" element={<SuspendedPage />} />
+          <Route path="strikes" element={<StrikesPage />} />
+          <Route path="audits" element={<AuditsPage />} />
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
           <Route path="seller-applications" element={<SellerApplicationsPage />} />
@@ -171,6 +175,7 @@ function AppRoutes() {
           <Route index element={<AdminDashboardPage />} />
           <Route path="ai-config" element={<AiConfigPage />} />
           <Route path="withdrawals" element={<WithdrawalsPage />} />
+          <Route path="appeals" element={<AppealsPage />} />
           {placeholderRoutes(adminPlaceholders)}
         </Route>
 

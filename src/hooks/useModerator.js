@@ -3,7 +3,15 @@ import {
   claimReview,
   decideReview,
   decideSeller,
+  dismissReport,
+  getAudits,
   getModeratorOverview,
+  getReportGroups,
+  getRestrictedListings,
+  getStrikes,
+  issueStrike,
+  runAudits,
+  suspendListing,
   getReview,
   getReviewQueue,
   getSellerApplications,
@@ -16,6 +24,10 @@ export const modKeys = {
   queue: ["moderator", "queue"],
   sellers: (status) => ["moderator", "sellers", status],
   review: (id) => ["moderator", "review", id],
+  reports: (status) => ["moderator", "reports", status],
+  restricted: (status) => ["moderator", "restricted", status],
+  strikes: (filter) => ["moderator", "strikes", filter],
+  audits: ["moderator", "audits"],
 };
 
 export const useModeratorOverview = () => useQuery({ queryKey: modKeys.overview, queryFn: getModeratorOverview, refetchInterval: 60_000 });
@@ -51,3 +63,19 @@ export const useDecideSeller = () => {
     },
   });
 };
+
+// Giám sát: mỗi thao tác có thể đổi hàng đợi, báo cáo, truyện tạm gỡ, cảnh cáo → làm mới cả nhóm "moderator".
+const useMonitoringMutation = (mutationFn) => {
+  const queryClient = useQueryClient();
+  return useMutation({ mutationFn, onSuccess: () => queryClient.invalidateQueries({ queryKey: modKeys.all }) });
+};
+
+export const useReportGroups = (status) => useQuery({ queryKey: modKeys.reports(status), queryFn: () => getReportGroups(status) });
+export const useRestrictedListings = (status) => useQuery({ queryKey: modKeys.restricted(status), queryFn: () => getRestrictedListings(status) });
+export const useStrikes = (filter = {}) => useQuery({ queryKey: modKeys.strikes(filter), queryFn: () => getStrikes(filter) });
+export const useAudits = () => useQuery({ queryKey: modKeys.audits, queryFn: getAudits });
+
+export const useDismissReport = () => useMonitoringMutation(dismissReport);
+export const useSuspendListing = () => useMonitoringMutation(({ listingId, reason }) => suspendListing(listingId, reason));
+export const useIssueStrike = () => useMonitoringMutation(issueStrike);
+export const useRunAudits = () => useMonitoringMutation(runAudits);

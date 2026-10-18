@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BookPlus, Bot, Check, FileText, Loader2, ShieldCheck, ShoppingCart, Store } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
+import ReportListingButton from "../../../components/parent/marketplace/ReportListingButton";
 import { ROUTES } from "../../../constants/routes";
 import { useCheckoutListing, useListing } from "../../../hooks/useMarketplace";
 import { useShelfStatus, useToggleShelf } from "../../../hooks/useStudio";
@@ -108,6 +109,11 @@ function ListingDetailPage() {
             {checkout.isPending ? <Loader2 size={20} className="animate-spin" /> : <ShoppingCart size={20} />}
             {free ? "Nhận miễn phí" : `Mua ${formatNumber(l.priceTier.priceVnd)}đ qua payOS`}
           </button>
+        )}
+        {!l.isMine && (
+          <div className="border-t border-outline pt-3">
+            <ReportListingButton listingId={l.id} />
+          </div>
         )}
       </article>
     </div>

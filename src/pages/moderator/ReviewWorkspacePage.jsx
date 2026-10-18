@@ -2,17 +2,25 @@ import { Fragment, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, Eye, Loader2, Lock } from "lucide-react";
 import CaselTag from "../../components/parent/library/CaselTag";
+import { DECISION_LABELS, LISTING_STATUS, REVIEW_TYPES } from "../../constants/moderation";
 import { CHECKPOINT_TYPES, EMOTIONS } from "../../constants/story";
 import { ROUTES } from "../../constants/routes";
 import { useClaimReview, useDecideReview, useReview, useViewPage } from "../../hooks/useModerator";
 import { toast } from "../../stores/toastStore";
 import { formatNumber } from "../../utils/format";
 
-const DECISIONS = [
-  { value: "approved", label: "Duyệt & xuất bản", tone: "btn-primary" },
-  { value: "changes_requested", label: "Yêu cầu sửa", tone: "btn-ghost" },
-  { value: "rejected", label: "Từ chối", tone: "btn-ghost text-danger" },
-];
+const DECISIONS = {
+  submission: [
+    { value: "approved", label: "Duyệt & xuất bản", tone: "btn-primary" },
+    { value: "changes_requested", label: "Yêu cầu sửa", tone: "btn-ghost" },
+    { value: "rejected", label: "Từ chối", tone: "btn-ghost text-danger" },
+  ],
+  // Hậu kiểm truyện đã bán: giữ (truyện đang tạm gỡ thì bán lại) hoặc gỡ hẳn (BE tự cảnh cáo tác giả)
+  followup: [
+    { value: "approved", label: "Giữ truyện (bán tiếp)", tone: "btn-primary" },
+    { value: "taken_down", label: "Gỡ hẳn & cảnh cáo tác giả", tone: "btn-ghost text-danger" },
+  ],
+};
 const ROLE_LABELS = { constructive: "Xây dựng", avoidant: "Né tránh", impulsive: "Bốc đồng" };
 
 /** Chữ dạng token → tên chung người bán đặt (bản đăng bán không có tên thật). */
@@ -63,6 +71,7 @@ function Workspace({ reviewId }) {
   const [checks, setChecks] = useState({});
   const [comment, setComment] = useState("");
   const [notes, setNotes] = useState({});
+  const [strike, setStrike] = useState(false);
 
   if (isLoading) return <Loader2 size={32} className="animate-spin text-primary" />;
   if (error) return <p className="card p-6 text-danger">{error.message}</p>;
@@ -73,10 +82,19 @@ function Workspace({ reviewId }) {
   const decided = !!review.decidedAt;
   const canAct = review.claimedByMe && !decided;
   const passedOf = (item) => checks[item.id] ?? item.passed;
+  const isFollowup = review.reviewType !== "submission";
+  const decisions = DECISIONS[isFollowup ? "followup" : "submission"];
+  const type = REVIEW_TYPES[review.reviewType];
+  const status = LISTING_STATUS[listing.status];
 
   const submit = (decision) =>
     decide.mutate(
-      { decision, comment: comment.trim() || undefined, checklist: checklist.map((i) => ({ itemId: i.id, passed: passedOf(i) === true })) },
+      {
+        decision,
+        comment: comment.trim() || undefined,
+        checklist: checklist.map((i) => ({ itemId: i.id, passed: passedOf(i) === true })),
+        ...(decision === "rejected" && strike && { issueStrike: true }),
+      },
       { onSuccess: () => toast.success("Đã lưu quyết định"), onError: (e) => toast.error(e.message) },
     );
 
@@ -89,6 +107,8 @@ function Workspace({ reviewId }) {
       <header className="card flex flex-wrap items-start justify-between gap-4 p-5">
         <div className="space-y-1">
           <div className="flex flex-wrap gap-2">
+            {type && <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${type.tone}`}>{type.label}</span>}
+            {isFollowup && status && <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${status.tone}`}>{status.label}</span>}
             <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" />
             <span className="tag-theme">{listing.priceVnd ? `${formatNumber(listing.priceVnd)}đ` : "Miễn phí"}</span>
             {listing.hasAiContent && <span className="tag-eq">Có AI hỗ trợ</span>}
@@ -100,7 +120,7 @@ function Workspace({ reviewId }) {
           {listing.description && <p className="text-sm text-navy/70">{listing.description}</p>}
         </div>
         {decided ? (
-          <span className="rounded-full bg-secondary-tint px-3 py-1 text-sm font-bold text-secondary-dark">Đã quyết định: {review.decision}</span>
+          <span className="rounded-full bg-secondary-tint px-3 py-1 text-sm font-bold text-secondary-dark">Đã quyết định: {DECISION_LABELS[review.decision] ?? review.decision}</span>
         ) : review.claimedByMe ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-primary-tint px-3 py-1 text-sm font-bold text-primary-dark">
             <Lock size={14} /> Bạn đang giữ bài đến {new Date(review.claimExpiresAt).toLocaleTimeString("vi-VN")}
@@ -176,12 +196,18 @@ function Workspace({ reviewId }) {
           onChange={(e) => setComment(e.target.value)}
           disabled={!canAct}
           rows={3}
-          placeholder="Nhận xét chung (bắt buộc khi yêu cầu sửa / từ chối)"
+          placeholder={isFollowup ? "Nhận xét chung (bắt buộc khi gỡ hẳn — người bán thấy đây là lý do cảnh cáo)" : "Nhận xét chung (bắt buộc khi yêu cầu sửa / từ chối)"}
           aria-label="Nhận xét chung"
           className="w-full rounded-card border-2 border-outline p-3 text-sm"
         />
+        {!isFollowup && (
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" disabled={!canAct} checked={strike} onChange={(e) => setStrike(e.target.checked)} className="h-4 w-4" />
+            Khi từ chối: cảnh cáo tác giả (vi phạm nghiêm trọng, cố ý)
+          </label>
+        )}
         <div className="flex flex-wrap gap-2">
-          {DECISIONS.map((d) => (
+          {decisions.map((d) => (
             <button key={d.value} type="button" disabled={!canAct || decide.isPending} onClick={() => submit(d.value)} className={`${d.tone} disabled:opacity-50`}>
               {decide.isPending && decide.variables?.decision === d.value && <Loader2 size={16} className="animate-spin" />}
               {d.label}

@@ -25,11 +25,16 @@ export const decideSeller = (userId, approve) => call(api.post(`/moderation/sell
 
 /** Thông tin cho layout: tên Moderator + badge số việc đang chờ. */
 export const getModeratorOverview = async () => {
-  const [queue, sellers] = await Promise.all([getReviewQueue(), getSellerApplications("pending")]);
+  const [queue, sellers, reports] = await Promise.all([getReviewQueue(), getSellerApplications("pending"), getReportGroups("open")]);
   const user = useAuthStore.getState().user;
   return {
     moderator: { name: user?.fullName || user?.username || "Kiểm duyệt viên", title: "Kiểm duyệt viên", avatar: null },
-    navBadges: { storyQueue: queue.length, sellerApplications: sellers.length },
+    navBadges: {
+      storyQueue: queue.length,
+      sellerApplications: sellers.length,
+      reports: reports.reduce((n, g) => n + g.reports.length, 0),
+      audits: queue.filter((q) => q.reviewType === "random_audit").length,
+    },
   };
 };
 
@@ -38,5 +43,30 @@ export const getReview = (reviewId) => call(api.get(`/moderation/submissions/${r
 export const claimReview = (reviewId) => call(api.post(`/moderation/submissions/${reviewId}/claim`));
 export const viewPage = (reviewId, pageId, comment) =>
   call(api.post(`/moderation/submissions/${reviewId}/pages/${pageId}/view`, comment === undefined ? {} : { comment }));
-/** { decision: approved|changes_requested|rejected, comment?, checklist: [{ itemId, passed }] } */
+/**
+ * Lượt nộp bán: { decision: approved|changes_requested|rejected, comment?, checklist, issueStrike? }.
+ * Lượt hậu kiểm (report_followup / random_audit): approved = giữ, taken_down = gỡ hẳn (BE tự cảnh cáo).
+ */
 export const decideReview = (reviewId, body) => call(api.post(`/moderation/submissions/${reviewId}/decision`, body));
+
+// ---------------------------------------------------------------------------
+// Giám sát (luồng 7): báo cáo, tạm gỡ, cảnh cáo, kiểm tra ngẫu nhiên
+// ---------------------------------------------------------------------------
+
+/** GET /moderation/reports?status → [{ listing, openReview, reports: [{ id, category, description, status, reporter, pageOrder, createdAt }] }] */
+export const getReportGroups = async (status = "open") => (await call(api.get("/moderation/reports", { params: { status } }))).groups;
+export const dismissReport = (reportId) => call(api.post(`/moderation/reports/${reportId}/dismiss`));
+
+/** GET /moderation/listings?status=suspended|archived */
+export const getRestrictedListings = async (status = "suspended") => (await call(api.get("/moderation/listings", { params: { status } }))).listings;
+/** → { listingId, status, reviewId } — tạm gỡ + tạo lượt hậu kiểm */
+export const suspendListing = (listingId, reason) => call(api.post(`/moderation/listings/${listingId}/suspend`, { reason }));
+
+/** GET /moderation/strikes → { strikeLimit, strikes } */
+export const getStrikes = ({ active } = {}) => call(api.get("/moderation/strikes", { params: active ? { active: "true" } : {} }));
+/** { sellerId, source: report|rejection|takedown, sourceId?, reason } → { strikeId, activeStrikes, strikeLimit, sellerSuspended } */
+export const issueStrike = (body) => call(api.post("/moderation/strikes", body));
+
+export const getAudits = async () => (await call(api.get("/moderation/audits"))).audits;
+/** → { created, reviewIds } */
+export const runAudits = (count) => call(api.post("/moderation/audits/run", count ? { count } : {}));
