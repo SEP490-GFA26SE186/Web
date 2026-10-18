@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BookPlus, Bot, Check, FileText, Loader2, ShieldCheck, ShoppingCart, Store } from "lucide-react";
+import { ArrowLeft, BookPlus, Bot, Check, FileText, Loader2, ShieldCheck, ShoppingCart, Store, Type, Volume2 } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
 import ReportListingButton from "../../../components/parent/marketplace/ReportListingButton";
 import { ROUTES } from "../../../constants/routes";
@@ -70,6 +70,9 @@ function ListingDetailPage() {
               <Bot size={12} /> AI hỗ trợ
             </span>
           )}
+          <span className={l.hasNarration ? "tag-eq" : "tag-theme"}>
+            {l.hasNarration ? <Volume2 size={12} /> : <Type size={12} />} {l.hasNarration ? "Có giọng đọc" : "Chỉ có chữ — ba mẹ đọc cùng bé"}
+          </span>
         </div>
         <h1 className="text-3xl">{l.title}</h1>
         {l.description && <p className="text-navy/70">{l.description}</p>}

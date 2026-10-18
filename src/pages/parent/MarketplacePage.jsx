@@ -8,7 +8,13 @@ import useDebounce from "../../hooks/useDebounce";
 import { useListings, usePriceTiers } from "../../hooks/useMarketplace";
 
 const PAGE_SIZE = 8;
-const DEFAULT_FILTERS = { competency: "all", age: "all", priceTierId: "all", sort: "best_selling" };
+const DEFAULT_FILTERS = { competency: "all", age: "all", priceTierId: "all", narration: "all", sort: "best_selling" };
+
+const NARRATION_OPTIONS = [
+  { value: "all", label: "Tất cả" },
+  { value: "with", label: "Có giọng đọc" },
+  { value: "without", label: "Chỉ có chữ" },
+];
 
 // Truyện dành cho trẻ 5–8 tuổi (topics.age_min / age_max)
 const AGE_OPTIONS = [{ value: "all", label: "Tất cả" }, ...[5, 6, 7, 8].map((a) => ({ value: String(a), label: `${a} tuổi` }))];
@@ -77,6 +83,7 @@ function MarketplacePage() {
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect label="Độ tuổi" value={filters.age} onChange={setFilter("age")} options={AGE_OPTIONS} />
             <FilterSelect label="Giá" value={filters.priceTierId} onChange={setFilter("priceTierId")} options={priceOptions} />
+            <FilterSelect label="Giọng đọc" value={filters.narration} onChange={setFilter("narration")} options={NARRATION_OPTIONS} />
             <FilterSelect label="Sắp xếp" value={filters.sort} onChange={setFilter("sort")} options={SORT_OPTIONS} highlight icon={ArrowDownUp} />
           </div>
         </div>

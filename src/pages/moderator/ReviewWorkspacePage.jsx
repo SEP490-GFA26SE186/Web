@@ -151,6 +151,7 @@ function Workspace({ reviewId }) {
                 ) : null}
               </div>
               <p className="whitespace-pre-line">{withNames(page.contentText, story.characters)}</p>
+              {page.audioUrl && <audio controls preload="none" src={page.audioUrl} className="h-9 w-full max-w-md" aria-label={`Giọng đọc trang ${page.pageOrder}`} />}
               {canAct && (
                 <div className="flex flex-wrap items-end gap-2">
                   <input

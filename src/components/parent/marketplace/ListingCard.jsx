@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bot, CheckCircle2, FileText, ShoppingCart, Star, Store } from "lucide-react";
+import { Bot, CheckCircle2, FileText, ShoppingCart, Star, Store, Type, Volume2 } from "lucide-react";
 import { ROUTES } from "../../../constants/routes";
 import { formatNumber, formatVND } from "../../../utils/format";
 import CaselTag from "../library/CaselTag";
@@ -63,6 +63,15 @@ function ListingCard({ listing }) {
             {listing.hasAiContent && (
               <span className="flex items-center gap-1" title="Truyện có nội dung do AI hỗ trợ, đã được người bán và Moderator xem lại">
                 <Bot size={12} /> AI hỗ trợ
+              </span>
+            )}
+            {listing.hasNarration ? (
+              <span className="flex items-center gap-1 font-semibold text-secondary-dark" title="Có giọng đọc kể truyện — bé nghe được, không cần biết chữ">
+                <Volume2 size={12} /> Có giọng đọc
+              </span>
+            ) : (
+              <span className="flex items-center gap-1" title="Truyện chỉ có chữ — ba mẹ đọc cùng bé">
+                <Type size={12} /> Chỉ có chữ
               </span>
             )}
           </div>

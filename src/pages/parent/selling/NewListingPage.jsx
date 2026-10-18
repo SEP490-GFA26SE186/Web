@@ -86,6 +86,7 @@ function NewListingPage() {
         </label>
         <fieldset className="space-y-2">
           <legend className="mb-1 text-sm font-semibold">Tên chung cho nhân vật</legend>
+          <p className="mb-2 text-xs text-navy/60">{story.useTts ? "Truyện có giọng đọc: hệ thống đọc lại bằng tên chung này (vài phút) trước khi Moderator duyệt." : "Truyện đang tắt giọng đọc: bản đăng bán chỉ có chữ, người mua sẽ thấy nhãn \"Chỉ có chữ\"."}</p>
           {story.characters.map((c) => {
             const err = errors[`aliases.${c.token}`];
             return (

@@ -6,7 +6,7 @@ import EarningsPanel from "../../../components/parent/selling/EarningsPanel";
 import StrikesPanel from "../../../components/parent/selling/StrikesPanel";
 import { LISTING_STATUS } from "../../../constants/moderation";
 import { ROUTES } from "../../../constants/routes";
-import { applySeller, getMyListings, getMySeller } from "../../../services/sellingService";
+import { applySeller, getMyListings, getMySeller, retryNarration } from "../../../services/sellingService";
 import { toast } from "../../../stores/toastStore";
 import { formatNumber } from "../../../utils/format";
 
@@ -44,11 +44,38 @@ function ApplyForm({ onDone }) {
   );
 }
 
+/** Giọng đọc của bản đăng bán (sinh lại bằng tên chung). Moderator chỉ nhận duyệt khi đọc xong. */
+function NarrationStatus({ listing: l }) {
+  const queryClient = useQueryClient();
+  const retry = useMutation({
+    mutationFn: () => retryNarration(l.publishedStoryId),
+    onSuccess: () => {
+      toast.success("Đang tạo lại giọng đọc");
+      queryClient.invalidateQueries({ queryKey: ["selling", "listings"] });
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  if (!l.hasNarration) return <p className="text-xs text-navy/50">Chỉ có chữ (không giọng đọc)</p>;
+  const n = l.narration;
+  if (!n || n.complete) return <p className="text-xs font-semibold text-secondary-dark">Có giọng đọc</p>;
+  const broken = n.failed > 0 || n.missing > 0;
+  return (
+    <p className={`flex flex-wrap items-center gap-2 text-xs font-semibold ${broken ? "text-danger" : "text-primary-dark"}`}>
+      {broken ? `Giọng đọc lỗi ${n.failed + n.missing}/${n.total} đoạn — Moderator chưa duyệt được` : `Đang tạo giọng đọc ${n.ready}/${n.total} đoạn — xong mới vào hàng chờ duyệt`}
+      {broken && (
+        <button type="button" onClick={() => retry.mutate()} disabled={retry.isPending} className="rounded-full bg-danger px-3 py-0.5 text-white disabled:opacity-60">
+          Tạo lại giọng đọc
+        </button>
+      )}
+    </p>
+  );
+}
+
 // Bán truyện: hồ sơ người bán (cần gói được bán) + danh sách truyện đã đăng và kết quả duyệt.
 function SellingPage() {
   const queryClient = useQueryClient();
   const { data: me, isLoading } = useQuery({ queryKey: ["selling", "me"], queryFn: getMySeller });
-  const { data: listings = [] } = useQuery({ queryKey: ["selling", "listings"], queryFn: getMyListings, enabled: ["approved", "suspended"].includes(me?.seller?.status) });
+  const { data: listings = [] } = useQuery({ queryKey: ["selling", "listings"], queryFn: getMyListings, refetchInterval: (q) => (q.state.data?.some((l) => l.narration && !l.narration.complete && !l.narration.failed && !l.narration.missing) ? 10_000 : false), enabled: ["approved", "suspended"].includes(me?.seller?.status) });
   const status = me?.seller?.status;
   const isSeller = status === "approved" || status === "suspended";
 
@@ -116,6 +143,7 @@ function SellingPage() {
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${s.tone}`}>{s.label}</span>
                     <span className="text-sm text-navy/60">{l.priceVnd ? `${formatNumber(l.priceVnd)}đ` : "Miễn phí"}</span>
                   </div>
+                  <NarrationStatus listing={l} />
                   {l.lastDecision?.comment && <p className="text-sm text-navy/70">Moderator: {l.lastDecision.comment}</p>}
                 </li>
               );

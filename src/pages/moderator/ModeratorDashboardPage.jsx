@@ -59,6 +59,11 @@ function ModeratorDashboardPage() {
                     {since(q.reviewType === "submission" ? q.submittedAt : q.createdAt)}
                   </p>
                 </div>
+                {q.hasNarration && q.narration && !q.narration.complete && (
+                  <span className="rounded-full bg-primary-tint px-2 py-0.5 text-xs font-bold text-primary-dark" title="Chỉ nhận duyệt khi giọng đọc tạo xong">
+                    Đang tạo giọng đọc {q.narration.ready}/{q.narration.total}
+                  </span>
+                )}
                 {q.reviewType !== "submission" && (
                   <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${REVIEW_TYPES[q.reviewType]?.tone}`}>
                     {REVIEW_TYPES[q.reviewType]?.label}
