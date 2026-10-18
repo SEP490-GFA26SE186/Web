@@ -1,10 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ROLES } from "../constants/roles";
 import {
   createChild,
   deleteChild,
   getChildBookshelf,
-  getChildEqReport,
+  getChildEqJourney,
   getChildOverview,
   getChildren,
   getChildUsage,
@@ -18,7 +18,7 @@ export const childKeys = {
   list: ["children", "list"],
   detail: (childId) => ["children", childId],
   overview: (childId) => ["children", childId, "overview"],
-  eqReport: (childId, range) => ["children", childId, "eq-report", range],
+  eqJourney: (childId, weeks) => ["children", childId, "eq-journey", weeks],
   bookshelf: (childId, params) => ["children", childId, "bookshelf", params],
   usage: (childId, date) => ["children", childId, "usage", date ?? "today"],
 };
@@ -42,10 +42,11 @@ export const useSelectedChild = () => {
 export const useChildOverview = (childId) =>
   useQuery({ queryKey: childKeys.overview(childId), queryFn: () => getChildOverview(childId), enabled: !!childId });
 
-export const useChildEqReport = (childId, range = {}) =>
+export const useChildEqJourney = (childId, weeks = 8) =>
   useQuery({
-    queryKey: childKeys.eqReport(childId, range),
-    queryFn: () => getChildEqReport(childId, range),
+    queryKey: childKeys.eqJourney(childId, weeks),
+    queryFn: () => getChildEqJourney(childId, weeks),
+    placeholderData: keepPreviousData,
     enabled: !!childId,
   });
 

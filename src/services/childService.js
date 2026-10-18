@@ -46,8 +46,8 @@ export const deleteChild = (childId) => call(api.delete(`/children/${childId}`))
 /** GET /children/:id/overview → { profile, todayUsage, readingStats, eqReport } */
 export const getChildOverview = (childId) => call(api.get(`/children/${childId}/overview`));
 
-/** GET /children/:id/eq-report → { childId, childName, skills: [{ caselCode, nameVi, items, scoreSum, score|null }] } (cộng dồn toàn bộ lịch sử) */
-export const getChildEqReport = (childId) => call(api.get(`/children/${childId}/eq-report`));
+/** GET /children/:id/eq-journey?weeks → { skills, strongest, focus, totals, trend, byType, recent } — chỉ lượt đọc đầu */
+export const getChildEqJourney = (childId, weeks = 8) => call(api.get(`/children/${childId}/eq-journey`, { params: { weeks } }));
 
 /**
  * GET /children/:id/bookshelf?page&limit&search&status&competency

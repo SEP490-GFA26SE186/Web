@@ -19,6 +19,7 @@ import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
 const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
 const TopicsPage = lazy(() => import("../pages/moderator/TopicsPage"));
+const EqJourneyPage = lazy(() => import("../pages/parent/EqJourneyPage"));
 const KeywordsPage = lazy(() => import("../pages/moderator/KeywordsPage"));
 const ReportsPage = lazy(() => import("../pages/moderator/ReportsPage"));
 const SuspendedPage = lazy(() => import("../pages/moderator/SuspendedPage"));
@@ -74,7 +75,6 @@ function PageLoader() {
 
 const parentPlaceholders = [
   { path: "family-characters", title: "Nhân vật gia đình" },
-  { path: "eq-journey", title: "Báo cáo EQ" },
   { path: "help", title: "Trợ giúp" },
 ];
 
@@ -112,6 +112,7 @@ function AppRoutes() {
         >
           <Route index element={<ParentDashboardPage />} />
           <Route path="library" element={<LibraryPage />} />
+          <Route path="eq-journey" element={<EqJourneyPage />} />
           <Route path="marketplace" element={<MarketplacePage />} />
           <Route path="marketplace/result" element={<PurchaseResultPage />} />
           <Route path="marketplace/:listingId" element={<ListingDetailPage />} />
