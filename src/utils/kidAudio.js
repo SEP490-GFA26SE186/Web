@@ -26,11 +26,3 @@ export function playAudio(url) {
     audio.play().catch(done);
   });
 }
-
-/** Phát lần lượt nhiều đoạn (vd. câu hỏi rồi các phương án). */
-export async function playSequence(urls) {
-  for (const url of urls.filter(Boolean)) {
-    if (current && !current.paused) stopAudio();
-    await playAudio(url);
-  }
-}

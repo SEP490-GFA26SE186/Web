@@ -3,13 +3,11 @@ import { ROLES } from "../constants/roles";
 import {
   createChild,
   deleteChild,
-  getChild,
   getChildBookshelf,
   getChildEqReport,
   getChildOverview,
   getChildren,
   getChildUsage,
-  logUsageSession,
   updateChild,
 } from "../services/childService";
 import useAuthStore from "../stores/authStore";
@@ -40,9 +38,6 @@ export const useSelectedChild = () => {
   const child = children.find((c) => c.id === selectedChildId) ?? children[0] ?? null;
   return { child, children, isLoading, isEmpty: !isLoading && children.length === 0 };
 };
-
-export const useChild = (childId) =>
-  useQuery({ queryKey: childKeys.detail(childId), queryFn: () => getChild(childId), enabled: !!childId });
 
 export const useChildOverview = (childId) =>
   useQuery({ queryKey: childKeys.overview(childId), queryFn: () => getChildOverview(childId), enabled: !!childId });
@@ -87,10 +82,3 @@ export const useDeleteChild = () => {
   return useMutation({ mutationFn: deleteChild, onSuccess: invalidate });
 };
 
-export const useLogUsage = (childId) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (session) => logUsageSession(childId, session),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: childKeys.detail(childId) }),
-  });
-};

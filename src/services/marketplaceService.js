@@ -25,7 +25,6 @@ export const getListings = (params) =>
 /** → listing (+ preview: chữ trang đầu, isMine) */
 export const getListing = async (listingId) => (await call(api.get(`/market/listings/${listingId}`))).listing;
 
-export const getOwnedListings = async () => (await call(api.get("/market/owned"))).items;
 
 /** POST /market/checkout { listingId } → { order, checkoutUrl } (null với truyện miễn phí) */
 export const checkoutListing = (listingId) => call(api.post("/market/checkout", { listingId }));

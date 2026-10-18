@@ -1,14 +1,14 @@
 import { forwardRef, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { CheckCircle2, Loader2, Sparkles, WandSparkles, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Sparkles, WandSparkles, Zap } from "lucide-react";
 import { SIGNUP_BONUS_CREDITS } from "../../constants/landingContent";
-import { EMAIL_REGEX, requestSignup } from "../../services/authService";
+import { EMAIL_REGEX } from "../../services/authService";
 
-// Banner CTA cuối trang: nhập email phụ huynh để nhận link tạo tài khoản
+// Banner CTA cuối trang: nhập email → sang trang đăng ký (điền sẵn email)
 const SignupBanner = forwardRef(function SignupBanner(_, inputRef) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const signup = useMutation({ mutationFn: requestSignup });
+  const navigate = useNavigate();
 
   const submit = (e) => {
     e.preventDefault();
@@ -19,7 +19,7 @@ const SignupBanner = forwardRef(function SignupBanner(_, inputRef) {
       return;
     }
     setError("");
-    signup.mutate(value, { onError: (err) => setError(err.message) });
+    navigate("/register", { state: { email: value } });
   };
 
   return (
@@ -37,17 +37,6 @@ const SignupBanner = forwardRef(function SignupBanner(_, inputRef) {
             <p className="text-lg text-white/90">Đăng ký tài khoản miễn phí chỉ trong 30 giây. Không cần thẻ tín dụng, hoàn toàn an toàn cho trẻ.</p>
           </div>
 
-          {signup.isSuccess ? (
-            <div role="status" className="flex w-full max-w-md items-start gap-3 rounded-card bg-white/95 p-5 text-navy shadow-high lg:w-auto">
-              <CheckCircle2 size={26} className="shrink-0 text-secondary" />
-              <div>
-                <p className="font-display text-lg font-bold">Đã gửi link tạo tài khoản!</p>
-                <p className="text-sm text-navy/70">
-                  Ba mẹ kiểm tra hộp thư <b>{signup.data.email}</b> để kích hoạt và nhận {SIGNUP_BONUS_CREDITS} AI Credits nhé.
-                </p>
-              </div>
-            </div>
-          ) : (
             <form onSubmit={submit} noValidate className="flex w-full flex-col gap-2 lg:w-auto">
               <div className="flex w-full flex-col items-center gap-3 sm:flex-row">
                 <label className="w-full sm:w-80">
@@ -69,10 +58,9 @@ const SignupBanner = forwardRef(function SignupBanner(_, inputRef) {
                 </label>
                 <button
                   type="submit"
-                  disabled={signup.isPending}
                   className="flex h-14 w-full shrink-0 items-center justify-center gap-2 rounded-full bg-teal-200 px-8 font-display text-lg font-bold text-[#00201c] shadow-mid transition hover:bg-teal-100 disabled:opacity-70 sm:w-auto"
                 >
-                  {signup.isPending ? <Loader2 size={20} className="animate-spin" /> : <Zap size={20} className="fill-current" />}
+                  <Zap size={20} className="fill-current" />
                   Tạo câu chuyện đầu tiên
                 </button>
               </div>
@@ -82,7 +70,6 @@ const SignupBanner = forwardRef(function SignupBanner(_, inputRef) {
                 </p>
               )}
             </form>
-          )}
         </div>
       </div>
     </section>

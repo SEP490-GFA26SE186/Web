@@ -37,9 +37,6 @@ export const getStory = async (id) => (await call(api.get(`/stories/${id}`))).da
  */
 export const createStory = async (payload) => (await call(api.post("/stories", payload))).data.story;
 
-/** PUT /stories/:id { title?, situation?, useAiImage?, useTts? } */
-export const updateStory = async (id, payload) => (await call(api.put(`/stories/${id}`, payload))).data.story;
-
 export const deleteStory = (id) => call(api.delete(`/stories/${id}`));
 
 // ---- Giá sách của bé ----

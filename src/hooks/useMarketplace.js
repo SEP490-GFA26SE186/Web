@@ -1,5 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { checkoutListing, getListing, getListings, getOwnedListings, getPriceTiers } from "../services/marketplaceService";
+import { checkoutListing, getListing, getListings, getPriceTiers } from "../services/marketplaceService";
 
 export const usePriceTiers = () =>
   useQuery({ queryKey: ["marketplace", "price-tiers"], queryFn: getPriceTiers, staleTime: 10 * 60 * 1000 });
@@ -13,8 +13,6 @@ export const useListings = (params) =>
 
 export const useListing = (listingId) =>
   useQuery({ queryKey: ["marketplace", "listing", listingId], queryFn: () => getListing(listingId), enabled: !!listingId });
-
-export const useOwnedListings = () => useQuery({ queryKey: ["marketplace", "owned"], queryFn: getOwnedListings });
 
 export const useCheckoutListing = () => {
   const queryClient = useQueryClient();

@@ -10,7 +10,6 @@ import { ROUTES } from "../../constants/routes";
 import { useChildBookshelf, useChildOverview, useChildUsage, useSelectedChild } from "../../hooks/useChildProfile";
 import { useListings } from "../../hooks/useMarketplace";
 import { usePendingDrafts, useParentProfile } from "../../hooks/useParent";
-import { toast } from "../../stores/toastStore";
 import { childEmoji, vnDateOffset } from "../../utils/child";
 
 const getGreeting = () => {
@@ -76,10 +75,9 @@ function ParentDashboardPage() {
             {getGreeting()}, {parent.name}! 👋
           </h1>
           <p className="mt-2 text-navy/70">
-            Hôm nay {child.name} đã đọc <span className="font-bold text-primary">{todayUsage.usedMinutes} phút</span>
-            {todayUsage.isLimitReached
-              ? " — đã chạm giới hạn thời gian trong ngày."
-              : `, còn ${todayUsage.remainingMinutes} phút trong giới hạn hôm nay.`}
+            {todayUsage.sessionsCount
+              ? <>Hôm nay {child.name} đã đọc <span className="font-bold text-primary">{todayUsage.usedMinutes} phút</span> ({todayUsage.sessionsCount} lượt đọc).</>
+              : `Hôm nay ${child.name} chưa đọc truyện nào.`}
           </p>
         </div>
         <div className="hidden items-center gap-3 rounded-full border border-outline bg-white py-2 pr-5 pl-2 shadow-low md:flex">
@@ -116,9 +114,9 @@ function ParentDashboardPage() {
         <StatCard
           icon={Hourglass}
           tone="teal"
-          label="Còn lại hôm nay"
-          value={`${todayUsage.remainingMinutes} phút`}
-          hint={`Giới hạn ${todayUsage.dailyLimitMinutes} phút/ngày`}
+          label="Lượt đọc hôm nay"
+          value={`${todayUsage.sessionsCount} lượt`}
+          hint={`${todayUsage.completedCount} lượt đọc hết truyện`}
           hintClassName="text-navy/60"
         />
         <StatCard
@@ -166,7 +164,6 @@ function ParentDashboardPage() {
               <ListingCard
                 key={listing.id}
                 listing={listing}
-                onAddToCart={(l) => toast.info(`Giỏ hàng đang được hoàn thiện — "${l.title}"`)}
               />
             ))}
           </div>

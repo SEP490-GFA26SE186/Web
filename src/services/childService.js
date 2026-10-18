@@ -28,12 +28,10 @@ const clean = (payload) => Object.fromEntries(Object.entries(payload).filter(([,
 /** GET /children → child[] */
 export const getChildren = async () => (await call(api.get("/children"))).children;
 
-/** GET /children/:id → child */
-export const getChild = async (childId) => (await call(api.get(`/children/${childId}`))).child;
 
 /**
  * POST /children
- * payload: { name, birthDate?: "YYYY-MM-DD", dailyScreenTimeMinutes?: 5–300, preferredVoice?, appearance? }
+ * payload: { name, birthDate?: "YYYY-MM-DD", preferredVoice?, appearance? }
  * appearance có → tạo kèm nhân vật đại diện của bé
  */
 export const createChild = async (payload) => (await call(api.post("/children", clean(payload)))).child;
@@ -59,12 +57,6 @@ export const getChildEqReport = (childId) => call(api.get(`/children/${childId}/
 export const getChildBookshelf = (childId, { page = 1, limit = 10, search, status = "all", competency = "all" } = {}) =>
   call(api.get(`/children/${childId}/bookshelf`, { params: clean({ page, limit, search: search?.trim(), status, competency }) }));
 
-/** GET /children/:id/usage?date=YYYY-MM-DD (mặc định hôm nay theo giờ Việt Nam, BE tự tính) */
+/** GET /children/:id/usage?date=YYYY-MM-DD → { usedMinutes, sessionsCount, completedCount } — tính từ các lượt đọc (giờ VN) */
 export const getChildUsage = (childId, date) => call(api.get(`/children/${childId}/usage`, { params: clean({ date }) }));
 
-/**
- * POST /children/:id/usage — ghi một phiên sử dụng.
- * Schema rev8: duration_seconds và usage_date do DB tự tính từ started_at/ended_at → chỉ gửi 2 mốc thời gian.
- */
-export const logUsageSession = async (childId, { startedAt, endedAt }) =>
-  (await call(api.post(`/children/${childId}/usage`, { startedAt, endedAt }))).session;

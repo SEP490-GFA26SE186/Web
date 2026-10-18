@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   Ban,
   Bot,
-  BookOpen,
   Brain,
   ClipboardList,
   Flag,
@@ -14,7 +13,6 @@ import {
   ListChecks,
   Mountain,
   PauseCircle,
-  PenLine,
 } from "lucide-react";
 import LogoutButton from "../components/common/LogoutButton";
 import PortalHeader from "../components/portal/PortalHeader";
@@ -44,7 +42,7 @@ const PAGE_TITLES = {
 const getBreadcrumbs = (pathname) => {
   const segment = pathname.split("/")[2] ?? "";
   const root = { label: "Cổng Kiểm Duyệt", to: R.DASHBOARD };
-  if (segment === "workspace") return [root, { label: "Hàng chờ", to: R.QUEUE }, { label: "Không gian làm việc" }];
+  if (segment === "workspace") return [root, { label: "Lượt duyệt" }];
   return [root, { label: PAGE_TITLES[segment] ?? "Tổng quan" }];
 };
 
@@ -58,10 +56,8 @@ function ModeratorLayout() {
     {
       title: "Nhiệm vụ kiểm duyệt",
       items: [
-        { to: R.DASHBOARD, label: "Tổng quan", icon: LayoutDashboard, end: true },
+        { to: R.DASHBOARD, label: "Tổng quan & hàng chờ", icon: LayoutDashboard, end: true, badge: badges.storyQueue },
         { to: R.SELLER_APPLICATIONS, label: "Duyệt đơn Seller", icon: IdCard, badge: badges.sellerApplications, badgeTone: "secondary" },
-        { to: R.QUEUE, label: "Hàng chờ duyệt truyện", icon: BookOpen, badge: badges.storyQueue },
-        { to: R.WORKSPACE, label: "Không gian kiểm duyệt", icon: PenLine },
         { to: R.TOPICS, label: "Danh sách bài học", icon: Brain },
         { to: R.BACKGROUNDS, label: "Thư viện bối cảnh", icon: Mountain },
       ],

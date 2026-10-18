@@ -87,8 +87,6 @@ const moderatorPlaceholders = [
 const publicPlaceholders = [
   { path: "/chinh-sach-bao-mat", title: "Chính sách bảo mật trẻ em" },
   { path: "/dieu-khoan-dich-vu", title: "Điều khoản dịch vụ" },
-  { path: "/goc-chuyen-gia", title: "Góc chuyên gia EQ" },
-  { path: "/huong-dan-phu-huynh", title: "Hướng dẫn phụ huynh" },
 ];
 
 const placeholderRoutes = (items) =>
@@ -147,7 +145,7 @@ function AppRoutes() {
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
           <Route path="seller-applications" element={<SellerApplicationsPage />} />
-          <Route path="queue" element={<ModeratorDashboardPage />} />
+          <Route path="queue" element={<Navigate to="/moderator" replace />} />
           {placeholderRoutes(moderatorPlaceholders)}
         </Route>
 
