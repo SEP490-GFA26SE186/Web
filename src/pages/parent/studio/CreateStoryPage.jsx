@@ -171,7 +171,7 @@ function CreateStoryPage() {
               onClick={() => setTopicId(t.id)}
               aria-pressed={topicId === t.id}
               aria-label={`Bài học: ${t.title}`}
-              className={`space-y-2 rounded-2xl border-2 p-4 text-left transition ${
+              className={`flex flex-col items-start justify-start gap-2 rounded-2xl border-2 p-4 text-left transition ${
                 topicId === t.id ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"
               }`}
             >
@@ -246,7 +246,7 @@ function CreateStoryPage() {
               onClick={() => setMode(value)}
               aria-pressed={mode === value}
               aria-label={label}
-              className={`space-y-1 rounded-2xl border-2 p-4 text-left transition ${mode === value ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"}`}
+              className={`flex flex-col justify-start gap-1 rounded-2xl border-2 p-4 text-left transition ${mode === value ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"}`}
             >
               <p className="flex items-center gap-2 font-display font-bold">
                 <Icon size={18} /> {label}
