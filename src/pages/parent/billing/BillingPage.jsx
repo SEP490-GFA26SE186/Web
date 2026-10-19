@@ -2,15 +2,18 @@ import { Check, Coins, Crown, Loader2 } from "lucide-react";
 import PaymentHistory from "../../../components/parent/billing/PaymentHistory";
 import { useCheckoutPlan, usePlans } from "../../../hooks/useBilling";
 import { useParentProfile, useSubscription } from "../../../hooks/useParent";
+import { useAiPricing } from "../../../hooks/useStudio";
+import { AI_LENGTHS } from "../../../constants/story";
 import { toast } from "../../../stores/toastStore";
 import { formatNumber } from "../../../utils/format";
 
 const formatDate = (iso) => (iso ? new Date(iso).toLocaleDateString("vi-VN") : null);
 
-// Gói dịch vụ & credit (rev8): mỗi gói cấp credit hằng tháng, 1 truyện AI = 1 credit. Trả qua payOS.
+// Gói dịch vụ & credit (rev8): mỗi gói cấp credit hằng tháng; truyện AI tốn credit theo độ dài (GET /stories/ai-pricing). Trả qua payOS.
 function BillingPage() {
   const { data: plans = [], isLoading } = usePlans();
   const { data: sub } = useSubscription();
+  const pricing = useAiPricing();
   const { creditBalance } = useParentProfile();
   const checkout = useCheckoutPlan();
   const currentCode = sub?.plan?.code;
@@ -29,7 +32,17 @@ function BillingPage() {
       <div>
         <h1 className="text-3xl">Gói dịch vụ & Credit</h1>
         <p className="mt-1 text-navy/60">
-          Mỗi truyện AI viết giúp dùng 1 credit. Credit được cấp mới mỗi tháng, phần còn dư không cộng dồn sang tháng sau.
+          Mỗi truyện AI viết giúp dùng credit theo độ dài
+          {pricing.data?.length > 0 && (
+            <>
+              {" "}(
+              {pricing.data
+                .map((p) => `${AI_LENGTHS.find((l) => l.value === p.length)?.label ?? p.length} ${p.pages} trang: ${p.credits} credit`)
+                .join(" · ")}
+              )
+            </>
+          )}
+          . Truyện tự viết không dùng credit. Credit được cấp mới mỗi tháng, phần còn dư không cộng dồn sang tháng sau.
         </p>
       </div>
 

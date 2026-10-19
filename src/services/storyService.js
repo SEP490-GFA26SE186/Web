@@ -56,6 +56,9 @@ export const retryNarration = async (id) => (await call(api.post(`/stories/${id}
 export const generateStory = async (id) => (await call(api.post(`/stories/${id}/generate`))).data;
 
 /** GET /stories/:id/generation → { status: queued|processing|succeeded|failed|blocked, errorCode, errorMessage } | null */
+/** GET /stories/ai-pricing → [{ length, pages, checkpoints, credits }] — giá AI viết theo độ dài. */
+export const getAiPricing = async () => (await call(api.get("/stories/ai-pricing"))).data.lengths;
+
 export const getGeneration = async (id) => (await call(api.get(`/stories/${id}/generation`))).data.generation;
 
 // ---- Editor (mỗi lệnh trả lại toàn bộ truyện) ----

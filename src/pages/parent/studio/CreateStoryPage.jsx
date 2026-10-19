@@ -8,7 +8,7 @@ import CaselTag from "../../../components/parent/library/CaselTag";
 import { fieldClass } from "../../../components/parent/studio/PageEditor";
 import { AI_LENGTHS } from "../../../constants/story";
 import { ROUTES } from "../../../constants/routes";
-import { refreshCredit, useCreateCharacter, useCharacters, useCreateStory } from "../../../hooks/useStudio";
+import { refreshCredit, useAiPricing, useCreateCharacter, useCharacters, useCreateStory } from "../../../hooks/useStudio";
 import { useTopics } from "../../../hooks/useTopics";
 import { generateStory } from "../../../services/storyService";
 import useAuthStore from "../../../stores/authStore";
@@ -94,6 +94,8 @@ function CreateStoryPage() {
   const topics = useTopics({});
   const characters = useCharacters();
   const createStory = useCreateStory();
+  const pricing = useAiPricing();
+  const priceOf = (len) => pricing.data?.find((p) => p.length === len);
 
   const [topicId, setTopicId] = useState(null);
   const [selected, setSelected] = useState([]); // characterId theo thứ tự chọn
@@ -114,10 +116,16 @@ function CreateStoryPage() {
     if (!next.includes(mainId)) setMainId(next[0] ?? null);
   };
 
+  // Giá của lần AI viết này (theo độ dài đang chọn) và credit còn lại sau khi viết
+  const cost = mode === "ai" ? priceOf(length)?.credits : 0;
+  const afterCost = creditBalance != null && cost != null ? creditBalance - cost : null;
+  const notEnough = mode === "ai" && afterCost != null && afterCost < 0;
+
   const missing =
     (!topicId && "Ba mẹ chọn một bài học nhé") ||
     (selected.length === 0 && "Ba mẹ chọn ít nhất một nhân vật nhé") ||
     (!title.trim() && "Ba mẹ đặt tên cho truyện nhé") ||
+    (notEnough && `Truyện này cần ${cost} credit, ba mẹ còn ${creditBalance} credit`) ||
     "";
 
   const submit = async () => {
@@ -140,6 +148,7 @@ function CreateStoryPage() {
         try {
           await generateStory(story.id);
           refreshCredit(queryClient); // credit vừa bị giữ
+          if (cost > 0) toast.success(`Đã dùng ${cost} credit — AI đang viết truyện`);
         } catch (err) {
           // Truyện đã tạo; báo lỗi rồi để trang editor cho bấm "Cho AI viết" lại
           toast.error(err.status === 402 ? "Ba mẹ không đủ credit để AI viết truyện" : err.message);
@@ -265,7 +274,8 @@ function CreateStoryPage() {
                 aria-pressed={length === l.value}
                 className={`rounded-full px-4 py-2 text-sm font-bold ${length === l.value ? "bg-secondary text-white" : "bg-surface hover:bg-secondary-tint"}`}
               >
-                {l.label} · {l.pages} trang
+                {l.label} · {priceOf(l.value)?.pages ?? l.pages} trang
+                {priceOf(l.value)?.credits != null && <span className="ml-1 opacity-80">· {priceOf(l.value).credits} credit</span>}
               </button>
             ))}
           </div>
@@ -308,16 +318,31 @@ function CreateStoryPage() {
       </Section>
 
       <div className="card flex flex-wrap items-center justify-between gap-3 p-5">
-        <p className="text-sm text-navy/65">
-          {mode === "ai" ? (
-            <>
-              AI viết truyện sẽ dùng credit. Ba mẹ đang có <span className="font-bold text-navy">{creditBalance ?? "…"}</span> credit.
-            </>
-          ) : (
+        <div className="min-w-0 flex-1 text-sm text-navy/65">
+          {mode !== "ai" ? (
             "Truyện tự viết không dùng credit."
+          ) : cost == null ? (
+            "Đang tải giá…"
+          ) : notEnough ? (
+            <p className="font-semibold text-danger">
+              Truyện {priceOf(length) ? `${priceOf(length).pages} trang` : "này"} cần {cost} credit, ba mẹ còn {creditBalance} credit. Chọn độ dài ngắn hơn hoặc{" "}
+              <Link to={ROUTES.PARENT.BILLING} className="underline">nâng gói</Link>.
+            </p>
+          ) : cost === 0 ? (
+            "Lần viết này miễn phí."
+          ) : (
+            <p>
+              AI viết truyện này dùng <span className="font-bold text-navy">{cost} credit</span>
+              {afterCost != null && (
+                <>
+                  {" "}— ba mẹ đang có {creditBalance}, còn <span className="font-bold text-navy">{afterCost}</span> sau khi viết
+                </>
+              )}
+              . Nếu AI viết lỗi, credit được hoàn lại.
+            </p>
           )}
-        </p>
-        <button type="button" onClick={submit} disabled={submitting} className="btn-primary disabled:opacity-60">
+        </div>
+        <button type="button" onClick={submit} disabled={submitting || notEnough} className="btn-primary disabled:opacity-60">
           {submitting ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
           {mode === "ai" ? "Tạo & cho AI viết" : "Tạo truyện"}
         </button>

@@ -9,6 +9,7 @@ import {
   deleteStory,
   generateStory,
   getCharacters,
+  getAiPricing,
   getGeneration,
   getStories,
   getStory,
@@ -48,6 +49,10 @@ export const refreshCredit = async (queryClient) => {
   }
 };
 export const isGenerating = (generation) => !!generation && ACTIVE.has(generation.status);
+
+/** Giá AI viết truyện theo độ dài (Admin chỉnh ở Cấu hình AI) — dùng để báo trước cho ba mẹ. */
+export const useAiPricing = () =>
+  useQuery({ queryKey: ["stories", "ai-pricing"], queryFn: getAiPricing, staleTime: 5 * 60_000 });
 
 export const useStories = (params) => useQuery({ queryKey: studioKeys.list(params), queryFn: () => getStories(params) });
 

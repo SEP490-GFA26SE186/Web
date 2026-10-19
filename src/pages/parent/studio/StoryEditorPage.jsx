@@ -13,6 +13,7 @@ import { STORY_LENGTH_LABELS } from "../../../constants/casel";
 import { ROUTES } from "../../../constants/routes";
 import {
   isGenerating,
+  useAiPricing,
   useDeleteStory,
   useGenerateStory,
   useGeneration,
@@ -156,6 +157,7 @@ function StoryEditorPage() {
   const isCustom = story?.length === "custom";
   const generation = useGeneration(storyId, { enabled: !!story && !isCustom });
   const generate = useGenerateStory(storyId);
+  const pricing = useAiPricing();
   const editor = useStoryEditor(storyId);
   const [gaps, setGaps] = useState({});
   const [addingAfter, setAddingAfter] = useState(null);
@@ -260,6 +262,7 @@ function StoryEditorPage() {
 
       {!isCustom && (
         <GenerationPanel
+          cost={pricing.data?.find((p) => p.length === story.length)?.credits}
           generation={generation.data}
           busy={busy}
           neverGenerated={neverGenerated}
