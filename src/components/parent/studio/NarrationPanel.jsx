@@ -1,17 +1,17 @@
 import { AlertTriangle, CheckCircle2, Loader2, RotateCcw, Volume2 } from "lucide-react";
+import { narrationState } from "./narrationState";
 
 // Giọng đọc kể truyện (story.narration + story.readiness từ GET /stories/:id).
 // Chỉ hiện sau khi ba mẹ bấm hoàn tất và truyện bật giọng đọc. Truyện chỉ lên giá sách cho bé
 // khi đủ giọng đọc khớp chữ hiện tại.
 function NarrationPanel({ story, onRetry, retrying }) {
-  const n = story.narration;
-  if (!story.reviewedAt || !n?.enabled) return null;
+  const state = narrationState(story);
+  if (!state) return null;
+  const { n, percent } = state;
+  const working = state.phase === "working";
+  const needsAction = state.phase === "failed" || state.phase === "stale";
 
-  const percent = n.total ? Math.round((n.ready / n.total) * 100) : 100;
-  const working = n.pending > 0;
-  const needsAction = !working && (n.failed > 0 || n.missing > 0);
-
-  if (n.complete) {
+  if (state.phase === "ready") {
     return (
       <div className="card flex items-center gap-3 border-secondary/40 p-5">
         <CheckCircle2 size={28} className="shrink-0 text-secondary-dark" />
