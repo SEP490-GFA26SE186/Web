@@ -110,7 +110,7 @@ function AppShell({ brand, sections, user, topbarRight, extraTitles = {}, before
           </button>
         </div>
 
-        <nav className={`flex-1 space-y-4 overflow-y-auto pb-4 ${rail ? "px-3 lg:px-2.5" : "px-3"}`} aria-label="Menu chính">
+        <nav className={`scrollbar-none flex-1 space-y-4 overflow-y-auto pb-4 ${rail ? "px-3 lg:px-2.5" : "px-3"}`} aria-label="Menu chính">
           {sections.map((section, i) => (
             <div key={section.title ?? i} className="flex flex-col gap-0.5">
               {section.title && rail && <hr className="mx-2 mb-1 hidden border-outline lg:block" />}
