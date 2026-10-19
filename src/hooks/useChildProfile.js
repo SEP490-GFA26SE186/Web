@@ -28,7 +28,18 @@ const useIsParent = () => useAuthStore((s) => s.isAuthenticated && s.user?.role 
 
 export const useChildren = () => {
   const isParent = useIsParent();
-  return useQuery({ queryKey: childKeys.list, queryFn: getChildren, enabled: isParent });
+  return useQuery({
+    queryKey: childKeys.list,
+    queryFn: getChildren,
+    enabled: isParent,
+    // Chân dung của bé đang vẽ -> tải lại mỗi 4 s để thẻ nhân vật cập nhật
+    refetchInterval: (query) =>
+      (Array.isArray(query.state.data) ? query.state.data : query.state.data?.children ?? []).some((c) =>
+        ["queued", "generating"].includes(c.character?.portraitStatus),
+      )
+        ? 4000
+        : false,
+  });
 };
 
 /** Bé đang được chọn trên header. Bé đã chọn không còn (bị xóa / đổi tài khoản) → lấy bé đầu tiên */

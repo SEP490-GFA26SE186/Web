@@ -33,16 +33,17 @@ function BillingPage() {
         <h1 className="text-3xl">Gói dịch vụ & Credit</h1>
         <p className="mt-1 text-navy/60">
           Mỗi truyện AI viết giúp dùng credit theo độ dài
-          {pricing.data?.length > 0 && (
+          {pricing.data?.lengths?.length > 0 && (
             <>
               {" "}(
-              {pricing.data
+              {pricing.data.lengths
                 .map((p) => `${AI_LENGTHS.find((l) => l.value === p.length)?.label ?? p.length} ${p.pages} trang: ${p.credits} credit`)
                 .join(" · ")}
               )
             </>
           )}
-          . Truyện tự viết không dùng credit. Credit được cấp mới mỗi tháng, phần còn dư không cộng dồn sang tháng sau.
+          .{pricing.data?.images && ` Tranh AI: ${pricing.data.images.scene} credit mỗi cảnh, chân dung nhân vật ${pricing.data.images.characterPortrait} credit (dùng lại cho mọi truyện).`}{" "}
+          Truyện tự viết không dùng credit. Credit được cấp mới mỗi tháng, phần còn dư không cộng dồn sang tháng sau.
         </p>
       </div>
 

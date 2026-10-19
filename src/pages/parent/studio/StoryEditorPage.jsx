@@ -7,6 +7,7 @@ import GenerationPanel from "../../../components/parent/studio/GenerationPanel";
 import NarrationPanel from "../../../components/parent/studio/NarrationPanel";
 import { narrationState } from "../../../components/parent/studio/narrationState";
 import ShelfPanel from "../../../components/parent/studio/ShelfPanel";
+import ScenePicture from "../../../components/parent/studio/ScenePicture";
 import PageEditor, { fieldClass } from "../../../components/parent/studio/PageEditor";
 import { CHECKPOINT_TYPES, NEEDS_TARGET, STORY_STATUS_LABELS } from "../../../constants/story";
 import { STORY_LENGTH_LABELS } from "../../../constants/casel";
@@ -19,6 +20,7 @@ import {
   useGeneration,
   useStory,
   useStoryEditor,
+  useStoryImages,
 } from "../../../hooks/useStudio";
 import { toast } from "../../../stores/toastStore";
 
@@ -158,6 +160,7 @@ function StoryEditorPage() {
   const generation = useGeneration(storyId, { enabled: !!story && !isCustom });
   const generate = useGenerateStory(storyId);
   const pricing = useAiPricing();
+  const images = useStoryImages(storyId);
   const editor = useStoryEditor(storyId);
   const [gaps, setGaps] = useState({});
   const [addingAfter, setAddingAfter] = useState(null);
@@ -189,6 +192,16 @@ function StoryEditorPage() {
   const showEditor = !busy && !neverGenerated && !failedEmpty;
   const warnings = warningsByPath(story.keywordWarnings);
   const checkpointAfter = new Map(story.checkpoints.map((c) => [c.afterPageId, c]));
+  const sceneById = new Map((story.scenes ?? []).map((sc) => [sc.id, sc]));
+  const sceneFirstPage = new Map();
+  const scenePages = new Map();
+  for (const p of story.pages) {
+    if (!sceneFirstPage.has(p.sceneId)) sceneFirstPage.set(p.sceneId, p.id);
+    scenePages.set(p.sceneId, [...(scenePages.get(p.sceneId) ?? []), p.pageOrder]);
+  }
+  const scenePageRange = new Map(
+    [...scenePages].map(([id, orders]) => [id, orders.length > 1 ? `trang ${orders[0]}–${orders[orders.length - 1]}` : `trang ${orders[0]}`]),
+  );
 
   const run = (mutation, args, { success, after } = {}) =>
     mutation.mutate(args, {
@@ -262,7 +275,7 @@ function StoryEditorPage() {
 
       {!isCustom && (
         <GenerationPanel
-          cost={pricing.data?.find((p) => p.length === story.length)?.credits}
+          cost={pricing.data?.lengths?.find((p) => p.length === story.length)?.credits}
           generation={generation.data}
           busy={busy}
           neverGenerated={neverGenerated}
@@ -283,10 +296,52 @@ function StoryEditorPage() {
 
       {showEditor && (
         <>
+          {!isCustom && !story.useAiImage && story.scenes?.some((s) => s.description?.trim()) && (
+            <div className="card flex flex-wrap items-center justify-between gap-3 p-5">
+              <div className="min-w-0">
+                <p className="font-semibold">Thêm tranh minh hoạ AI</p>
+                <p className="text-sm text-navy/60">
+                  AI vẽ {story.scenes.length} cảnh theo chân dung nhân vật
+                  {pricing.data?.images ? ` · ${pricing.data.images.scene} credit/cảnh, chân dung còn thiếu ${pricing.data.images.characterPortrait} credit` : ""}.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  images.drawAll.mutate(undefined, {
+                    onSuccess: () => toast.success("Đang vẽ tranh cho truyện"),
+                    onError: (e) => toast.error(e.message),
+                  })
+                }
+                disabled={busy || images.drawAll.isPending}
+                className="btn-primary whitespace-nowrap disabled:opacity-60"
+              >
+                {images.drawAll.isPending ? <Loader2 size={18} className="animate-spin" /> : null} Vẽ tranh cho truyện
+              </button>
+            </div>
+          )}
           {story.pages.map((page) => {
             const cp = checkpointAfter.get(page.id);
+            // Tranh của cảnh đặt trên trang đầu tiên của cảnh đó
+            const scene = story.useAiImage ? sceneById.get(page.sceneId) : null;
+            const firstOfScene = scene && sceneFirstPage.get(scene.id) === page.id;
             return (
               <Fragment key={page.id}>
+                {firstOfScene && (
+                  <ScenePicture
+                    scene={scene}
+                    pageRange={scenePageRange.get(scene.id)}
+                    cost={pricing.data?.images?.scene}
+                    disabled={busy}
+                    redrawing={images.redraw.isPending && images.redraw.variables === scene.id}
+                    onRedraw={() =>
+                      images.redraw.mutate(scene.id, {
+                        onSuccess: () => toast.success("Đang vẽ lại cảnh"),
+                        onError: (e) => toast.error(e.message),
+                      })
+                    }
+                  />
+                )}
                 <PageEditor
                   key={`${page.id}:${page.contentText}`}
                   page={page}

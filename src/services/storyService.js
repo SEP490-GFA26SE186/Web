@@ -56,8 +56,11 @@ export const retryNarration = async (id) => (await call(api.post(`/stories/${id}
 export const generateStory = async (id) => (await call(api.post(`/stories/${id}/generate`))).data;
 
 /** GET /stories/:id/generation → { status: queued|processing|succeeded|failed|blocked, errorCode, errorMessage } | null */
-/** GET /stories/ai-pricing → [{ length, pages, checkpoints, credits }] — giá AI viết theo độ dài. */
-export const getAiPricing = async () => (await call(api.get("/stories/ai-pricing"))).data.lengths;
+/**
+ * GET /stories/ai-pricing → { lengths: [{ length, pages, checkpoints, credits }], images: { characterPortrait, scene, maxScenes } }
+ * — giá AI viết theo độ dài và giá tranh AI.
+ */
+export const getAiPricing = async () => (await call(api.get("/stories/ai-pricing"))).data;
 
 export const getGeneration = async (id) => (await call(api.get(`/stories/${id}/generation`))).data.generation;
 
@@ -95,6 +98,15 @@ export const createCharacter = async (payload) => (await call(api.post("/charact
 
 /** PUT /characters/:id { name?, appearance? } — nhân vật của bé không đổi tên ở đây (422) */
 export const updateCharacter = async (id, payload) => (await call(api.put(`/characters/${id}`, payload))).data.character;
+
+/** POST /characters/:id/portrait → 202 { character } — giữ credit, AI vẽ 1 chân dung (ảnh tham chiếu cho tranh). */
+export const generatePortrait = async (id) => (await call(api.post(`/characters/${id}/portrait`))).data.character;
+
+/** POST /stories/:id/images → bật tranh và vẽ mọi cảnh còn thiếu. */
+export const drawStoryImages = async (id) => (await call(api.post(`/stories/${id}/images`))).data;
+
+/** POST /stories/:id/scenes/:sceneId/image → vẽ lại một cảnh. */
+export const redrawScene = async (id, sceneId) => (await call(api.post(`/stories/${id}/scenes/${sceneId}/image`))).data;
 
 /** DELETE /characters/:id — xoá mềm; truyện cũ giữ nguyên nhân vật. Nhân vật của bé → 422 */
 export const deleteCharacter = (id) => call(api.delete(`/characters/${id}`));

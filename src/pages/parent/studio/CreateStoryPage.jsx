@@ -95,7 +95,7 @@ function CreateStoryPage() {
   const characters = useCharacters();
   const createStory = useCreateStory();
   const pricing = useAiPricing();
-  const priceOf = (len) => pricing.data?.find((p) => p.length === len);
+  const priceOf = (len) => pricing.data?.lengths?.find((p) => p.length === len);
 
   const [topicId, setTopicId] = useState(null);
   const [selected, setSelected] = useState([]); // characterId theo thứ tự chọn
@@ -105,6 +105,7 @@ function CreateStoryPage() {
   const [title, setTitle] = useState("");
   const [situation, setSituation] = useState("");
   const [useTts, setUseTts] = useState(true);
+  const [useAiImage, setUseAiImage] = useState(false);
   const [showNewCharacter, setShowNewCharacter] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -120,6 +121,15 @@ function CreateStoryPage() {
   const cost = mode === "ai" ? priceOf(length)?.credits : 0;
   const afterCost = creditBalance != null && cost != null ? creditBalance - cost : null;
   const notEnough = mode === "ai" && afterCost != null && afterCost < 0;
+
+  // Tranh AI (chỉ truyện AI viết): tối đa `maxScenes` cảnh + chân dung còn thiếu của nhân vật đã chọn.
+  // Trừ dần khi vẽ (sau khi AI viết xong chữ); thiếu credit thì truyện vẫn viết, chỉ vẽ được đến đâu hay đến đó.
+  const imageCosts = pricing.data?.images;
+  const missingPortraits = (characters.data ?? []).filter(
+    (c) => selected.includes(c.id) && !c.portraitImageUrl && c.portraitStatus === "none",
+  ).length;
+  const imagesMax =
+    mode === "ai" && useAiImage && imageCosts ? imageCosts.maxScenes * imageCosts.scene + missingPortraits * imageCosts.characterPortrait : 0;
 
   const missing =
     (!topicId && "Ba mẹ chọn một bài học nhé") ||
@@ -141,7 +151,7 @@ function CreateStoryPage() {
         title: title.trim(),
         ...(situation.trim() && { situation: situation.trim() }),
         characters: ordered.map((characterId) => ({ characterId, isMain: characterId === mainId })),
-        useAiImage: false,
+        useAiImage: mode === "ai" && useAiImage,
         useTts,
       });
       if (mode === "ai") {
@@ -308,12 +318,20 @@ function CreateStoryPage() {
           </div>
           <Switch checked={useTts} onChange={setUseTts} label="Giọng đọc kể truyện" />
         </div>
-        <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4 opacity-60">
+        <div className={`flex items-center justify-between gap-3 rounded-2xl bg-surface p-4 ${mode === "ai" ? "" : "opacity-60"}`}>
           <div>
             <p className="font-semibold">Tranh minh họa bằng AI</p>
-            <p className="text-xs text-navy/55">Sắp có</p>
+            <p className="text-xs text-navy/55">
+              {mode !== "ai"
+                ? "Hiện chỉ dành cho truyện AI viết"
+                : imageCosts
+                  ? `AI vẽ ${imageCosts.maxScenes > 1 ? `tối đa ${imageCosts.maxScenes} cảnh` : "cảnh"} (${imageCosts.scene} credit/cảnh)${
+                      missingPortraits ? ` + ${missingPortraits} chân dung còn thiếu (${imageCosts.characterPortrait} credit/chân dung)` : ""
+                    }, vẽ sau khi chữ xong`
+                  : "AI vẽ tranh cho từng cảnh sau khi viết xong chữ"}
+            </p>
           </div>
-          <Switch checked={false} onChange={() => {}} label="Tranh minh họa bằng AI" disabled />
+          <Switch checked={mode === "ai" && useAiImage} onChange={setUseAiImage} label="Tranh minh họa bằng AI" disabled={mode !== "ai"} />
         </div>
       </Section>
 
@@ -339,6 +357,12 @@ function CreateStoryPage() {
                 </>
               )}
               . Nếu AI viết lỗi, credit được hoàn lại.
+              {imagesMax > 0 && (
+                <span className="mt-1 block">
+                  Tranh dùng thêm <span className="font-bold text-navy">tối đa {imagesMax} credit</span>, trừ dần khi vẽ từng cảnh
+                  {afterCost != null && afterCost < imagesMax ? " — không đủ thì truyện vẫn viết, tranh vẽ được đến đâu hay đến đó" : ""}.
+                </span>
+              )}
             </p>
           )}
         </div>
