@@ -40,7 +40,9 @@ function CharacterCard({ child, onEdit }) {
             <p className="text-xs font-bold text-navy/60">Mô tả ngoại hình</p>
             <p className="mt-1 text-sm leading-relaxed">{character.appearance}</p>
           </div>
-          <CharacterPortrait character={{ ...character, name: character.name ?? child.name }} />
+          <div className="max-w-xs">
+            <CharacterPortrait character={{ ...character, name: character.name ?? child.name }} />
+          </div>
           <div className="flex flex-wrap gap-2">
             <button onClick={onEdit} className="rounded-full bg-surface px-4 py-2 text-sm font-semibold transition hover:bg-outline">
               Sửa mô tả

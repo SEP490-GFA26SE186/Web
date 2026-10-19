@@ -8,13 +8,15 @@ const DRAWING = new Set(["queued", "generating"]);
  * Chân dung AI của nhân vật (1 ảnh, dùng làm ảnh tham chiếu để tranh cảnh vẽ đúng nhân vật).
  * Nút tạo / vẽ lại báo giá trước; đang vẽ thì hiện vòng xoay (danh sách nhân vật tự tải lại).
  */
-function CharacterPortrait({ character, size = "md" }) {
+function CharacterPortrait({ character, size = "full" }) {
   const generate = useGeneratePortrait();
   const { data: pricing } = useAiPricing();
   const cost = pricing?.images?.characterPortrait;
   const drawing = DRAWING.has(character.portraitStatus) || (generate.isPending && generate.variables === character.id);
   const failed = character.portraitStatus === "failed";
-  const box = size === "sm" ? "h-16 w-16" : "h-24 w-24";
+  const full = size === "full";
+  // full: ảnh chiếm hết chiều ngang thẻ (vuông, như ảnh gốc 496x496); sm: ô nhỏ cạnh chữ
+  const box = full ? "aspect-square w-full" : "h-16 w-16";
 
   const start = () =>
     generate.mutate(character.id, {
@@ -23,17 +25,19 @@ function CharacterPortrait({ character, size = "md" }) {
     });
 
   return (
-    <div className="flex items-center gap-3">
-      <div className={`${box} relative shrink-0 overflow-hidden rounded-2xl border border-outline bg-surface`}>
+    <div className={full ? "flex flex-col gap-3" : "flex items-center gap-3"}>
+      <div className={`${box} relative shrink-0 overflow-hidden rounded-2xl border border-outline bg-white`}>
         {character.portraitImageUrl && !drawing ? (
-          <img src={character.portraitImageUrl} alt={`Chân dung ${character.name}`} className="h-full w-full object-cover" />
+          <a href={character.portraitImageUrl} target="_blank" rel="noreferrer" title="Mở ảnh gốc" className="block h-full w-full">
+            <img src={character.portraitImageUrl} alt={`Chân dung ${character.name}`} className="h-full w-full object-contain" />
+          </a>
         ) : (
-          <div className="grid h-full w-full place-items-center text-navy/30">
-            {drawing ? <Loader2 size={22} className="animate-spin text-primary" /> : <UserRound size={28} />}
+          <div className="grid h-full w-full place-items-center bg-surface text-navy/30">
+            {drawing ? <Loader2 size={full ? 36 : 22} className="animate-spin text-primary" /> : <UserRound size={full ? 56 : 28} />}
           </div>
         )}
       </div>
-      <div className="min-w-0 space-y-1">
+      <div className={`min-w-0 space-y-1 ${full ? "flex flex-wrap items-center justify-between gap-2" : ""}`}>
         {drawing ? (
           <p className="text-xs font-semibold text-primary-dark">AI đang vẽ chân dung… (khoảng 30 giây)</p>
         ) : failed ? (
