@@ -175,7 +175,7 @@ function StoryEditorPage() {
     });
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5 pb-28">
+    <div className="mx-auto max-w-3xl space-y-5 pb-4">
       <Link to={ROUTES.PARENT.STUDIO} className="inline-flex items-center gap-1 text-sm font-semibold text-navy/60 hover:text-primary">
         <ArrowLeft size={16} /> Truyện của ba mẹ
       </Link>
@@ -317,8 +317,9 @@ function StoryEditorPage() {
       )}
 
       {showEditor && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-outline bg-white/95 px-4 py-3 backdrop-blur" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
-          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+        // Dinh day man hinh nhung nam TRONG cot noi dung: luon thang hang voi cac trang du sidebar thu gon hay mo rong.
+        <div className="sticky z-20 rounded-2xl border border-outline bg-white/95 px-4 py-3 shadow-mid backdrop-blur" style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-navy/65">
               {story.reviewedAt
                 ? "Truyện đã hoàn tất. Sửa thêm thì bấm hoàn tất lại."
