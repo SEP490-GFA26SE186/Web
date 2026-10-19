@@ -47,11 +47,6 @@ function Reader({ session, story }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ chạy khi đổi trang
   }, [page.id]);
 
-  useEffect(() => {
-    if (atCheckpoint && checkpoint && !muted) playAudio(checkpoint.questionAudioUrl);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- chỉ khi mở điểm dừng
-  }, [atCheckpoint]);
-
   const goTo = (i) => {
     setAtCheckpoint(false);
     setIndex(i);
