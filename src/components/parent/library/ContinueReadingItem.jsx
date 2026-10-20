@@ -29,13 +29,13 @@ function ContinueReadingItem({ story, accent = "primary" }) {
       <div className="flex min-w-0 flex-1 flex-col justify-between py-1">
         <div>
           <div className="flex items-center justify-between gap-2">
-            <CaselTag competency={story.topic.competency} className="bg-secondary-tint" />
+            <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" />
             <span className="shrink-0 text-xs text-navy/60">
               Trang {currentPageOrder}/{story.totalPages}
             </span>
           </div>
           <h3 className={`mt-2 line-clamp-1 text-xl transition-colors ${a.hover}`}>{story.title}</h3>
-          <p className="mt-1 line-clamp-1 text-sm text-navy/65">Bài học: {story.topic.title}</p>
+          {story.topic && <p className="mt-1 line-clamp-1 text-sm text-navy/65">Bài học: {story.topic.title}</p>}
         </div>
 
         <div className="mt-4">

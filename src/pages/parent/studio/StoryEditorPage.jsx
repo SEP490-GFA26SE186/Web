@@ -250,7 +250,12 @@ function StoryEditorPage() {
         </div>
         <h1 className="text-2xl">{story.title}</h1>
         <p className="text-sm text-navy/65">
-          Bài học: <span className="font-semibold text-navy">{story.topic?.title}</span> · Nhân vật:{" "}
+          {story.topic ? (
+            <>
+              Bài học: <span className="font-semibold text-navy">{story.topic.title}</span> ·{" "}
+            </>
+          ) : null}
+          Nhân vật:{" "}
           {characters.map((c) => c.name).filter(Boolean).join(", ")}
         </p>
         {story.reviewedAt && story.kind !== "published" && (

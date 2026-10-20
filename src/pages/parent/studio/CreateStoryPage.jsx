@@ -132,7 +132,7 @@ function CreateStoryPage() {
     mode === "ai" && useAiImage && imageCosts ? imageCosts.maxScenes * imageCosts.scene + missingPortraits * imageCosts.characterPortrait : 0;
 
   const missing =
-    (!topicId && "Ba mẹ chọn một bài học nhé") ||
+    (mode === "ai" && !topicId && "Ba mẹ chọn một bài học nhé") ||
     (selected.length === 0 && "Ba mẹ chọn ít nhất một nhân vật nhé") ||
     (!title.trim() && "Ba mẹ đặt tên cho truyện nhé") ||
     (notEnough && `Truyện này cần ${cost} credit, ba mẹ còn ${creditBalance} credit`) ||
@@ -146,7 +146,8 @@ function CreateStoryPage() {
     const ordered = [mainId, ...selected.filter((id) => id !== mainId)];
     try {
       const story = await createStory.mutateAsync({
-        topicId,
+        // Truyện tự viết có thể không gắn bài học
+        ...(topicId && { topicId }),
         length: mode === "ai" ? length : "custom",
         title: title.trim(),
         ...(situation.trim() && { situation: situation.trim() }),
@@ -179,7 +180,28 @@ function CreateStoryPage() {
       </Link>
       <h1 className="text-3xl">Sáng tác truyện mới</h1>
 
-      <Section step={1} title="Chọn bài học" hint="Bài học do chuyên gia soạn, mỗi bài gắn một năng lực cảm xúc (CASEL).">
+      <Section
+        step={1}
+        title="Chọn bài học"
+        hint={
+          mode === "ai"
+            ? "Bài học do chuyên gia soạn, mỗi bài gắn một năng lực cảm xúc (CASEL)."
+            : "Truyện tự viết không bắt buộc chọn bài học."
+        }
+      >
+        {mode !== "ai" && (
+          <>
+            <button
+              type="button"
+              onClick={() => setTopicId(null)}
+              aria-pressed={!topicId}
+              className={`rounded-full px-4 py-2 text-sm font-bold ${!topicId ? "bg-secondary text-white" : "bg-surface hover:bg-secondary-tint"}`}
+            >
+              Không chọn bài học
+            </button>
+            <p className="text-sm text-navy/60">Truyện tự viết không tính vào báo cáo EQ.</p>
+          </>
+        )}
         {topics.isLoading && <Loader2 className="animate-spin text-primary" />}
         {topics.error && <p className="text-sm text-danger">{topics.error.message}</p>}
         <div className="grid gap-3 sm:grid-cols-2">
@@ -338,7 +360,7 @@ function CreateStoryPage() {
       <div className="card flex flex-wrap items-center justify-between gap-3 p-5">
         <div className="min-w-0 flex-1 text-sm text-navy/65">
           {mode !== "ai" ? (
-            "Truyện tự viết không dùng credit."
+            "Truyện tự viết không dùng credit và không tính vào báo cáo EQ."
           ) : cost == null ? (
             "Đang tải giá…"
           ) : notEnough ? (

@@ -115,7 +115,7 @@ function Workspace({ reviewId }) {
           </div>
           <h1 className="text-2xl">{listing.title}</h1>
           <p className="text-sm text-navy/60">
-            Người bán: <b>{seller}</b> • Bài học: {story.topic?.title} • Nhân vật: {story.characters.map((c) => c.name).join(", ")}
+            Người bán: <b>{seller}</b> • Bài học: {story.topic?.title ?? "không có"} • Nhân vật: {story.characters.map((c) => c.name).join(", ")}
           </p>
           {listing.description && <p className="text-sm text-navy/70">{listing.description}</p>}
         </div>

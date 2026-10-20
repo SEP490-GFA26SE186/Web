@@ -34,7 +34,7 @@ function DraftReviewCard({ draft, moreCount = 0 }) {
           <>
             <article className="space-y-3 rounded-2xl bg-surface p-4">
               <div className="flex flex-wrap items-center justify-between gap-1">
-                <CaselTag competency={draft.topic.competency} className="bg-white" />
+                <CaselTag competency={draft.topic?.competency} className="bg-white" />
                 <span className="flex items-center gap-1 text-xs font-bold text-navy/60">
                   {draft.mode === "ai" ? <Bot size={14} /> : <PenLine size={14} />}
                   {draft.mode === "ai" ? "AI viết giúp" : "Tự viết"}
@@ -43,7 +43,12 @@ function DraftReviewCard({ draft, moreCount = 0 }) {
               <div>
                 <h4 className="text-lg">{draft.title}</h4>
                 <p className="mt-1 text-sm text-navy/65">
-                  Bài học: <span className="font-semibold text-navy">{draft.topic.title}</span> · {draft.pageCount} trang (
+                  {draft.topic ? (
+                    <>
+                      Bài học: <span className="font-semibold text-navy">{draft.topic.title}</span> ·{" "}
+                    </>
+                  ) : null}
+                  {draft.pageCount} trang (
                   {STORY_LENGTH_LABELS[draft.length]}) · {draft.checkpointCount} điểm dừng
                 </p>
               </div>

@@ -64,8 +64,8 @@ function ListingDetailPage() {
       </Link>
       <article className="card space-y-4 p-6">
         <div className="flex flex-wrap items-center gap-2">
-          <CaselTag competency={l.topic.competency} className="bg-secondary-tint" />
-          <span className="tag-eq">{l.topic.ageMin}–{l.topic.ageMax} tuổi</span>
+          <CaselTag competency={l.topic?.competency} className="bg-secondary-tint" />
+          {l.topic && <span className="tag-eq">{l.topic.ageMin}–{l.topic.ageMax} tuổi</span>}
           {l.hasAiContent && (
             <span className="tag-theme">
               <Bot size={12} /> AI hỗ trợ
@@ -78,7 +78,7 @@ function ListingDetailPage() {
         <h1 className="text-3xl">{l.title}</h1>
         {l.description && <p className="text-navy/70">{l.description}</p>}
         <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-navy/60">
-          <span>Bài học: {l.topic.title}</span>
+          {l.topic && <span>Bài học: {l.topic.title}</span>}
           <span className="flex items-center gap-1">
             <FileText size={14} /> {l.totalPages} trang • {l.checkpointCount} điểm dừng
           </span>

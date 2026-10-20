@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CircleHelp, Loader2, Save, Trash2 } from "lucide-react";
+import { CircleHelp, Loader2, Lock, Save, Trash2 } from "lucide-react";
 import { CHECKPOINT_TYPES, EMOTIONS, OPTION_ROLES } from "../../../constants/story";
 import { fillNames, nameOfToken } from "../../../utils/storyNames";
 import { fieldClass } from "./PageEditor";
@@ -52,7 +52,68 @@ function Field({ label, children }) {
   );
 }
 
-function CheckpointEditor({ checkpoint: cp, characters, disabled, gap, warning, onSave, saving, onDelete, deleting }) {
+/** Điểm dừng truyện AI: câu hỏi do khung của chuyên gia quyết định, ba mẹ chỉ xem. */
+function LockedCheckpoint({ checkpoint: cp, characters, gap, warning }) {
+  const form = initialForm(cp, characters);
+  const meta = CHECKPOINT_TYPES[cp.type];
+  const rows = [
+    ["Câu hỏi cho bé", form.question],
+    (cp.type === "emotion_self" || cp.type === "emotion_other") && ["Cảm xúc đúng", EMOTIONS[form.answerEmotion] ?? form.answerEmotion],
+    form.hint && ["Gợi ý khi bé chọn sai", form.hint],
+  ].filter(Boolean);
+  return (
+    <section
+      id={`checkpoint-${cp.id}`}
+      className={`ml-4 space-y-3 rounded-card border-2 border-dashed border-secondary/40 bg-secondary-tint/40 p-5 sm:ml-10 ${
+        gap ? "border-danger ring-2 ring-danger/20" : ""
+      }`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="flex items-center gap-2 text-base text-secondary-dark">
+          <CircleHelp size={18} /> Điểm dừng sau trang {cp.afterPageOrder}: {meta?.label ?? cp.type}
+        </h3>
+        {cp.targetToken && <span className="tag-eq">Hỏi về: {nameOfToken(cp.targetToken, characters)}</span>}
+      </div>
+      <p className="flex items-center gap-1.5 text-sm font-semibold text-navy/70">
+        <Lock size={14} /> Câu hỏi do khung của chuyên gia sư phạm quyết định
+      </p>
+      <dl className="space-y-2 text-sm">
+        {rows.map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-xs font-semibold text-navy/55">{label}</dt>
+            <dd>{value || "—"}</dd>
+          </div>
+        ))}
+      </dl>
+      {form.options.length > 0 && (
+        <ul className="space-y-2 text-sm">
+          {form.options.map((o, i) => (
+            <li key={i} className="rounded-2xl bg-white p-3">
+              {o.role && (
+                <span className={`mb-1 inline-block rounded-full px-3 py-1 text-xs font-bold ${OPTION_ROLES[o.role].tone}`}>
+                  {OPTION_ROLES[o.role].label}
+                </span>
+              )}
+              <p>
+                {o.text || "—"}
+                {o.isCorrect && <span className="ml-2 text-xs font-bold text-secondary-dark">(đúng)</span>}
+              </p>
+              {o.feedback && <p className="text-navy/60">{o.feedback}</p>}
+            </li>
+          ))}
+        </ul>
+      )}
+      {gap && <p className="text-sm font-semibold text-danger">{gap}</p>}
+      {!gap && warning && <p className="text-sm font-semibold text-amber-700">{warning}</p>}
+    </section>
+  );
+}
+
+function CheckpointEditor(props) {
+  return props.checkpoint.locked ? <LockedCheckpoint {...props} /> : <EditableCheckpoint {...props} />;
+}
+
+function EditableCheckpoint({ checkpoint: cp, characters, disabled, gap, warning, onSave, saving, onDelete, deleting }) {
   const [form, setForm] = useState(() => initialForm(cp, characters));
   const [dirty, setDirty] = useState(false);
   const meta = CHECKPOINT_TYPES[cp.type];

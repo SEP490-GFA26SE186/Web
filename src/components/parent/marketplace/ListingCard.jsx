@@ -29,7 +29,7 @@ function ListingCard({ listing }) {
         className="h-44 w-full [&>div]:transition-transform [&>div]:duration-500 group-hover:[&>div]:scale-105"
       >
         <span className="absolute top-3 left-3">
-          <CaselTag competency={topic.competency} short />
+          <CaselTag competency={topic?.competency} short />
         </span>
         <span className="absolute top-3 right-3">
           <PriceBadge priceVnd={priceTier.priceVnd} />
@@ -39,9 +39,13 @@ function ListingCard({ listing }) {
       <div className="flex flex-1 flex-col justify-between gap-3 p-4">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2 text-xs text-navy/60">
-            <span className="tag-eq py-0.5">
-              {topic.ageMin}–{topic.ageMax} tuổi
-            </span>
+            {topic ? (
+              <span className="tag-eq py-0.5">
+                {topic.ageMin}–{topic.ageMax} tuổi
+              </span>
+            ) : (
+              <span />
+            )}
             <span className="flex items-center gap-1">
               <Star size={13} className="fill-primary text-primary" />
               <b className="text-navy">{listing.ratingAvg.toFixed(1)}</b> ({formatNumber(listing.ratingCount)})
@@ -52,7 +56,7 @@ function ListingCard({ listing }) {
         </div>
 
         <div className="flex flex-col gap-2 pt-1 text-xs text-navy/60">
-          <p className="line-clamp-1 font-semibold text-secondary-dark">Bài học: {topic.title}</p>
+          {topic && <p className="line-clamp-1 font-semibold text-secondary-dark">Bài học: {topic.title}</p>}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="flex items-center gap-1">
               <FileText size={12} /> {listing.totalPages} trang
