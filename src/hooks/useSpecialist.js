@@ -6,7 +6,7 @@ import {
   dismissReport,
   getAiFlags,
   getAudits,
-  getModeratorOverview,
+  getSpecialistOverview,
   getReportGroups,
   getRestrictedListings,
   getStrikes,
@@ -19,22 +19,22 @@ import {
   getReviewQueue,
   getSellerApplications,
   viewPage,
-} from "../services/moderatorService";
+} from "../services/specialistService";
 
 export const modKeys = {
-  all: ["moderator"],
-  overview: ["moderator", "overview"],
-  queue: ["moderator", "queue"],
-  sellers: (status) => ["moderator", "sellers", status],
-  review: (id) => ["moderator", "review", id],
-  reports: (status) => ["moderator", "reports", status],
-  restricted: (status) => ["moderator", "restricted", status],
-  strikes: (filter) => ["moderator", "strikes", filter],
-  audits: ["moderator", "audits"],
-  aiFlags: (f) => ["moderator", "ai-flags", f],
+  all: ["specialist"],
+  overview: ["specialist", "overview"],
+  queue: ["specialist", "queue"],
+  sellers: (status) => ["specialist", "sellers", status],
+  review: (id) => ["specialist", "review", id],
+  reports: (status) => ["specialist", "reports", status],
+  restricted: (status) => ["specialist", "restricted", status],
+  strikes: (filter) => ["specialist", "strikes", filter],
+  audits: ["specialist", "audits"],
+  aiFlags: (f) => ["specialist", "ai-flags", f],
 };
 
-export const useModeratorOverview = () => useQuery({ queryKey: modKeys.overview, queryFn: getModeratorOverview, refetchInterval: 60_000 });
+export const useSpecialistOverview = () => useQuery({ queryKey: modKeys.overview, queryFn: getSpecialistOverview, refetchInterval: 60_000 });
 export const useReviewQueue = () => useQuery({ queryKey: modKeys.queue, queryFn: getReviewQueue });
 export const useSellerApplications = (status = "pending") =>
   useQuery({ queryKey: modKeys.sellers(status), queryFn: () => getSellerApplications(status) });
@@ -62,13 +62,13 @@ export const useDecideSeller = () => {
   return useMutation({
     mutationFn: ({ userId, approve }) => decideSeller(userId, approve),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["moderator", "sellers"] });
+      queryClient.invalidateQueries({ queryKey: ["specialist", "sellers"] });
       queryClient.invalidateQueries({ queryKey: modKeys.overview });
     },
   });
 };
 
-// Giám sát: mỗi thao tác có thể đổi hàng đợi, báo cáo, truyện tạm gỡ, cảnh cáo → làm mới cả nhóm "moderator".
+// Giám sát: mỗi thao tác có thể đổi hàng đợi, báo cáo, truyện tạm gỡ, cảnh cáo → làm mới cả nhóm "specialist".
 const useMonitoringMutation = (mutationFn) => {
   const queryClient = useQueryClient();
   return useMutation({ mutationFn, onSuccess: () => queryClient.invalidateQueries({ queryKey: modKeys.all }) });

@@ -5,7 +5,7 @@ import CaselTag from "../../components/parent/library/CaselTag";
 import { DECISION_LABELS, LISTING_STATUS, REVIEW_TYPES } from "../../constants/moderation";
 import { CHECKPOINT_TYPES, EMOTIONS } from "../../constants/story";
 import { ROUTES } from "../../constants/routes";
-import { useClaimReview, useDecideReview, useReview, useViewPage } from "../../hooks/useModerator";
+import { useClaimReview, useDecideReview, useReview, useViewPage } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
 import { formatNumber } from "../../utils/format";
 
@@ -100,7 +100,7 @@ function Workspace({ reviewId }) {
 
   return (
     <div className="space-y-5">
-      <Link to={ROUTES.MODERATOR.DASHBOARD} className="inline-flex items-center gap-1 text-sm font-semibold text-navy/60 hover:text-primary">
+      <Link to={ROUTES.SPECIALIST.DASHBOARD} className="inline-flex items-center gap-1 text-sm font-semibold text-navy/60 hover:text-primary">
         <ArrowLeft size={16} /> Hàng chờ
       </Link>
 
@@ -226,9 +226,9 @@ function ReviewWorkspacePage() {
   return <Workspace key={reviewId} reviewId={reviewId} />;
 }
 
-/** /moderator/workspace → về hàng chờ để chọn bài. */
+/** /specialist/workspace → về hàng chờ để chọn bài. */
 export function WorkspaceIndexRedirect() {
-  return <Navigate to={ROUTES.MODERATOR.DASHBOARD} replace />;
+  return <Navigate to={ROUTES.SPECIALIST.DASHBOARD} replace />;
 }
 
 export default ReviewWorkspacePage;

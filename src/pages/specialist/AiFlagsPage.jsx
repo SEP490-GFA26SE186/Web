@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Bot, Loader2, Lock, Unlock } from "lucide-react";
 import { formatDateTime } from "../../constants/moderation";
-import { useAiFlags, useSetAiBlock } from "../../hooks/useModerator";
+import { useAiFlags, useSetAiBlock } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
 
 const WINDOWS = [7, 14, 30];

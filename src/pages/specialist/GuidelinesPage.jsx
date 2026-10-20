@@ -15,7 +15,7 @@ const RULES = [
 // Quy chuẩn kiểm duyệt: checklist sư phạm (checklist_items, đang dùng khi duyệt) + quy tắc của không gian duyệt.
 function GuidelinesPage() {
   const { data: items = [], isLoading } = useQuery({
-    queryKey: ["moderator", "checklist-items"],
+    queryKey: ["specialist", "checklist-items"],
     queryFn: async () => (await api.get("/checklist-items", { params: { isActive: true } })).data.data,
   });
   return (

@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
 import logo from "../../assets/logo.png";
 
-// Trang tạm cho các mục chưa làm — dùng chung cho cả cổng Phụ huynh, Kiểm duyệt và Admin
+// Trang tạm cho các mục chưa làm — dùng chung cho cả cổng Phụ huynh, Chuyên gia sư phạm và Admin
 function ComingSoonPage({ title }) {
   const { pathname } = useLocation();
   const segment = `/${pathname.split("/")[1]}`;
-  // Trong cổng (parent/moderator/admin/kid) → về trang Tổng quan của cổng; trang công khai → về trang chủ
-  const portalRoot = ["/parent", "/moderator", "/admin", "/kid"].includes(segment) ? segment : "/";
+  // Trong cổng (parent/specialist/admin/kid) → về trang Tổng quan của cổng; trang công khai → về trang chủ
+  const portalRoot = ["/parent", "/specialist", "/admin", "/kid"].includes(segment) ? segment : "/";
   const isParent = segment === "/parent";
 
   return (

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ListChecks, Loader2, PenLine, Shuffle } from "lucide-react";
 import { DECISION_LABELS, LISTING_STATUS, formatDateTime } from "../../constants/moderation";
 import { ROUTES } from "../../constants/routes";
-import { useAudits, useRunAudits } from "../../hooks/useModerator";
+import { useAudits, useRunAudits } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
 
 // Kiểm tra ngẫu nhiên: mỗi tuần hệ thống chọn vài truyện đang bán (ưu tiên truyện lâu chưa kiểm) để Moderator
@@ -68,7 +68,7 @@ function AuditsPage() {
                   {a.comment && <p className="text-sm text-navy/70">{a.comment}</p>}
                 </div>
                 {!a.decidedAt && (
-                  <Link to={ROUTES.MODERATOR.workspace(a.reviewId)} className="btn-primary px-4 py-2 text-sm">
+                  <Link to={ROUTES.SPECIALIST.workspace(a.reviewId)} className="btn-primary px-4 py-2 text-sm">
                     <PenLine size={15} /> Kiểm tra
                   </Link>
                 )}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import Modal from "../common/Modal";
 import { STRIKE_SOURCES } from "../../constants/moderation";
-import { useIssueStrike } from "../../hooks/useModerator";
+import { useIssueStrike } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
 
 /**
