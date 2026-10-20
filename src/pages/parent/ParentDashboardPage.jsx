@@ -140,7 +140,7 @@ function ParentDashboardPage() {
       {/* EQ + Truyện chờ xem lại */}
       <div className="grid gap-6 xl:grid-cols-12">
         <div className="xl:col-span-7">
-          <EqRadarCard childName={child.name} skills={eqReport.skills} />
+          <EqRadarCard childName={child.name} report={eqReport} />
         </div>
         <div className="flex flex-col gap-4 xl:col-span-5">
           <DraftReviewCard draft={pendingDrafts[0]} moreCount={Math.max(0, pendingDrafts.length - 1)} />

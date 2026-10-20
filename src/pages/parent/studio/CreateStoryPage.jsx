@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Bot, Check, Loader2, PenLine, Plus, Sparkles, Star } from "lucide-react";
 import Modal from "../../../components/common/Modal";
 import Switch from "../../../components/common/Switch";
@@ -97,7 +97,10 @@ function CreateStoryPage() {
   const pricing = useAiPricing();
   const priceOf = (len) => pricing.data?.lengths?.find((p) => p.length === len);
 
-  const [topicId, setTopicId] = useState(null);
+  // ?topicId= từ "Bài học nên đọc tiếp" của Báo cáo EQ → chọn sẵn bài học + chế độ AI viết
+  const [searchParams] = useSearchParams();
+  const suggestedTopicId = searchParams.get("topicId");
+  const [topicId, setTopicId] = useState(suggestedTopicId);
   const [selected, setSelected] = useState([]); // characterId theo thứ tự chọn
   const [mainId, setMainId] = useState(null);
   const [mode, setMode] = useState("ai");
@@ -131,8 +134,10 @@ function CreateStoryPage() {
   const imagesMax =
     mode === "ai" && useAiImage && imageCosts ? imageCosts.maxScenes * imageCosts.scene + missingPortraits * imageCosts.characterPortrait : 0;
 
+  // topicId lấy từ URL có thể là bài học đã tắt → chỉ coi là đã chọn khi có trong danh sách
+  const chosenTopicId = (topics.data ?? []).some((t) => t.id === topicId) ? topicId : null;
   const missing =
-    (mode === "ai" && !topicId && "Ba mẹ chọn một bài học nhé") ||
+    (mode === "ai" && !chosenTopicId && "Ba mẹ chọn một bài học nhé") ||
     (selected.length === 0 && "Ba mẹ chọn ít nhất một nhân vật nhé") ||
     (!title.trim() && "Ba mẹ đặt tên cho truyện nhé") ||
     (notEnough && `Truyện này cần ${cost} credit, ba mẹ còn ${creditBalance} credit`) ||
@@ -147,7 +152,7 @@ function CreateStoryPage() {
     try {
       const story = await createStory.mutateAsync({
         // Truyện tự viết có thể không gắn bài học
-        ...(topicId && { topicId }),
+        ...(chosenTopicId && { topicId: chosenTopicId }),
         length: mode === "ai" ? length : "custom",
         title: title.trim(),
         ...(situation.trim() && { situation: situation.trim() }),
@@ -204,6 +209,13 @@ function CreateStoryPage() {
         )}
         {topics.isLoading && <Loader2 className="animate-spin text-primary" />}
         {topics.error && <p className="text-sm text-danger">{topics.error.message}</p>}
+        {suggestedTopicId && topics.data && (
+          <p className="rounded-2xl bg-secondary-tint px-4 py-2.5 text-sm text-secondary-dark">
+            {topics.data.some((t) => t.id === suggestedTopicId)
+              ? "Đã chọn sẵn bài học gợi ý từ Báo cáo EQ. Ba mẹ có thể đổi bài khác."
+              : "Bài học gợi ý không còn mở, ba mẹ chọn bài học khác nhé."}
+          </p>
+        )}
         <div className="grid gap-3 sm:grid-cols-2">
           {(topics.data ?? []).map((t) => (
             <button

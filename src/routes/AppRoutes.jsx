@@ -21,6 +21,8 @@ const SpecialistLayout = lazy(() => import("../layouts/SpecialistLayout"));
 const TopicsPage = lazy(() => import("../pages/specialist/TopicsPage"));
 const SubSkillsPage = lazy(() => import("../pages/specialist/SubSkillsPage"));
 const TemplatesPage = lazy(() => import("../pages/specialist/TemplatesPage"));
+const CheckpointReviewPage = lazy(() => import("../pages/specialist/CheckpointReviewPage"));
+const ReportSettingsPage = lazy(() => import("../pages/specialist/ReportSettingsPage"));
 const HelpPage = lazy(() => import("../pages/parent/HelpPage"));
 const GuidelinesPage = lazy(() => import("../pages/specialist/GuidelinesPage"));
 const PrivacyPolicyPage = lazy(() => import("../pages/legal/PrivacyPolicyPage"));
@@ -145,6 +147,8 @@ function AppRoutes() {
           <Route path="topics" element={<TopicsPage />} />
           <Route path="sub-skills" element={<SubSkillsPage />} />
           <Route path="templates" element={<TemplatesPage />} />
+          <Route path="checkpoint-review" element={<CheckpointReviewPage />} />
+          <Route path="report-settings" element={<ReportSettingsPage />} />
           <Route path="keywords" element={<KeywordsPage />} />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="suspended" element={<SuspendedPage />} />

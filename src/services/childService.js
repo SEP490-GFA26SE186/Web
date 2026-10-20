@@ -2,9 +2,6 @@ import api, { getErrorMessage } from "./api";
 
 // API hồ sơ bé — BE: /api/v1/children (yêu cầu đăng nhập phụ huynh), schema rev8.
 
-// eq_competency_stats: điểm = score_sum / items * 100; dưới 5 lượt trả lời BE trả score = null ("chưa đủ dữ liệu")
-export const EQ_MIN_ITEMS = 5;
-
 const toChildError = (error) => {
   const message = getErrorMessage(error);
   const quota = message.match(/maximum limit of (\d+) child profiles/);
@@ -43,10 +40,20 @@ export const updateChild = async (childId, payload) =>
 /** DELETE /children/:id (BE xóa mềm, đồng thời hủy phiên Kid Mode của bé) */
 export const deleteChild = (childId) => call(api.delete(`/children/${childId}`));
 
-/** GET /children/:id/overview → { profile, todayUsage, readingStats, eqReport } */
+/**
+ * GET /children/:id/overview → { profile, todayUsage, readingStats, eqReport }
+ * eqReport = /eq-report: { childId, childName, settings{ window, minItems, developingFrom, secureFrom },
+ *   competencies[{ caselCode, nameVi, level, subSkills[{ id, nameVi, caselTextEn, level, items }] }], recommendations[{ id, title, skill, subSkills }] }
+ * level: "emerging" | "developing" | "secure" | null (chưa đủ dữ liệu) — không có điểm / %.
+ */
 export const getChildOverview = (childId) => call(api.get(`/children/${childId}/overview`));
 
-/** GET /children/:id/eq-journey?weeks → { skills, strongest, focus, totals, trend, byType, recent } — chỉ lượt đọc đầu */
+/**
+ * GET /children/:id/eq-journey?weeks → mọi trường của eq-report, thêm:
+ * evidence[{ subSkillId, answeredAt, storyTitle, question, firstChoiceText, correctFirstTry, usedHint, source }],
+ * conversation[{ storyId, storyTitle, subSkillId, prompts[], reflection?{ question, answered } }],
+ * trend[{ weekStart, competencies{ [caselCode]: { items, level } } }] — chỉ lượt đọc đầu, câu không bị gắn cờ
+ */
 export const getChildEqJourney = (childId, weeks = 8) => call(api.get(`/children/${childId}/eq-journey`, { params: { weeks } }));
 
 /**
