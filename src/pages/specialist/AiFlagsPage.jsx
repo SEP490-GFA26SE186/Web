@@ -34,7 +34,7 @@ function BlockForm({ flag, onDone }) {
 }
 
 // Cảnh báo AI (luồng 7.6): phụ huynh có nhiều lượt AI bị chặn (nội dung không an toàn / từ khoá cấm).
-// Moderator tạm khoá riêng quyền dùng AI — phụ huynh vẫn đọc truyện, tự viết truyện được.
+// Chuyên gia tạm khoá riêng quyền dùng AI — phụ huynh vẫn đọc truyện, tự viết truyện được.
 function AiFlagsPage() {
   const [days, setDays] = useState(7);
   const [min, setMin] = useState(2);

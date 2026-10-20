@@ -6,7 +6,7 @@ import { ROUTES } from "../../constants/routes";
 import { useAudits, useRunAudits } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
 
-// Kiểm tra ngẫu nhiên: mỗi tuần hệ thống chọn vài truyện đang bán (ưu tiên truyện lâu chưa kiểm) để Moderator
+// Kiểm tra ngẫu nhiên: mỗi tuần hệ thống chọn vài truyện đang bán (ưu tiên truyện lâu chưa kiểm) để chuyên gia
 // xem lại theo checklist. Không ảnh hưởng truyện khi đang kiểm; gỡ hẳn nếu phát hiện vi phạm.
 function AuditsPage() {
   const [count, setCount] = useState(3);

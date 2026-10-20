@@ -16,7 +16,7 @@ function PriceBadge({ priceVnd }) {
   );
 }
 
-// Thẻ truyện đang bán trên chợ (listing đã được Moderator duyệt)
+// Thẻ truyện đang bán trên chợ (listing đã được chuyên gia duyệt)
 function ListingCard({ listing }) {
   const { topic, priceTier, seller } = listing;
 
@@ -65,7 +65,7 @@ function ListingCard({ listing }) {
               <ShoppingCart size={12} /> {formatNumber(listing.purchaseCount)} lượt mua
             </span>
             {listing.hasAiContent && (
-              <span className="flex items-center gap-1" title="Truyện có nội dung do AI hỗ trợ, đã được người bán và Moderator xem lại">
+              <span className="flex items-center gap-1" title="Truyện có nội dung do AI hỗ trợ, đã được người bán và chuyên gia xem lại">
                 <Bot size={12} /> AI hỗ trợ
               </span>
             )}

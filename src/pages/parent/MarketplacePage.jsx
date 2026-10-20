@@ -62,7 +62,7 @@ function MarketplacePage() {
         </p>
         <h1 className="text-3xl">Truyện từ các gia đình khác</h1>
         <p className="mt-1 max-w-2xl text-navy/70">
-          Mọi truyện đều được Moderator duyệt từng trang theo checklist sư phạm trước khi đăng bán. Mua xong, truyện vào
+          Mọi truyện đều được chuyên gia duyệt từng trang theo checklist sư phạm trước khi đăng bán. Mua xong, truyện vào
           giá sách để bé đọc ngay.
         </p>
 

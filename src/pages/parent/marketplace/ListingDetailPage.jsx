@@ -96,7 +96,7 @@ function ListingDetailPage() {
           </blockquote>
         )}
         <p className="flex items-start gap-2 text-sm text-navy/60">
-          <ShieldCheck size={18} className="shrink-0 text-secondary" /> Moderator đã duyệt từng trang theo checklist sư phạm. Truyện dùng tên nhân vật chung, có thể đọc ngay trên giá sách của bé.
+          <ShieldCheck size={18} className="shrink-0 text-secondary" /> Chuyên gia sư phạm đã duyệt từng trang theo checklist sư phạm. Truyện dùng tên nhân vật chung, có thể đọc ngay trên giá sách của bé.
         </p>
 
         {l.isMine ? (

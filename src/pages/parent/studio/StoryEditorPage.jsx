@@ -27,7 +27,7 @@ import { toast } from "../../../stores/toastStore";
 // Lỗi theo đường dẫn của BE: "pages.<id>" / "checkpoints.<id>" → câu báo, để tô đỏ đúng chỗ
 const gapsByPath = (errors) => Object.fromEntries(errors.map((e) => [e.path, e.message]));
 // "pages.<id>" → id phần tử "page-<id>" (PageEditor), "checkpoints.<id>" → "checkpoint-<id>"
-// Từ `warn` (Moderator đặt) vẫn lưu được → nhắc phụ huynh cân nhắc; từ `block` BE trả 422 như một chỗ thiếu
+// Từ `warn` (chuyên gia đặt) vẫn lưu được → nhắc phụ huynh cân nhắc; từ `block` BE trả 422 như một chỗ thiếu
 const warningsByPath = (warnings = []) => {
   const byPath = {};
   for (const w of warnings) (byPath[w.path] ??= []).push(`“${w.keyword}”`);

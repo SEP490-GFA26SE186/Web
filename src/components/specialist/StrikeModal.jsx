@@ -7,7 +7,7 @@ import { toast } from "../../stores/toastStore";
 
 /**
  * Cảnh cáo tác giả. `seller` = { id, displayName } cố định (từ báo cáo / truyện bị gỡ), hoặc truyền
- * `sellers` để Moderator chọn. Cảnh cáo hiệu lực 90 ngày; đủ 3 → BE khoá tài khoản bán.
+ * `sellers` để chuyên gia chọn. Cảnh cáo hiệu lực 90 ngày; đủ 3 → BE khoá tài khoản bán.
  */
 function StrikeModal({ seller, sellers, source = "report", sourceId, defaultReason = "", onClose }) {
   const [sellerId, setSellerId] = useState(seller?.id ?? "");

@@ -20,7 +20,7 @@ function ApplyForm({ onDone }) {
     e.preventDefault();
     apply.mutate(
       { displayName: form.displayName, bio: form.bio || undefined, expertise: form.expertise || undefined },
-      { onSuccess: () => { toast.success("Đã gửi hồ sơ, Moderator sẽ duyệt sớm"); onDone(); }, onError: (err) => toast.error(err.message) },
+      { onSuccess: () => { toast.success("Đã gửi hồ sơ, chuyên gia sẽ duyệt sớm"); onDone(); }, onError: (err) => toast.error(err.message) },
     );
   };
   return (
@@ -44,7 +44,7 @@ function ApplyForm({ onDone }) {
   );
 }
 
-/** Giọng đọc của bản đăng bán (sinh lại bằng tên chung). Moderator chỉ nhận duyệt khi đọc xong. */
+/** Giọng đọc của bản đăng bán (sinh lại bằng tên chung). Chuyên gia chỉ nhận duyệt khi đọc xong. */
 function NarrationStatus({ listing: l }) {
   const queryClient = useQueryClient();
   const retry = useMutation({
@@ -61,7 +61,7 @@ function NarrationStatus({ listing: l }) {
   const broken = n.failed > 0 || n.missing > 0;
   return (
     <p className={`flex flex-wrap items-center gap-2 text-xs font-semibold ${broken ? "text-danger" : "text-primary-dark"}`}>
-      {broken ? `Giọng đọc lỗi ${n.failed + n.missing}/${n.total} đoạn — Moderator chưa duyệt được` : `Đang tạo giọng đọc ${n.ready}/${n.total} đoạn — xong mới vào hàng chờ duyệt`}
+      {broken ? `Giọng đọc lỗi ${n.failed + n.missing}/${n.total} đoạn — chuyên gia chưa duyệt được` : `Đang tạo giọng đọc ${n.ready}/${n.total} đoạn — xong mới vào hàng chờ duyệt`}
       {broken && (
         <button type="button" onClick={() => retry.mutate()} disabled={retry.isPending} className="rounded-full bg-danger px-3 py-0.5 text-white disabled:opacity-60">
           Tạo lại giọng đọc
@@ -112,7 +112,7 @@ function SellingPage() {
           </div>
         ) : status === "pending" ? (
           <p className="flex items-center gap-2 font-semibold text-primary-dark">
-            <Clock size={20} /> Hồ sơ “{me.seller.displayName}” đang chờ Moderator duyệt.
+            <Clock size={20} /> Hồ sơ “{me.seller.displayName}” đang chờ chuyên gia duyệt.
           </p>
         ) : (
           <>
@@ -144,7 +144,7 @@ function SellingPage() {
                     <span className="text-sm text-navy/60">{l.priceVnd ? `${formatNumber(l.priceVnd)}đ` : "Miễn phí"}</span>
                   </div>
                   <NarrationStatus listing={l} />
-                  {l.lastDecision?.comment && <p className="text-sm text-navy/70">Moderator: {l.lastDecision.comment}</p>}
+                  {l.lastDecision?.comment && <p className="text-sm text-navy/70">Chuyên gia: {l.lastDecision.comment}</p>}
                 </li>
               );
             })}

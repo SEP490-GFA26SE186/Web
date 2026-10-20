@@ -11,7 +11,7 @@ const TABS = [
   { value: "archived", label: "Đã gỡ hẳn" },
 ];
 
-// Truyện tạm gỡ: ẩn khỏi chợ, không mua được, bé đã mua tạm không đọc được — chờ Moderator xem lại để giữ hoặc gỡ hẳn.
+// Truyện tạm gỡ: ẩn khỏi chợ, không mua được, bé đã mua tạm không đọc được — chờ chuyên gia xem lại để giữ hoặc gỡ hẳn.
 function SuspendedPage() {
   const [status, setStatus] = useState("suspended");
   const [strike, setStrike] = useState(null);

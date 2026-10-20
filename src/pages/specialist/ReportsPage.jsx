@@ -136,7 +136,7 @@ function ReportGroup({ group, onStrike }) {
 }
 
 // Báo cáo vi phạm từ phụ huynh, gom theo truyện. Đủ 3 người khác nhau trong 24 giờ → BE tự tạm gỡ và tạo lượt
-// hậu kiểm; Moderator vào xem lại truyện để giữ hoặc gỡ hẳn (gỡ hẳn tự cảnh cáo tác giả, đóng các báo cáo).
+// hậu kiểm; chuyên gia vào xem lại truyện để giữ hoặc gỡ hẳn (gỡ hẳn tự cảnh cáo tác giả, đóng các báo cáo).
 function ReportsPage() {
   const [status, setStatus] = useState("open");
   const [strike, setStrike] = useState(null);

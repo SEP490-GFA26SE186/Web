@@ -153,7 +153,7 @@ function ParentDashboardPage() {
           <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
             <div>
               <h2 className="text-2xl">Bán chạy trên Chợ truyện</h2>
-              <p className="mt-1 text-sm text-navy/60">Truyện từ các gia đình khác, đã được Moderator duyệt từng trang</p>
+              <p className="mt-1 text-sm text-navy/60">Truyện từ các gia đình khác, đã được chuyên gia duyệt từng trang</p>
             </div>
             <Link to={ROUTES.PARENT.MARKETPLACE} className="inline-flex items-center gap-1 text-sm font-bold text-primary-dark hover:text-primary">
               Xem chợ truyện <ChevronRight size={16} />
