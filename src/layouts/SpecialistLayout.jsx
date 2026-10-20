@@ -1,4 +1,4 @@
-import { AlertTriangle, Ban, Bot, Brain, ClipboardList, Flag, IdCard, LayoutDashboard, ListChecks, Mountain, PauseCircle } from "lucide-react";
+import { AlertTriangle, Ban, Bot, Brain, ClipboardList, FileQuestion, Flag, IdCard, LayoutDashboard, ListChecks, Mountain, PauseCircle, Sprout } from "lucide-react";
 import AppShell from "../components/shell/AppShell";
 import { ROUTES } from "../constants/routes";
 import { useSpecialistOverview } from "../hooks/useSpecialist";
@@ -19,9 +19,16 @@ function SpecialistLayout() {
       ],
     },
     {
+      title: "Chương trình sư phạm",
+      items: [
+        { to: R.SUB_SKILLS, label: "Kỹ năng con", icon: Sprout },
+        { to: R.TEMPLATES, label: "Mẫu câu hỏi", icon: FileQuestion },
+        { to: R.TOPICS, label: "Bài học", icon: Brain },
+      ],
+    },
+    {
       title: "Nội dung",
       items: [
-        { to: R.TOPICS, label: "Bài học", icon: Brain },
         { to: R.KEYWORDS, label: "Từ khoá chặn", icon: Ban },
         { to: R.BACKGROUNDS, label: "Thư viện bối cảnh", icon: Mountain, soon: true },
       ],

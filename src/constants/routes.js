@@ -29,6 +29,8 @@ export const ROUTES = {
     WORKSPACE: "/specialist/workspace",
     workspace: (storyId) => `/specialist/workspace/${storyId}`,
     TOPICS: "/specialist/topics",
+    SUB_SKILLS: "/specialist/sub-skills",
+    TEMPLATES: "/specialist/templates",
     BACKGROUNDS: "/specialist/backgrounds",
     REPORTS: "/specialist/reports",
     SUSPENDED: "/specialist/suspended",

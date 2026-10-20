@@ -19,6 +19,8 @@ import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
 const SpecialistLayout = lazy(() => import("../layouts/SpecialistLayout"));
 const TopicsPage = lazy(() => import("../pages/specialist/TopicsPage"));
+const SubSkillsPage = lazy(() => import("../pages/specialist/SubSkillsPage"));
+const TemplatesPage = lazy(() => import("../pages/specialist/TemplatesPage"));
 const HelpPage = lazy(() => import("../pages/parent/HelpPage"));
 const GuidelinesPage = lazy(() => import("../pages/specialist/GuidelinesPage"));
 const PrivacyPolicyPage = lazy(() => import("../pages/legal/PrivacyPolicyPage"));
@@ -141,6 +143,8 @@ function AppRoutes() {
         >
           <Route index element={<SpecialistDashboardPage />} />
           <Route path="topics" element={<TopicsPage />} />
+          <Route path="sub-skills" element={<SubSkillsPage />} />
+          <Route path="templates" element={<TemplatesPage />} />
           <Route path="keywords" element={<KeywordsPage />} />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="suspended" element={<SuspendedPage />} />

@@ -4,6 +4,7 @@ import Modal from "../../components/common/Modal";
 import Switch from "../../components/common/Switch";
 import CaselTag from "../../components/parent/library/CaselTag";
 import useDebounce from "../../hooks/useDebounce";
+import { useSubSkills } from "../../hooks/usePedagogy";
 import { useCreateTopic, useDeleteTopic, useEqSkills, useTopics, useUpdateTopic } from "../../hooks/useTopics";
 import { toast } from "../../stores/toastStore";
 
@@ -20,6 +21,7 @@ const STATUS_OPTIONS = [
 const validateTopic = (form) => {
   if (form.title.trim().length < 3 || form.title.trim().length > 200) return "Tên bài học dài 3–200 ký tự";
   if (!form.skillId) return "Chọn năng lực CASEL cho bài học";
+  if (form.subSkillIds.length < 1 || form.subSkillIds.length > 3) return "Chọn từ 1 đến 3 kỹ năng con";
   if (form.guidance.trim().length < 10) return "Hướng dẫn sư phạm có ít nhất 10 ký tự";
   if (!Number.isInteger(form.ageMin) || !Number.isInteger(form.ageMax)) return "Độ tuổi phải là số nguyên";
   if (form.ageMin < 1 || form.ageMax > 18) return "Độ tuổi trong khoảng 1–18";
@@ -31,6 +33,7 @@ function TopicFormModal({ topic, skills, onClose }) {
   const [form, setForm] = useState(() => ({
     title: topic?.title ?? "",
     skillId: topic?.skillId ?? "",
+    subSkillIds: topic?.subSkills?.map((x) => x.id) ?? [],
     guidance: topic?.guidance ?? "",
     ageMin: topic?.ageMin ?? 5,
     ageMax: topic?.ageMax ?? 8,
@@ -40,6 +43,7 @@ function TopicFormModal({ topic, skills, onClose }) {
   const [error, setError] = useState("");
   const create = useCreateTopic();
   const update = useUpdateTopic();
+  const { data: subSkills = [], isLoading: loadingSubs } = useSubSkills({ skillId: form.skillId, isActive: "true" }, { enabled: !!form.skillId });
   const pending = create.isPending || update.isPending;
   // BE khoá năng lực khi bài học đã có truyện (điểm EQ của truyện cũ phải giữ nguyên nghĩa)
   const skillLocked = topic?.storiesCount > 0;
@@ -49,12 +53,25 @@ function TopicFormModal({ topic, skills, onClose }) {
     setError("");
   };
 
+  const setSkill = (e) => {
+    setForm((f) => ({ ...f, skillId: e.target.value, subSkillIds: [] })); // kỹ năng con phải cùng năng lực
+    setError("");
+  };
+  const toggleSub = (id) => {
+    setForm((f) => ({ ...f, subSkillIds: f.subSkillIds.includes(id) ? f.subSkillIds.filter((x) => x !== id) : [...f.subSkillIds, id] }));
+    setError("");
+  };
+
   const submit = (e) => {
     e.preventDefault();
     const message = validateTopic(form);
     if (message) return setError(message);
     const payload = { ...form, title: form.title.trim(), guidance: form.guidance.trim() };
     if (skillLocked) delete payload.skillId;
+    // Sửa bài học: chỉ gửi kỹ năng con khi đổi (BE kiểm lại 422 theo từng kỹ năng con)
+    const original = topic?.subSkills?.map((x) => x.id) ?? [];
+    const unchanged = original.length === form.subSkillIds.length && original.every((id) => form.subSkillIds.includes(id));
+    if (topic && unchanged) delete payload.subSkillIds;
     const options = {
       onSuccess: () => {
         toast.success(topic ? "Đã cập nhật bài học" : "Đã tạo bài học mới");
@@ -92,7 +109,7 @@ function TopicFormModal({ topic, skills, onClose }) {
           <span className="mb-1.5 block text-sm font-semibold">Năng lực CASEL</span>
           <select
             value={form.skillId}
-            onChange={set("skillId")}
+            onChange={setSkill}
             disabled={skillLocked}
             className={`${inputClass} cursor-pointer disabled:cursor-not-allowed disabled:bg-surface disabled:text-navy/60`}
           >
@@ -109,6 +126,40 @@ function TopicFormModal({ topic, skills, onClose }) {
             </span>
           )}
         </label>
+        <div>
+          <span className="mb-1.5 block text-sm font-semibold">Kỹ năng con (chọn 1–3)</span>
+          {!form.skillId ? (
+            <p className="rounded-2xl bg-surface px-4 py-3 text-sm text-navy/60">Chọn năng lực CASEL trước để xem các kỹ năng con.</p>
+          ) : loadingSubs ? (
+            <div className="h-16 animate-pulse rounded-2xl bg-surface" />
+          ) : subSkills.length === 0 ? (
+            <p className="rounded-2xl bg-surface px-4 py-3 text-sm text-navy/60">Năng lực này chưa có kỹ năng con đang dùng. Hãy tạo ở trang Kỹ năng con.</p>
+          ) : (
+            <ul className="space-y-2">
+              {subSkills.map((s) => {
+                const checked = form.subSkillIds.includes(s.id);
+                const noTemplate = s.publishedTemplatesCount === 0;
+                const disabled = !checked && (noTemplate || form.subSkillIds.length >= 3);
+                return (
+                  <li key={s.id}>
+                    <label
+                      className={`flex items-start gap-3 rounded-2xl border-[1.5px] px-4 py-2.5 text-sm ${
+                        checked ? "border-secondary bg-secondary-tint" : "border-outline"
+                      } ${disabled ? "opacity-50" : "cursor-pointer"}`}
+                    >
+                      <input type="checkbox" className="mt-1" checked={checked} disabled={disabled} onChange={() => toggleSub(s.id)} />
+                      <span className="min-w-0">
+                        <span className="block font-semibold">{s.nameVi}</span>
+                        <span className="block text-xs text-navy/60">{s.caselReference?.textEn}</span>
+                        {noTemplate && <span className="block text-xs font-semibold text-danger">Chưa có mẫu câu hỏi đã ban hành</span>}
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Hướng dẫn sư phạm</span>
           <textarea
@@ -253,6 +304,15 @@ function TopicsPage() {
                     {!t.isActive && <span className="rounded-full bg-outline px-2 py-0.5 text-xs font-bold text-navy/60">Ngưng dùng</span>}
                   </div>
                   <p className="mt-1 line-clamp-2 text-sm text-navy/65">{t.guidance}</p>
+                  {t.subSkills?.length > 0 && (
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {t.subSkills.map((s) => (
+                        <span key={s.id} title={s.caselReference?.textEn} className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-semibold text-navy/70">
+                          {s.nameVi}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <p className="mt-1 text-xs text-navy/50">
                     {t.ageMin}–{t.ageMax} tuổi · {t.storiesCount} truyện · Thứ tự {t.displayOrder}
                     {t.creator && ` · Tạo bởi ${t.creator.fullName || t.creator.username}`}
