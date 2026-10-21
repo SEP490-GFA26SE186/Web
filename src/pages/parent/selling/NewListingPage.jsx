@@ -10,7 +10,7 @@ import { toast } from "../../../stores/toastStore";
 const field = "w-full rounded-card border-2 border-outline px-4 py-2.5 focus:border-primary focus:outline-none";
 
 // Đăng bán một truyện riêng đã hoàn tất: tên mới, mô tả, giá, tên chung cho từng nhân vật.
-// BE tạo bản sao đã gỡ cá nhân hoá (không chuyện thật, không giọng đọc) và gửi Moderator duyệt.
+// BE tạo bản sao đã gỡ cá nhân hoá (không chuyện thật, không giọng đọc) và gửi chuyên gia duyệt.
 function NewListingPage() {
   const [params] = useSearchParams();
   const storyId = params.get("storyId");
@@ -39,7 +39,7 @@ function NewListingPage() {
       },
       {
         onSuccess: () => {
-          toast.success("Đã gửi truyện cho Moderator duyệt");
+          toast.success("Đã gửi truyện cho chuyên gia duyệt");
           queryClient.invalidateQueries({ queryKey: ["selling"] });
           navigate(ROUTES.PARENT.SELLING);
         },
@@ -86,7 +86,7 @@ function NewListingPage() {
         </label>
         <fieldset className="space-y-2">
           <legend className="mb-1 text-sm font-semibold">Tên chung cho nhân vật</legend>
-          <p className="mb-2 text-xs text-navy/60">{story.useTts ? "Truyện có giọng đọc: hệ thống đọc lại bằng tên chung này (vài phút) trước khi Moderator duyệt." : "Truyện đang tắt giọng đọc: bản đăng bán chỉ có chữ, người mua sẽ thấy nhãn \"Chỉ có chữ\"."}</p>
+          <p className="mb-2 text-xs text-navy/60">{story.useTts ? "Truyện có giọng đọc: hệ thống đọc lại bằng tên chung này (vài phút) trước khi chuyên gia duyệt." : "Truyện đang tắt giọng đọc: bản đăng bán chỉ có chữ, người mua sẽ thấy nhãn \"Chỉ có chữ\"."}</p>
           {story.characters.map((c) => {
             const err = errors[`aliases.${c.token}`];
             return (
@@ -117,7 +117,7 @@ function NewListingPage() {
             </p>
           ))}
         <button type="submit" disabled={create.isPending} className="btn-primary">
-          {create.isPending && <Loader2 size={16} className="animate-spin" />} Gửi Moderator duyệt
+          {create.isPending && <Loader2 size={16} className="animate-spin" />} Gửi chuyên gia duyệt
         </button>
       </form>
     </div>

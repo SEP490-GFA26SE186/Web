@@ -3,7 +3,8 @@ import { AlertTriangle, Loader2, RotateCcw, Sparkles } from "lucide-react";
 // Trạng thái AI viết truyện (GET /stories/:id/generation). Lỗi do BE trả về đã là câu tiếng Việt.
 // `busy`: job còn chạy HOẶC truyện vẫn đang ở trạng thái generating (job vừa xong nhưng truyện chưa tải lại
 // xong) — vẫn hiện khung "đang viết" để trang không trống trong lúc chờ.
-function GenerationPanel({ generation, busy, neverGenerated, onStart, starting, startError }) {
+// `cost`: credit của một lần viết (theo độ dài truyện) — ghi ngay trên nút để ba mẹ biết trước.
+function GenerationPanel({ generation, busy, neverGenerated, onStart, starting, startError, cost }) {
   if (busy) {
     return (
       <div className="card flex flex-col items-center gap-3 p-8 text-center">
@@ -33,6 +34,7 @@ function GenerationPanel({ generation, busy, neverGenerated, onStart, starting, 
       <button type="button" onClick={onStart} disabled={starting} className="btn-primary disabled:opacity-70">
         {starting ? <Loader2 size={18} className="animate-spin" /> : failed ? <RotateCcw size={18} /> : <Sparkles size={18} />}
         {failed ? "Cho AI viết lại" : "Cho AI viết truyện"}
+        {cost > 0 && <span className="opacity-80">· {cost} credit</span>}
       </button>
     </div>
   );

@@ -29,7 +29,7 @@ function ContinueReadingCard({ story }) {
 
         <div className="min-w-0 lg:col-span-8">
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <CaselTag competency={story.topic.competency} className="bg-secondary-tint" />
+            <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" />
             <span className="flex items-center gap-1 text-xs text-navy/60">
               <Clock size={13} /> Đọc lần cuối {formatRelativeDay(lastActivityAt)}
             </span>
@@ -37,9 +37,11 @@ function ContinueReadingCard({ story }) {
 
           <p className="text-xs font-extrabold tracking-wider text-primary-dark">ĐANG ĐỌC DỞ DANG</p>
           <h2 className="mt-1 text-2xl leading-tight md:text-[28px]">{story.title}</h2>
-          <p className="mt-2 text-[15px] text-navy/75">
-            Bài học: <span className="font-semibold text-navy">{story.topic.title}</span>
-          </p>
+          {story.topic && (
+            <p className="mt-2 text-[15px] text-navy/75">
+              Bài học: <span className="font-semibold text-navy">{story.topic.title}</span>
+            </p>
+          )}
 
           <div className="mt-5 max-w-2xl">
             <div className="mb-1.5 flex justify-between text-xs">

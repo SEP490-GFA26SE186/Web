@@ -65,7 +65,7 @@ function LibraryStoryCard({ story }) {
           className="mb-4 aspect-[4/3] w-full rounded-2xl"
         >
           <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1">
-            <CaselTag competency={story.topic.competency} short />
+            <CaselTag competency={story.topic?.competency} short />
             <KindBadge story={story} />
           </div>
           {reading && (
@@ -76,7 +76,7 @@ function LibraryStoryCard({ story }) {
         </StoryCover>
 
         <div className="mb-1 flex items-center justify-between gap-2 text-xs text-navy/60">
-          <span className="line-clamp-1">Bài học: {story.topic.title}</span>
+          <span className="line-clamp-1">{story.topic ? `Bài học: ${story.topic.title}` : "Truyện tự viết"}</span>
           <span className={`shrink-0 ${progress.className}`}>{progress.text}</span>
         </div>
         <h3 className="line-clamp-2 text-lg transition-colors group-hover:text-primary-dark">{story.title}</h3>

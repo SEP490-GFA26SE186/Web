@@ -3,7 +3,7 @@ import { Bot, BookOpen, Flag, IdCard, Loader2, Lock } from "lucide-react";
 import CaselTag from "../../components/parent/library/CaselTag";
 import { REVIEW_TYPES } from "../../constants/moderation";
 import { ROUTES } from "../../constants/routes";
-import { useModeratorOverview, useReviewQueue } from "../../hooks/useModerator";
+import { useSpecialistOverview, useReviewQueue } from "../../hooks/useSpecialist";
 import { formatNumber } from "../../utils/format";
 
 const since = (iso) => {
@@ -13,8 +13,8 @@ const since = (iso) => {
 
 // Tổng quan kiểm duyệt: hàng đợi (nộp bán + hậu kiểm báo cáo + kiểm tra ngẫu nhiên, cũ nhất trước),
 // số hồ sơ người bán và báo cáo vi phạm đang chờ.
-function ModeratorDashboardPage() {
-  const { data: overview } = useModeratorOverview();
+function SpecialistDashboardPage() {
+  const { data: overview } = useSpecialistOverview();
   const { data: queue = [], isLoading, error } = useReviewQueue();
 
   return (
@@ -31,14 +31,14 @@ function ModeratorDashboardPage() {
             <p className="font-display text-2xl font-bold">{overview?.navBadges.storyQueue ?? "—"}</p>
           </div>
         </div>
-        <Link to={ROUTES.MODERATOR.SELLER_APPLICATIONS} className="card flex items-center gap-4 p-5 transition hover:shadow-mid">
+        <Link to={ROUTES.SPECIALIST.SELLER_APPLICATIONS} className="card flex items-center gap-4 p-5 transition hover:shadow-mid">
           <IdCard size={28} className="text-secondary-dark" />
           <div>
             <p className="text-sm text-navy/60">Hồ sơ người bán chờ duyệt</p>
             <p className="font-display text-2xl font-bold">{overview?.navBadges.sellerApplications ?? "—"}</p>
           </div>
         </Link>
-        <Link to={ROUTES.MODERATOR.REPORTS} className="card flex items-center gap-4 p-5 transition hover:shadow-mid">
+        <Link to={ROUTES.SPECIALIST.REPORTS} className="card flex items-center gap-4 p-5 transition hover:shadow-mid">
           <Flag size={28} className="text-danger" />
           <div>
             <p className="text-sm text-navy/60">Báo cáo vi phạm đang mở</p>
@@ -55,7 +55,7 @@ function ModeratorDashboardPage() {
         <ul className="divide-y divide-outline">
           {queue.map((q) => (
             <li key={q.reviewId}>
-              <Link to={ROUTES.MODERATOR.workspace(q.reviewId)} className="-mx-2 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl px-2 py-3 hover:bg-surface">
+              <Link to={ROUTES.SPECIALIST.workspace(q.reviewId)} className="-mx-2 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl px-2 py-3 hover:bg-surface">
                 <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
                   <p className="truncate font-bold">{q.title}</p>
                   <p className="text-sm text-navy/60">
@@ -94,4 +94,4 @@ function ModeratorDashboardPage() {
   );
 }
 
-export default ModeratorDashboardPage;
+export default SpecialistDashboardPage;

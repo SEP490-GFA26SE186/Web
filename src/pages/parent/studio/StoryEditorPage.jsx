@@ -1,29 +1,33 @@
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Bot, CheckCircle2, Loader2, PenLine, Plus, Store, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Bot, CheckCircle2, Loader2, PenLine, Plus, RotateCcw, Store, Trash2 } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
 import CheckpointEditor from "../../../components/parent/studio/CheckpointEditor";
 import GenerationPanel from "../../../components/parent/studio/GenerationPanel";
 import NarrationPanel from "../../../components/parent/studio/NarrationPanel";
+import { narrationState } from "../../../components/parent/studio/narrationState";
 import ShelfPanel from "../../../components/parent/studio/ShelfPanel";
+import ScenePicture from "../../../components/parent/studio/ScenePicture";
 import PageEditor, { fieldClass } from "../../../components/parent/studio/PageEditor";
 import { CHECKPOINT_TYPES, NEEDS_TARGET, STORY_STATUS_LABELS } from "../../../constants/story";
 import { STORY_LENGTH_LABELS } from "../../../constants/casel";
 import { ROUTES } from "../../../constants/routes";
 import {
   isGenerating,
+  useAiPricing,
   useDeleteStory,
   useGenerateStory,
   useGeneration,
   useStory,
   useStoryEditor,
+  useStoryImages,
 } from "../../../hooks/useStudio";
 import { toast } from "../../../stores/toastStore";
 
 // Lỗi theo đường dẫn của BE: "pages.<id>" / "checkpoints.<id>" → câu báo, để tô đỏ đúng chỗ
 const gapsByPath = (errors) => Object.fromEntries(errors.map((e) => [e.path, e.message]));
 // "pages.<id>" → id phần tử "page-<id>" (PageEditor), "checkpoints.<id>" → "checkpoint-<id>"
-// Từ `warn` (Moderator đặt) vẫn lưu được → nhắc phụ huynh cân nhắc; từ `block` BE trả 422 như một chỗ thiếu
+// Từ `warn` (chuyên gia đặt) vẫn lưu được → nhắc phụ huynh cân nhắc; từ `block` BE trả 422 như một chỗ thiếu
 const warningsByPath = (warnings = []) => {
   const byPath = {};
   for (const w of warnings) (byPath[w.path] ??= []).push(`“${w.keyword}”`);
@@ -113,6 +117,40 @@ function DeleteStoryButton({ onConfirm, deleting, disabled }) {
   );
 }
 
+/** Dòng trạng thái trên thanh Hoàn tất: chưa hoàn tất / đang tạo giọng đọc (x/y đoạn) / sẵn sàng / lỗi. */
+function FinishBarStatus({ story, voice }) {
+  if (!story.reviewedAt) return <p className="min-w-0 flex-1 text-sm text-navy/65">Xem lại hết các trang và điểm dừng rồi bấm hoàn tất.</p>;
+  if (!voice) return <p className="min-w-0 flex-1 text-sm text-navy/65">Truyện đã hoàn tất. Sửa thêm thì bấm hoàn tất lại.</p>;
+  const { phase, percent, n } = voice;
+  if (phase === "working") {
+    return (
+      <div className="min-w-0 flex-1 space-y-1.5" aria-live="polite">
+        <p className="flex items-center gap-2 text-sm font-semibold">
+          <Loader2 size={16} className="shrink-0 animate-spin text-primary" />
+          Đang tạo giọng đọc · {n.ready}/{n.total} đoạn
+          <span className="hidden font-normal text-navy/55 sm:inline">— ba mẹ có thể rời trang</span>
+        </p>
+        <div className="h-1.5 overflow-hidden rounded-full bg-navy-tint" role="progressbar" aria-label="Tiến độ giọng đọc" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
+          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percent}%` }} />
+        </div>
+      </div>
+    );
+  }
+  if (phase === "ready") {
+    return (
+      <p className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold text-secondary-dark" aria-live="polite">
+        <CheckCircle2 size={16} className="shrink-0" /> Giọng đọc đã sẵn sàng — bé nghe được truyện này.
+      </p>
+    );
+  }
+  return (
+    <p className="flex min-w-0 flex-1 items-center gap-2 text-sm font-semibold text-danger" aria-live="polite">
+      <AlertTriangle size={16} className="shrink-0" />
+      {phase === "failed" ? `Còn ${n.failed + n.missing} đoạn giọng đọc chưa tạo được.` : `Có ${n.missing} đoạn đã sửa chữ — bấm hoàn tất lại để đọc lại.`}
+    </p>
+  );
+}
+
 function StoryEditorPage() {
   const { storyId } = useParams();
   const navigate = useNavigate();
@@ -121,9 +159,20 @@ function StoryEditorPage() {
   const isCustom = story?.length === "custom";
   const generation = useGeneration(storyId, { enabled: !!story && !isCustom });
   const generate = useGenerateStory(storyId);
+  const pricing = useAiPricing();
+  const images = useStoryImages(storyId);
   const editor = useStoryEditor(storyId);
   const [gaps, setGaps] = useState({});
   const [addingAfter, setAddingAfter] = useState(null);
+  const voice = narrationState(story);
+
+  // Giọng đọc chạy xong (đang tạo -> sẵn sàng / lỗi) trong lúc ba mẹ còn ở trang -> báo ngay.
+  const prevPhase = useRef(voice?.phase);
+  useEffect(() => {
+    if (prevPhase.current === "working" && voice?.phase === "ready") toast.success("Giọng đọc đã sẵn sàng — bé nghe được truyện này rồi");
+    if (prevPhase.current === "working" && voice?.phase === "failed") toast.error("Có đoạn giọng đọc bị lỗi — ba mẹ bấm “Thử lại” nhé");
+    prevPhase.current = voice?.phase;
+  }, [voice?.phase]);
 
   if (isLoading) {
     return (
@@ -143,6 +192,16 @@ function StoryEditorPage() {
   const showEditor = !busy && !neverGenerated && !failedEmpty;
   const warnings = warningsByPath(story.keywordWarnings);
   const checkpointAfter = new Map(story.checkpoints.map((c) => [c.afterPageId, c]));
+  const sceneById = new Map((story.scenes ?? []).map((sc) => [sc.id, sc]));
+  const sceneFirstPage = new Map();
+  const scenePages = new Map();
+  for (const p of story.pages) {
+    if (!sceneFirstPage.has(p.sceneId)) sceneFirstPage.set(p.sceneId, p.id);
+    scenePages.set(p.sceneId, [...(scenePages.get(p.sceneId) ?? []), p.pageOrder]);
+  }
+  const scenePageRange = new Map(
+    [...scenePages].map(([id, orders]) => [id, orders.length > 1 ? `trang ${orders[0]}–${orders[orders.length - 1]}` : `trang ${orders[0]}`]),
+  );
 
   const run = (mutation, args, { success, after } = {}) =>
     mutation.mutate(args, {
@@ -175,7 +234,7 @@ function StoryEditorPage() {
     });
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5 pb-28">
+    <div className="mx-auto max-w-3xl space-y-5 pb-4">
       <Link to={ROUTES.PARENT.STUDIO} className="inline-flex items-center gap-1 text-sm font-semibold text-navy/60 hover:text-primary">
         <ArrowLeft size={16} /> Truyện của ba mẹ
       </Link>
@@ -191,7 +250,12 @@ function StoryEditorPage() {
         </div>
         <h1 className="text-2xl">{story.title}</h1>
         <p className="text-sm text-navy/65">
-          Bài học: <span className="font-semibold text-navy">{story.topic?.title}</span> · Nhân vật:{" "}
+          {story.topic ? (
+            <>
+              Bài học: <span className="font-semibold text-navy">{story.topic.title}</span> ·{" "}
+            </>
+          ) : null}
+          Nhân vật:{" "}
           {characters.map((c) => c.name).filter(Boolean).join(", ")}
         </p>
         {story.reviewedAt && story.kind !== "published" && (
@@ -216,6 +280,7 @@ function StoryEditorPage() {
 
       {!isCustom && (
         <GenerationPanel
+          cost={pricing.data?.lengths?.find((p) => p.length === story.length)?.credits}
           generation={generation.data}
           busy={busy}
           neverGenerated={neverGenerated}
@@ -236,10 +301,52 @@ function StoryEditorPage() {
 
       {showEditor && (
         <>
+          {!isCustom && !story.useAiImage && story.scenes?.some((s) => s.description?.trim()) && (
+            <div className="card flex flex-wrap items-center justify-between gap-3 p-5">
+              <div className="min-w-0">
+                <p className="font-semibold">Thêm tranh minh hoạ AI</p>
+                <p className="text-sm text-navy/60">
+                  AI vẽ {story.scenes.length} cảnh theo chân dung nhân vật
+                  {pricing.data?.images ? ` · ${pricing.data.images.scene} credit/cảnh, chân dung còn thiếu ${pricing.data.images.characterPortrait} credit` : ""}.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  images.drawAll.mutate(undefined, {
+                    onSuccess: () => toast.success("Đang vẽ tranh cho truyện"),
+                    onError: (e) => toast.error(e.message),
+                  })
+                }
+                disabled={busy || images.drawAll.isPending}
+                className="btn-primary whitespace-nowrap disabled:opacity-60"
+              >
+                {images.drawAll.isPending ? <Loader2 size={18} className="animate-spin" /> : null} Vẽ tranh cho truyện
+              </button>
+            </div>
+          )}
           {story.pages.map((page) => {
             const cp = checkpointAfter.get(page.id);
+            // Tranh của cảnh đặt trên trang đầu tiên của cảnh đó
+            const scene = story.useAiImage ? sceneById.get(page.sceneId) : null;
+            const firstOfScene = scene && sceneFirstPage.get(scene.id) === page.id;
             return (
               <Fragment key={page.id}>
+                {firstOfScene && (
+                  <ScenePicture
+                    scene={scene}
+                    pageRange={scenePageRange.get(scene.id)}
+                    cost={pricing.data?.images?.scene}
+                    disabled={busy}
+                    redrawing={images.redraw.isPending && images.redraw.variables === scene.id}
+                    onRedraw={() =>
+                      images.redraw.mutate(scene.id, {
+                        onSuccess: () => toast.success("Đang vẽ lại cảnh"),
+                        onError: (e) => toast.error(e.message),
+                      })
+                    }
+                  />
+                )}
                 <PageEditor
                   key={`${page.id}:${page.contentText}`}
                   page={page}
@@ -317,17 +424,26 @@ function StoryEditorPage() {
       )}
 
       {showEditor && (
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-outline bg-white/95 px-4 py-3 backdrop-blur" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
-          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
-            <p className="text-sm text-navy/65">
-              {story.reviewedAt
-                ? "Truyện đã hoàn tất. Sửa thêm thì bấm hoàn tất lại."
-                : "Xem lại hết các trang và điểm dừng rồi bấm hoàn tất."}
-            </p>
-            <button type="button" onClick={finish} disabled={editor.review.isPending || busy} className="btn-primary disabled:opacity-60">
-              {editor.review.isPending ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
-              Hoàn tất
-            </button>
+        // Dinh day man hinh nhung nam TRONG cot noi dung: luon thang hang voi cac trang du sidebar thu gon hay mo rong.
+        <div className="sticky z-20 rounded-2xl border border-outline bg-white/95 px-4 py-3 shadow-mid backdrop-blur" style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <FinishBarStatus story={story} voice={voice} />
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {voice?.phase === "failed" && (
+                <button
+                  type="button"
+                  onClick={() => run(editor.retryNarration, undefined, { success: "Đang tạo lại giọng đọc" })}
+                  disabled={editor.retryNarration.isPending}
+                  className="btn-ghost py-2.5 whitespace-nowrap disabled:opacity-60"
+                >
+                  {editor.retryNarration.isPending ? <Loader2 size={18} className="animate-spin" /> : <RotateCcw size={18} />} Thử lại
+                </button>
+              )}
+              <button type="button" onClick={finish} disabled={editor.review.isPending || busy} className="btn-primary whitespace-nowrap disabled:opacity-60">
+                {editor.review.isPending ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
+                Hoàn tất
+              </button>
+            </div>
           </div>
         </div>
       )}

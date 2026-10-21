@@ -12,17 +12,17 @@ import { toast } from "../../stores/toastStore";
 const ROLES = [
   { value: "all", label: "Tất cả" },
   { value: "parent", label: "Phụ huynh" },
-  { value: "moderator", label: "Kiểm duyệt viên" },
+  { value: "specialist", label: "Chuyên gia sư phạm" },
   { value: "admin", label: "Admin" },
 ];
-const ROLE_LABEL = { parent: "Phụ huynh", moderator: "Kiểm duyệt viên", admin: "Admin" };
+const ROLE_LABEL = { parent: "Phụ huynh", specialist: "Chuyên gia sư phạm", admin: "Admin" };
 const STATUS = [
   { value: "all", label: "Mọi trạng thái" },
   { value: "active", label: "Đang hoạt động" },
   { value: "locked", label: "Đã khoá" },
 ];
 
-function CreateModeratorModal({ onClose }) {
+function CreateSpecialistModal({ onClose }) {
   const [form, setForm] = useState({ email: "", username: "", fullName: "", password: "" });
   const create = useCreateModerator();
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -30,7 +30,7 @@ function CreateModeratorModal({ onClose }) {
     e.preventDefault();
     create.mutate(form, {
       onSuccess: () => {
-        toast.success("Đã tạo tài khoản Kiểm duyệt viên");
+        toast.success("Đã tạo tài khoản Chuyên gia sư phạm");
         onClose();
       },
       onError: (err) => toast.error(err.message),
@@ -40,7 +40,7 @@ function CreateModeratorModal({ onClose }) {
     <Modal
       open
       onClose={onClose}
-      title="Tạo tài khoản Kiểm duyệt viên"
+      title="Tạo tài khoản Chuyên gia sư phạm"
       description="Gửi email + mật khẩu tạm cho người được giao; họ nên đổi mật khẩu sau lần đăng nhập đầu."
       footer={
         <>
@@ -68,7 +68,7 @@ function CreateModeratorModal({ onClose }) {
   );
 }
 
-// Tài khoản: tìm kiếm, khoá / mở khoá (khoá → đăng xuất ngay, mọi request bị chặn), tạo Kiểm duyệt viên.
+// Tài khoản: tìm kiếm, khoá / mở khoá (khoá → đăng xuất ngay, mọi request bị chặn), tạo Chuyên gia sư phạm.
 function AccountsPage() {
   const me = useAuthStore((s) => s.user);
   const [role, setRole] = useState("all");
@@ -94,9 +94,9 @@ function AccountsPage() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Tài khoản" description="Phụ huynh tự đăng ký; Kiểm duyệt viên do Admin tạo. Khoá tài khoản sẽ đăng xuất người đó ngay.">
+      <PageHeader title="Tài khoản" description="Phụ huynh tự đăng ký; Chuyên gia sư phạm do Admin tạo. Khoá tài khoản sẽ đăng xuất người đó ngay.">
         <button type="button" onClick={() => setCreating(true)} className="btn-primary">
-          <Plus size={18} /> Kiểm duyệt viên
+          <Plus size={18} /> Chuyên gia sư phạm
         </button>
       </PageHeader>
       <div className="card flex flex-col gap-3 p-4 lg:flex-row lg:items-center">
@@ -157,7 +157,7 @@ function AccountsPage() {
         )}
       </section>
       {data?.pagination.totalPages > 1 && <Pagination page={page} totalPages={data.pagination.totalPages} onChange={setPage} />}
-      {creating && <CreateModeratorModal onClose={() => setCreating(false)} />}
+      {creating && <CreateSpecialistModal onClose={() => setCreating(false)} />}
     </div>
   );
 }

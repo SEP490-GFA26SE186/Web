@@ -140,7 +140,7 @@ function ParentDashboardPage() {
       {/* EQ + Truyện chờ xem lại */}
       <div className="grid gap-6 xl:grid-cols-12">
         <div className="xl:col-span-7">
-          <EqRadarCard childName={child.name} skills={eqReport.skills} />
+          <EqRadarCard childName={child.name} report={eqReport} />
         </div>
         <div className="flex flex-col gap-4 xl:col-span-5">
           <DraftReviewCard draft={pendingDrafts[0]} moreCount={Math.max(0, pendingDrafts.length - 1)} />
@@ -153,7 +153,7 @@ function ParentDashboardPage() {
           <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
             <div>
               <h2 className="text-2xl">Bán chạy trên Chợ truyện</h2>
-              <p className="mt-1 text-sm text-navy/60">Truyện từ các gia đình khác, đã được Moderator duyệt từng trang</p>
+              <p className="mt-1 text-sm text-navy/60">Truyện từ các gia đình khác, đã được chuyên gia duyệt từng trang</p>
             </div>
             <Link to={ROUTES.PARENT.MARKETPLACE} className="inline-flex items-center gap-1 text-sm font-bold text-primary-dark hover:text-primary">
               Xem chợ truyện <ChevronRight size={16} />

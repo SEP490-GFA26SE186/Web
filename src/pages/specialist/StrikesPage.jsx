@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { AlertTriangle, Loader2, Plus } from "lucide-react";
-import StrikeModal from "../../components/moderator/StrikeModal";
+import StrikeModal from "../../components/specialist/StrikeModal";
 import { APPEAL_STATUS, STRIKE_SOURCES, formatDate } from "../../constants/moderation";
-import { useSellerApplications, useStrikes } from "../../hooks/useModerator";
+import { useSellerApplications, useStrikes } from "../../hooks/useSpecialist";
 
 const strikeState = (s) =>
   s.revokedAt

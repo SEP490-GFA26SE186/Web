@@ -26,6 +26,13 @@ export const EMOTIONS = {
   neutral: "Bình thường",
 };
 
+// Dạng trả lời của mẫu câu hỏi (question_templates.answer_format)
+export const ANSWER_FORMATS = {
+  emotion_pick: "Chọn cảm xúc",
+  single_correct: "Chọn 1 đáp án đúng",
+  role_choice: "Chọn cách xử lý (3 vai)",
+};
+
 // Vai của phương án giải quyết tình huống (option_role) — do khung quy định, không đổi
 export const OPTION_ROLES = {
   constructive: { label: "Xây dựng", tone: "bg-secondary-tint text-secondary-dark" },

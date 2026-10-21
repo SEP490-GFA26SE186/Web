@@ -9,6 +9,10 @@ import {
   deleteStory,
   generateStory,
   getCharacters,
+  generatePortrait,
+  drawStoryImages,
+  redrawScene,
+  getAiPricing,
   getGeneration,
   getStories,
   getStory,
@@ -49,16 +53,38 @@ export const refreshCredit = async (queryClient) => {
 };
 export const isGenerating = (generation) => !!generation && ACTIVE.has(generation.status);
 
+/** Giá AI viết truyện theo độ dài (Admin chỉnh ở Cấu hình AI) — dùng để báo trước cho ba mẹ. */
+export const useAiPricing = () =>
+  useQuery({ queryKey: ["stories", "ai-pricing"], queryFn: getAiPricing, staleTime: 5 * 60_000 });
+
 export const useStories = (params) => useQuery({ queryKey: studioKeys.list(params), queryFn: () => getStories(params) });
 
-/** Đang tạo giọng đọc (story.narration.pending > 0) thì tải lại mỗi 5 s để cập nhật tiến độ. */
+const DRAWING = new Set(["queued", "generating"]);
+/** Còn tranh cảnh đang chờ / đang vẽ. */
+export const isDrawingScenes = (story) => !!story?.scenes?.some((s) => DRAWING.has(s.imageStatus));
+
+/** Đang tạo giọng đọc hoặc đang vẽ tranh thì tải lại mỗi 5 s để cập nhật tiến độ. */
 export const useStory = (id) =>
   useQuery({
     queryKey: studioKeys.story(id),
     queryFn: () => getStory(id),
     enabled: !!id,
-    refetchInterval: (query) => (query.state.data?.narration?.pending > 0 ? 5000 : false),
+    refetchInterval: (query) => (query.state.data?.narration?.pending > 0 || isDrawingScenes(query.state.data) ? 5000 : false),
   });
+
+/** Vẽ tranh cả truyện / vẽ lại một cảnh: tải lại truyện + credit (đã giữ). */
+export const useStoryImages = (id) => {
+  const queryClient = useQueryClient();
+  const done = () => {
+    queryClient.invalidateQueries({ queryKey: studioKeys.story(id) });
+    queryClient.invalidateQueries({ queryKey: studioKeys.characters });
+    refreshCredit(queryClient);
+  };
+  return {
+    drawAll: useMutation({ mutationFn: () => drawStoryImages(id), onSuccess: done }),
+    redraw: useMutation({ mutationFn: (sceneId) => redrawScene(id, sceneId), onSuccess: done }),
+  };
+};
 
 /** Tiến độ AI viết: hỏi lại mỗi 3 s khi job đang chạy; xong thì tải lại truyện và số credit. */
 export const useGeneration = (id, { enabled = true } = {}) => {
@@ -78,7 +104,26 @@ export const useGeneration = (id, { enabled = true } = {}) => {
   });
 };
 
-export const useCharacters = () => useQuery({ queryKey: studioKeys.characters, queryFn: getCharacters });
+/** Có chân dung đang chờ / đang vẽ thì tải lại mỗi 4 s. */
+export const useCharacters = () =>
+  useQuery({
+    queryKey: studioKeys.characters,
+    queryFn: getCharacters,
+    refetchInterval: (query) => (query.state.data?.some((c) => DRAWING.has(c.portraitStatus)) ? 4000 : false),
+  });
+
+/** Tạo / vẽ lại chân dung AI của nhân vật (giữ credit). */
+export const useGeneratePortrait = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: generatePortrait,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: studioKeys.characters });
+      queryClient.invalidateQueries({ queryKey: ["children"] }); // childKeys.all — thẻ nhân vật ở trang Bé nhà mình
+      refreshCredit(queryClient);
+    },
+  });
+};
 
 export const useCreateCharacter = () => {
   const queryClient = useQueryClient();

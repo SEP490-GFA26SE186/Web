@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import HomePage from "../pages/home/HomePage";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
@@ -17,35 +17,39 @@ import CreateStoryPage from "../pages/parent/studio/CreateStoryPage";
 import StoryEditorPage from "../pages/parent/studio/StoryEditorPage";
 
 // Cổng Kiểm duyệt & Admin tách bundle riêng — phụ huynh không phải tải code quản trị
-const ModeratorLayout = lazy(() => import("../layouts/ModeratorLayout"));
-const TopicsPage = lazy(() => import("../pages/moderator/TopicsPage"));
+const SpecialistLayout = lazy(() => import("../layouts/SpecialistLayout"));
+const TopicsPage = lazy(() => import("../pages/specialist/TopicsPage"));
+const SubSkillsPage = lazy(() => import("../pages/specialist/SubSkillsPage"));
+const TemplatesPage = lazy(() => import("../pages/specialist/TemplatesPage"));
+const CheckpointReviewPage = lazy(() => import("../pages/specialist/CheckpointReviewPage"));
+const ReportSettingsPage = lazy(() => import("../pages/specialist/ReportSettingsPage"));
 const HelpPage = lazy(() => import("../pages/parent/HelpPage"));
-const GuidelinesPage = lazy(() => import("../pages/moderator/GuidelinesPage"));
+const GuidelinesPage = lazy(() => import("../pages/specialist/GuidelinesPage"));
 const PrivacyPolicyPage = lazy(() => import("../pages/legal/PrivacyPolicyPage"));
 const TermsPage = lazy(() => import("../pages/legal/TermsPage"));
 const FamilyCharactersPage = lazy(() => import("../pages/parent/FamilyCharactersPage"));
 const EqJourneyPage = lazy(() => import("../pages/parent/EqJourneyPage"));
-const KeywordsPage = lazy(() => import("../pages/moderator/KeywordsPage"));
-const ReportsPage = lazy(() => import("../pages/moderator/ReportsPage"));
-const SuspendedPage = lazy(() => import("../pages/moderator/SuspendedPage"));
-const StrikesPage = lazy(() => import("../pages/moderator/StrikesPage"));
-const AiFlagsPage = lazy(() => import("../pages/moderator/AiFlagsPage"));
-const AuditsPage = lazy(() => import("../pages/moderator/AuditsPage"));
+const KeywordsPage = lazy(() => import("../pages/specialist/KeywordsPage"));
+const ReportsPage = lazy(() => import("../pages/specialist/ReportsPage"));
+const SuspendedPage = lazy(() => import("../pages/specialist/SuspendedPage"));
+const StrikesPage = lazy(() => import("../pages/specialist/StrikesPage"));
+const AiFlagsPage = lazy(() => import("../pages/specialist/AiFlagsPage"));
+const AuditsPage = lazy(() => import("../pages/specialist/AuditsPage"));
 const AppealsPage = lazy(() => import("../pages/admin/AppealsPage"));
 const AccountsPage = lazy(() => import("../pages/admin/AccountsPage"));
 const PlansPage = lazy(() => import("../pages/admin/PlansPage"));
 const RefundsPage = lazy(() => import("../pages/admin/RefundsPage"));
 const FinanceReportPage = lazy(() => import("../pages/admin/FinanceReportPage"));
 const AuditLogsPage = lazy(() => import("../pages/admin/AuditLogsPage"));
-const SellerApplicationsPage = lazy(() => import("../pages/moderator/SellerApplicationsPage"));
-const ModeratorDashboardPage = lazy(
-  () => import("../pages/moderator/ModeratorDashboardPage"),
+const SellerApplicationsPage = lazy(() => import("../pages/specialist/SellerApplicationsPage"));
+const SpecialistDashboardPage = lazy(
+  () => import("../pages/specialist/SpecialistDashboardPage"),
 );
 const ReviewWorkspacePage = lazy(
-  () => import("../pages/moderator/ReviewWorkspacePage"),
+  () => import("../pages/specialist/ReviewWorkspacePage"),
 );
 const WorkspaceIndexRedirect = lazy(() =>
-  import("../pages/moderator/ReviewWorkspacePage").then((m) => ({
+  import("../pages/specialist/ReviewWorkspacePage").then((m) => ({
     default: m.WorkspaceIndexRedirect,
   })),
 );
@@ -79,7 +83,7 @@ function PageLoader() {
   );
 }
 
-const moderatorPlaceholders = [
+const specialistPlaceholders = [
   { path: "backgrounds", title: "Thư viện bối cảnh" },
 ];
 
@@ -87,6 +91,12 @@ const placeholderRoutes = (items) =>
   items.map(({ path, title }) => (
     <Route key={path} path={path} element={<ComingSoonPage title={title} />} />
   ));
+
+/** Link cũ /moderator/* → cùng đường dẫn con dưới /specialist/*. */
+function LegacyModeratorRedirect() {
+  const { "*": rest } = useParams();
+  return <Navigate to={`/specialist${rest ? `/${rest}` : ""}`} replace />;
+}
 
 function AppRoutes() {
   return (
@@ -123,16 +133,22 @@ function AppRoutes() {
           <Route path="billing/result" element={<BillingResultPage />} />
         </Route>
 
+        <Route path="/moderator/*" element={<LegacyModeratorRedirect />} />
+
         <Route
-          path="/moderator"
+          path="/specialist"
           element={
-            <ProtectedRoute roles={[ROLES.MODERATOR]}>
-              <ModeratorLayout />
+            <ProtectedRoute roles={[ROLES.SPECIALIST]}>
+              <SpecialistLayout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<ModeratorDashboardPage />} />
+          <Route index element={<SpecialistDashboardPage />} />
           <Route path="topics" element={<TopicsPage />} />
+          <Route path="sub-skills" element={<SubSkillsPage />} />
+          <Route path="templates" element={<TemplatesPage />} />
+          <Route path="checkpoint-review" element={<CheckpointReviewPage />} />
+          <Route path="report-settings" element={<ReportSettingsPage />} />
           <Route path="keywords" element={<KeywordsPage />} />
           <Route path="reports" element={<ReportsPage />} />
           <Route path="suspended" element={<SuspendedPage />} />
@@ -143,8 +159,8 @@ function AppRoutes() {
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
           <Route path="seller-applications" element={<SellerApplicationsPage />} />
-          <Route path="queue" element={<Navigate to="/moderator" replace />} />
-          {placeholderRoutes(moderatorPlaceholders)}
+          <Route path="queue" element={<Navigate to="/specialist" replace />} />
+          {placeholderRoutes(specialistPlaceholders)}
         </Route>
 
         {/* Chế độ Trẻ Em: cần phiên Kid Mode (ba mẹ mở ở trang Bé nhà mình); thoát ra phải qua cổng PIN */}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Bot, Loader2, Lock, Unlock } from "lucide-react";
 import { formatDateTime } from "../../constants/moderation";
-import { useAiFlags, useSetAiBlock } from "../../hooks/useModerator";
+import { useAiFlags, useSetAiBlock } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
 
 const WINDOWS = [7, 14, 30];
@@ -34,7 +34,7 @@ function BlockForm({ flag, onDone }) {
 }
 
 // Cảnh báo AI (luồng 7.6): phụ huynh có nhiều lượt AI bị chặn (nội dung không an toàn / từ khoá cấm).
-// Moderator tạm khoá riêng quyền dùng AI — phụ huynh vẫn đọc truyện, tự viết truyện được.
+// Chuyên gia tạm khoá riêng quyền dùng AI — phụ huynh vẫn đọc truyện, tự viết truyện được.
 function AiFlagsPage() {
   const [days, setDays] = useState(7);
   const [min, setMin] = useState(2);

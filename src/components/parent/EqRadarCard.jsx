@@ -1,66 +1,109 @@
 import { ArrowRight, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CASEL } from "../../constants/casel";
+import { EQ_LEVELS, EQ_REPORT_NOTE, levelLabel } from "../../constants/eqLevels";
 import { ROUTES } from "../../constants/routes";
-import { EQ_MIN_ITEMS } from "../../services/childService";
 
-// Khung rộng hơn chiều cao để nhãn dài (VD "Kỹ năng QH (92%)") không bị cắt
+// Khung rộng hơn chiều cao để nhãn 2 dòng ở trục trái / phải không bị cắt
 const WIDTH = 560;
-const HEIGHT = 340;
+const HEIGHT = 360;
 const CX = WIDTH / 2;
-const CY = HEIGHT / 2 + 6;
-const RADIUS = 110;
-const LEVELS = [0.25, 0.5, 0.75, 1];
+const CY = HEIGHT / 2 + 10;
+const RADIUS = 116;
+const RINGS = [1, 2, 3]; // Đang làm quen / Đang phát triển / Vững
+const RING_NAMES = ["emerging", "developing", "secure"];
 
-// Điểm trên trục thứ i (bắt đầu từ đỉnh, theo chiều kim đồng hồ)
-const pointAt = (i, total, ratio) => {
+// Điểm trên trục thứ i (bắt đầu từ đỉnh, theo chiều kim đồng hồ); value 0..3
+const pointAt = (i, total, value) => {
   const angle = (Math.PI * 2 * i) / total - Math.PI / 2;
-  return [CX + Math.cos(angle) * RADIUS * ratio, CY + Math.sin(angle) * RADIUS * ratio];
+  const r = (RADIUS * value) / 3;
+  return [CX + Math.cos(angle) * r, CY + Math.sin(angle) * r];
 };
 
 const toPath = (points) => points.map((p) => p.join(",")).join(" ");
 
-// skills: [{ caselCode, score: 0–100 | null }] — null = chưa đủ dữ liệu, vẽ ở tâm
-export function RadarChart({ skills }) {
-  const n = skills.length;
-  const ratio = (s) => (s.score ?? 0) / 100;
+/** Nhãn mức độ (luôn có chữ, không chỉ màu). */
+export function LevelBadge({ level, className = "" }) {
+  const meta = EQ_LEVELS[level];
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap ${
+        meta ? meta.badge : "border border-dashed border-navy/25 text-navy/55"
+      } ${className}`}
+    >
+      {levelLabel(level)}
+    </span>
+  );
+}
+
+/**
+ * Radar 5 năng lực theo MỨC (1–3), không theo %. Năng lực chưa có dữ liệu: trục để trống, ghi "chưa có dữ liệu".
+ * Chỉ nối hai trục kề nhau khi cả hai có mức; đủ 5 trục mới tô vùng.
+ * competencies: [{ caselCode, nameVi, level }]
+ */
+export function RadarChart({ competencies }) {
+  const n = competencies.length;
+  const value = (c) => EQ_LEVELS[c.level]?.value ?? null;
+  const points = competencies.map((c, i) => (value(c) == null ? null : pointAt(i, n, value(c))));
+  const complete = points.every(Boolean);
 
   return (
-    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="mx-auto w-full max-w-135" role="img" aria-label="Biểu đồ EQ theo 5 năng lực CASEL">
-      {LEVELS.map((lv) => (
-        <polygon key={lv} points={toPath(skills.map((_, i) => pointAt(i, n, lv)))} fill="none" stroke="#f1e8dc" strokeWidth="1.5" />
+    <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="mx-auto w-full max-w-140" role="img" aria-label="Biểu đồ mức độ 5 năng lực CASEL">
+      <title>
+        {competencies.map((c) => `${CASEL[c.caselCode]?.label ?? c.nameVi}: ${levelLabel(c.level)}`).join("; ")}
+      </title>
+      {RINGS.map((lv) => (
+        <polygon key={lv} points={toPath(competencies.map((_, i) => pointAt(i, n, lv)))} fill="none" stroke="#f1e8dc" strokeWidth="1.5" />
       ))}
-      {skills.map((_, i) => {
-        const [x, y] = pointAt(i, n, 1);
-        return <line key={i} x1={CX} y1={CY} x2={x} y2={y} stroke="#f1e8dc" strokeWidth="1.5" />;
-      })}
-
-      <polygon
-        points={toPath(skills.map((s, i) => pointAt(i, n, ratio(s))))}
-        fill="#00a896"
-        fillOpacity="0.18"
-        stroke="#006b5f"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
-      />
-      {skills.map((s, i) => {
-        if (s.score == null) return null;
-        const [x, y] = pointAt(i, n, ratio(s));
-        return <circle key={s.caselCode} cx={x} cy={y} r="5" fill="#006b5f" stroke="#fff" strokeWidth="2" />;
-      })}
-
-      {skills.map((s, i) => {
-        const [x, y] = pointAt(i, n, 1.28);
-        const anchor = Math.abs(x - CX) < 5 ? "middle" : x > CX ? "start" : "end";
+      {competencies.map((c, i) => {
+        const [x, y] = pointAt(i, n, 3);
         return (
-          <text
-            key={s.caselCode}
-            x={anchor === "start" ? x - 14 : anchor === "end" ? x + 14 : x}
-            y={anchor === "middle" && y < CY ? y + 8 : y + 4}
-            textAnchor={anchor}
-            className={`text-[13px] font-bold ${s.score == null ? "fill-navy/40" : "fill-navy"}`}
-          >
-            {CASEL[s.caselCode]?.short} ({s.score == null ? "chưa đủ" : `${s.score}%`})
+          <line
+            key={c.caselCode}
+            x1={CX}
+            y1={CY}
+            x2={x}
+            y2={y}
+            stroke={value(c) == null ? "#e5d9c9" : "#f1e8dc"}
+            strokeWidth="1.5"
+            strokeDasharray={value(c) == null ? "4 4" : undefined}
+          />
+        );
+      })}
+      {/* Nhãn vòng dọc trục trên cùng */}
+      {RINGS.map((lv, k) => {
+        const [x, y] = pointAt(0, n, lv);
+        return (
+          <text key={lv} x={x + 6} y={y + 4} className="fill-navy/45 text-[10px] font-semibold">
+            {EQ_LEVELS[RING_NAMES[k]].label}
+          </text>
+        );
+      })}
+
+      {complete && <polygon points={toPath(points)} fill="#00a896" fillOpacity="0.16" stroke="none" />}
+      {points.map((p, i) => {
+        const q = points[(i + 1) % n];
+        if (!p || !q) return null;
+        return <line key={i} x1={p[0]} y1={p[1]} x2={q[0]} y2={q[1]} stroke="#006b5f" strokeWidth="2" strokeLinecap="round" />;
+      })}
+      {points.map((p, i) =>
+        p ? <circle key={competencies[i].caselCode} cx={p[0]} cy={p[1]} r="5.5" fill="#006b5f" stroke="#fff" strokeWidth="2" /> : null,
+      )}
+
+      {competencies.map((c, i) => {
+        const [x, y] = pointAt(i, n, 3.75);
+        const anchor = Math.abs(x - CX) < 5 ? "middle" : x > CX ? "start" : "end";
+        const tx = anchor === "start" ? x - 18 : anchor === "end" ? x + 18 : x;
+        const ty = y - 4;
+        const empty = value(c) == null;
+        return (
+          <text key={c.caselCode} x={tx} y={ty} textAnchor={anchor}>
+            <tspan x={tx} className={`text-[13px] font-bold ${empty ? "fill-navy/45" : "fill-navy"}`}>
+              {CASEL[c.caselCode]?.short ?? c.nameVi}
+            </tspan>
+            <tspan x={tx} dy="16" className={`text-[11px] font-semibold ${empty ? "fill-navy/40" : "fill-secondary-dark"}`}>
+              {empty ? "chưa có dữ liệu" : levelLabel(c.level)}
+            </tspan>
           </text>
         );
       })}
@@ -68,56 +111,51 @@ export function RadarChart({ skills }) {
   );
 }
 
-/**
- * Báo cáo EQ theo 5 năng lực CASEL (eq_competency_stats).
- * Chỉ tính lần chọn đầu của lần chơi đầu, trên toàn bộ lịch sử; < 5 câu trả lời → "chưa đủ dữ liệu".
- */
-function EqRadarCard({ childName, skills }) {
-  const answered = skills.reduce((sum, s) => sum + s.items, 0);
-  const hasAnyScore = skills.some((s) => s.score != null);
+/** Thẻ báo cáo EQ ở dashboard: radar mức độ + mức từng năng lực (eqReport của /children/:id/overview). */
+function EqRadarCard({ childName, report }) {
+  const competencies = report?.competencies ?? [];
+  const hasAnyLevel = competencies.some((c) => c.level);
 
   return (
     <section className="card flex flex-col p-6 md:p-7">
       <div>
         <h3 className="text-xl">Báo cáo EQ của {childName}</h3>
-        <p className="mt-1 text-sm text-navy/60">Dựa trên {answered} câu trả lời ở các điểm dừng trong truyện (lần đọc đầu)</p>
+        <p className="mt-1 text-sm text-navy/60">Mức hiểu ở 5 năng lực CASEL, từ câu trả lời lần đọc đầu của các truyện AI</p>
       </div>
 
-      {hasAnyScore ? (
+      {hasAnyLevel ? (
         <div className="my-4">
-          <RadarChart skills={skills} />
+          <RadarChart competencies={competencies} />
         </div>
       ) : (
         <div className="my-6 rounded-2xl bg-surface p-6 text-center">
           <p className="text-4xl">🌱</p>
-          <p className="mt-2 font-display font-bold">Chưa đủ dữ liệu để vẽ biểu đồ</p>
+          <p className="mt-2 font-display font-bold">Chưa có dữ liệu để vẽ biểu đồ</p>
           <p className="mt-1 text-sm text-navy/60">
-            Mỗi năng lực cần ít nhất {EQ_MIN_ITEMS} câu trả lời. Biểu đồ sẽ hiện khi bé đọc thêm truyện có điểm dừng.
+            Mỗi kỹ năng cần ít nhất {report?.settings?.minItems ?? 3} câu trả lời. Biểu đồ sẽ hiện khi bé đọc thêm truyện có câu hỏi.
           </p>
         </div>
       )}
 
       <ul className="grid gap-1.5 text-sm sm:grid-cols-2">
-        {skills.map((s) => (
-          <li key={s.caselCode} className="flex items-center justify-between gap-2 rounded-xl bg-surface px-3 py-2">
-            <span className="font-semibold">{s.nameVi}</span>
-            <span className={s.score == null ? "text-xs text-navy/50" : "font-bold text-secondary-dark"}>
-              {s.score == null ? `${s.items}/${EQ_MIN_ITEMS} câu` : `${s.score}%`}
-            </span>
+        {competencies.map((c) => (
+          <li key={c.caselCode} className="flex items-center justify-between gap-2 rounded-xl bg-surface px-3 py-2">
+            <span className="font-semibold">{c.nameVi}</span>
+            <LevelBadge level={c.level} />
           </li>
         ))}
       </ul>
 
       <p className="mt-4 flex items-start gap-2 text-xs text-navy/60">
         <Info size={14} className="mt-0.5 shrink-0" />
-        Đây là tín hiệu quan sát qua lựa chọn của bé trong truyện, không mang tính chẩn đoán tâm lý hay y khoa.
+        {EQ_REPORT_NOTE}
       </p>
 
       <Link
         to={ROUTES.PARENT.EQ_JOURNEY}
         className="mt-4 inline-flex items-center gap-1.5 self-start text-sm font-bold text-primary-dark hover:gap-2.5 hover:text-primary"
       >
-        Xem tiến bộ theo thời gian <ArrowRight size={16} />
+        Xem báo cáo chi tiết <ArrowRight size={16} />
       </Link>
     </section>
   );

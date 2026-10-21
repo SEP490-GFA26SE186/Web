@@ -1,6 +1,6 @@
 import api, { getErrorMessage } from "./api";
 
-// Chợ truyện (rev8): truyện đã được Moderator duyệt, mua qua payOS (0đ nhận ngay).
+// Chợ truyện (rev8): truyện đã được chuyên gia duyệt, mua qua payOS (0đ nhận ngay).
 // Người mua dùng bản đăng bán nguyên trạng (tên chung) — quyền đọc là entitlement.
 const call = async (request) => {
   try {

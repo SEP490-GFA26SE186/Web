@@ -23,12 +23,12 @@ export const getSellerApplications = async (status = "pending") =>
 
 export const decideSeller = (userId, approve) => call(api.post(`/moderation/sellers/${userId}/decision`, { approve }));
 
-/** Thông tin cho layout: tên Moderator + badge số việc đang chờ. */
-export const getModeratorOverview = async () => {
+/** Thông tin cho layout: tên chuyên gia + badge số việc đang chờ. */
+export const getSpecialistOverview = async () => {
   const [queue, sellers, reports] = await Promise.all([getReviewQueue(), getSellerApplications("pending"), getReportGroups("open")]);
   const user = useAuthStore.getState().user;
   return {
-    moderator: { name: user?.fullName || user?.username || "Kiểm duyệt viên", title: "Kiểm duyệt viên", avatar: null },
+    specialist: { name: user?.fullName || user?.username || "Chuyên gia sư phạm", title: "Chuyên gia sư phạm", avatar: null },
     navBadges: {
       storyQueue: queue.length,
       sellerApplications: sellers.length,

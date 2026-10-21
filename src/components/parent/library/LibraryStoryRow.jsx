@@ -18,11 +18,11 @@ function LibraryStoryRow({ story }) {
 
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
-          <CaselTag competency={story.topic.competency} className="bg-secondary-tint" />
+          <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" />
           <KindBadge story={story} />
         </div>
         <h3 className="mt-2 line-clamp-1 text-lg group-hover:text-primary-dark">{story.title}</h3>
-        <p className="mt-0.5 line-clamp-1 text-sm text-navy/65">Bài học: {story.topic.title}</p>
+        {story.topic && <p className="mt-0.5 line-clamp-1 text-sm text-navy/65">Bài học: {story.topic.title}</p>}
         <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-navy/60">
           <StoryFacts story={story} />
           <span className={progress.className}>{progress.text}</span>

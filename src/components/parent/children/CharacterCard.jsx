@@ -1,4 +1,5 @@
-import { ArrowRight, Loader2, UserRound, WandSparkles } from "lucide-react";
+import { ArrowRight, Loader2, UserRound } from "lucide-react";
+import CharacterPortrait from "../CharacterPortrait";
 import { Link } from "react-router-dom";
 import { ROUTES } from "../../../constants/routes";
 import SectionCard from "./SectionCard";
@@ -8,13 +9,13 @@ const PORTRAIT_STATUS = {
   none: { label: "Chưa có chân dung", className: "bg-surface text-navy/60" },
   queued: { label: "Đang chờ vẽ", className: "bg-primary-tint text-primary-dark", spinning: true },
   generating: { label: "AI đang vẽ", className: "bg-primary-tint text-primary-dark", spinning: true },
-  ready: { label: "Đã chọn chân dung", className: "bg-secondary-tint text-secondary-dark" },
+  ready: { label: "Đã có chân dung", className: "bg-secondary-tint text-secondary-dark" },
   failed: { label: "Vẽ thất bại", className: "bg-danger-tint text-danger-dark" },
 };
 
 /**
  * Nhân vật đại diện của bé (characters.child_id — mỗi bé tối đa 1 nhân vật).
- * Ngoại hình chỉ mô tả bằng chữ. Chân dung AI thuộc phần ảnh đang nghiên cứu (chưa bật).
+ * Ngoại hình mô tả bằng chữ; chân dung AI (1 ảnh) là ảnh tham chiếu để tranh trong truyện vẽ đúng bé.
  */
 function CharacterCard({ child, onEdit }) {
   const character = child.character;
@@ -39,16 +40,13 @@ function CharacterCard({ child, onEdit }) {
             <p className="text-xs font-bold text-navy/60">Mô tả ngoại hình</p>
             <p className="mt-1 text-sm leading-relaxed">{character.appearance}</p>
           </div>
+          <div className="max-w-xs">
+            <CharacterPortrait character={{ ...character, name: character.name ?? child.name }} />
+          </div>
           <div className="flex flex-wrap gap-2">
             <button onClick={onEdit} className="rounded-full bg-surface px-4 py-2 text-sm font-semibold transition hover:bg-outline">
               Sửa mô tả
             </button>
-            <span
-              title="Chân dung AI đang được nghiên cứu, sẽ có sau"
-              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-full bg-surface px-4 py-2 text-sm font-semibold text-navy/45"
-            >
-              <WandSparkles size={15} /> Chân dung AI — sắp có
-            </span>
             <Link to={ROUTES.PARENT.FAMILY_CHARACTERS} className="inline-flex items-center gap-1 px-2 py-2 text-sm font-bold text-primary-dark hover:gap-2">
               Nhân vật gia đình <ArrowRight size={15} />
             </Link>

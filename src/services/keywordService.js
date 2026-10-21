@@ -1,6 +1,6 @@
 import api, { getErrorMessage } from "./api";
 
-// Từ khoá bị chặn (blocked_keywords) — Moderator quản lý. Dùng khi AI viết truyện và khi phụ huynh tự viết / sửa:
+// Từ khoá bị chặn (blocked_keywords) — chuyên gia quản lý. Dùng khi AI viết truyện và khi phụ huynh tự viết / sửa:
 // `block` chặn hẳn (không lưu được), `warn` chỉ cảnh báo.
 
 const call = async (request) => {

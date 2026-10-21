@@ -10,7 +10,7 @@ Mật khẩu chung cho tất cả tài khoản: **`123456`**
 | Vai trò          | Email                        | Số điện thoại | Vào cổng     |
 | ---------------- | ---------------------------- | ------------- | ------------ |
 | Phụ huynh        | `me.lanhuong@storyweaver.vn` | `0901234567`  | `/parent`    |
-| Kiểm duyệt viên  | `kdv@storyweaver.vn`         | `0907654321`  | `/moderator` |
+| Chuyên gia sư phạm | `kdv@storyweaver.vn`         | `0907654321`  | `/specialist` |
 | Admin            | `admin@storyweaver.vn`       | `0909999999`  | `/admin`     |
 
 - Đăng nhập được bằng **email hoặc số điện thoại** (nhận cả dạng `+84...`).

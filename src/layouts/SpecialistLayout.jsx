@@ -1,12 +1,12 @@
-import { AlertTriangle, Ban, Bot, Brain, ClipboardList, Flag, IdCard, LayoutDashboard, ListChecks, Mountain, PauseCircle } from "lucide-react";
+import { AlertTriangle, Ban, Bot, Brain, ClipboardList, FileQuestion, Flag, IdCard, LayoutDashboard, ListChecks, Mountain, PauseCircle, ScanSearch, SlidersHorizontal, Sprout } from "lucide-react";
 import AppShell from "../components/shell/AppShell";
 import { ROUTES } from "../constants/routes";
-import { useModeratorOverview } from "../hooks/useModerator";
+import { useSpecialistOverview } from "../hooks/useSpecialist";
 
-const R = ROUTES.MODERATOR;
+const R = ROUTES.SPECIALIST;
 
-function ModeratorLayout() {
-  const { data } = useModeratorOverview();
+function SpecialistLayout() {
+  const { data } = useSpecialistOverview();
   const badges = data?.navBadges ?? {};
 
   const sections = [
@@ -19,9 +19,18 @@ function ModeratorLayout() {
       ],
     },
     {
+      title: "Chương trình sư phạm",
+      items: [
+        { to: R.SUB_SKILLS, label: "Kỹ năng con", icon: Sprout },
+        { to: R.TEMPLATES, label: "Mẫu câu hỏi", icon: FileQuestion },
+        { to: R.TOPICS, label: "Bài học", icon: Brain },
+        { to: R.CHECKPOINT_REVIEW, label: "Soát câu hỏi AI", icon: ScanSearch },
+        { to: R.REPORT_SETTINGS, label: "Tham số báo cáo", icon: SlidersHorizontal },
+      ],
+    },
+    {
       title: "Nội dung",
       items: [
-        { to: R.TOPICS, label: "Bài học", icon: Brain },
         { to: R.KEYWORDS, label: "Từ khoá chặn", icon: Ban },
         { to: R.BACKGROUNDS, label: "Thư viện bối cảnh", icon: Mountain, soon: true },
       ],
@@ -41,12 +50,12 @@ function ModeratorLayout() {
   return (
     <AppShell
       homeTo={R.DASHBOARD}
-      brand={{ subtitle: "Kiểm duyệt", badge: { label: "MOD", className: "bg-primary-dark text-white" } }}
+      brand={{ subtitle: "Chuyên gia sư phạm", badge: { label: "CG", className: "bg-primary-dark text-white" } }}
       sections={sections}
-      extraTitles={{ "/moderator/workspace": "Lượt duyệt" }}
-      user={data && { name: data.moderator.name, subtitle: "Kiểm duyệt viên" }}
+      extraTitles={{ "/specialist/workspace": "Lượt duyệt" }}
+      user={data && { name: data.specialist.name, subtitle: "Chuyên gia sư phạm" }}
     />
   );
 }
 
-export default ModeratorLayout;
+export default SpecialistLayout;

@@ -7,7 +7,7 @@ import { useAuditLogs } from "../../hooks/useAdmin";
 const ACTION_LABELS = {
   "account.lock": "Khoá tài khoản",
   "account.unlock": "Mở khoá tài khoản",
-  "account.create_moderator": "Tạo Kiểm duyệt viên",
+  "account.create_moderator": "Tạo Chuyên gia sư phạm",
   "plan.create": "Tạo gói",
   "plan.update": "Sửa gói",
   "price_tier.create": "Thêm bậc giá",
@@ -27,12 +27,12 @@ const PREFIX_LABELS = {
   all: "Tất cả", account: "Tài khoản", plan: "Gói", price_tier: "Bậc giá", setting: "Cấu hình", refund: "Hoàn tiền",
   withdrawal: "Rút tiền", appeal: "Kháng nghị", strike: "Cảnh cáo", listing: "Truyện", report: "Báo cáo", audit: "Kiểm tra", reconcile: "Đối soát",
 };
-const ROLE = { admin: "Admin", moderator: "Kiểm duyệt viên", parent: "Phụ huynh" };
+const ROLE = { admin: "Admin", specialist: "Chuyên gia sư phạm", parent: "Phụ huynh" };
 
 /** Tóm tắt trạng thái trước → sau (JSON nhỏ). */
 const brief = (v) => (v == null ? "" : typeof v === "object" ? Object.entries(v).map(([k, x]) => `${k}: ${typeof x === "object" ? JSON.stringify(x) : x}`).join(", ") : String(v));
 
-// Nhật ký thao tác của Admin và Kiểm duyệt viên (admin_audit_logs) — chỉ ghi thêm.
+// Nhật ký thao tác của Admin và Chuyên gia sư phạm (admin_audit_logs) — chỉ ghi thêm.
 function AuditLogsPage() {
   const [action, setAction] = useState("all");
   const [page, setPage] = useState(1);
@@ -40,7 +40,7 @@ function AuditLogsPage() {
   const logs = data?.logs ?? [];
   return (
     <div className="space-y-5">
-      <PageHeader title="Nhật ký kiểm toán" description="Mọi thao tác thay đổi tiền, quyền và nội dung của Admin / Kiểm duyệt viên.">
+      <PageHeader title="Nhật ký kiểm toán" description="Mọi thao tác thay đổi tiền, quyền và nội dung của Admin / Chuyên gia sư phạm.">
         <select value={action} onChange={(e) => { setAction(e.target.value); setPage(1); }} aria-label="Loại thao tác" className="cursor-pointer rounded-full border-[1.5px] border-outline bg-white px-4 py-2 text-sm">
           {["all", ...(data?.prefixes ?? [])].map((p) => <option key={p} value={p}>{PREFIX_LABELS[p] ?? p}</option>)}
         </select>

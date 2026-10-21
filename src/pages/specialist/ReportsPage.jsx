@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AlertTriangle, Flag, Loader2, PauseCircle, PenLine, X } from "lucide-react";
-import StrikeModal from "../../components/moderator/StrikeModal";
+import StrikeModal from "../../components/specialist/StrikeModal";
 import { LISTING_STATUS, REPORT_CATEGORIES, REPORT_STATUS, REVIEW_TYPES, formatDateTime } from "../../constants/moderation";
 import { ROUTES } from "../../constants/routes";
-import { useDismissReport, useHideReview, useReportGroups, useSuspendListing } from "../../hooks/useModerator";
+import { useDismissReport, useHideReview, useReportGroups, useSuspendListing } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
 
 const TABS = [
@@ -68,7 +68,7 @@ function ReportGroup({ group, onStrike }) {
         </div>
         <div className="flex flex-wrap gap-2">
           {openReview && (
-            <Link to={ROUTES.MODERATOR.workspace(openReview.id)} className="btn-primary px-4 py-2 text-sm">
+            <Link to={ROUTES.SPECIALIST.workspace(openReview.id)} className="btn-primary px-4 py-2 text-sm">
               <PenLine size={15} /> {REVIEW_TYPES[openReview.reviewType]?.label}: xem lại truyện
             </Link>
           )}
@@ -136,7 +136,7 @@ function ReportGroup({ group, onStrike }) {
 }
 
 // Báo cáo vi phạm từ phụ huynh, gom theo truyện. Đủ 3 người khác nhau trong 24 giờ → BE tự tạm gỡ và tạo lượt
-// hậu kiểm; Moderator vào xem lại truyện để giữ hoặc gỡ hẳn (gỡ hẳn tự cảnh cáo tác giả, đóng các báo cáo).
+// hậu kiểm; chuyên gia vào xem lại truyện để giữ hoặc gỡ hẳn (gỡ hẳn tự cảnh cáo tác giả, đóng các báo cáo).
 function ReportsPage() {
   const [status, setStatus] = useState("open");
   const [strike, setStrike] = useState(null);

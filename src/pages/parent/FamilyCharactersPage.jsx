@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { BookOpen, ImageOff, Loader2, Pencil, Plus, Trash2, UsersRound } from "lucide-react";
+import { BookOpen, Loader2, Pencil, Plus, Trash2, UsersRound } from "lucide-react";
+import CharacterPortrait from "../../components/parent/CharacterPortrait";
 import Modal from "../../components/common/Modal";
 import { ROUTES } from "../../constants/routes";
 import { studioKeys, useCharacters } from "../../hooks/useStudio";
@@ -141,9 +142,9 @@ function FamilyCharactersPage() {
               </div>
             </div>
             <p className="line-clamp-3 text-sm text-navy/75">{c.appearance}</p>
+            <CharacterPortrait character={c} />
             <div className="mt-auto flex flex-wrap items-center gap-3 pt-1 text-xs text-navy/55">
               <span className="flex items-center gap-1"><BookOpen size={13} /> {c.storiesCount ? `Có trong ${c.storiesCount} truyện` : "Chưa có trong truyện nào"}</span>
-              <span className="flex items-center gap-1" title="Chân dung AI đang được nghiên cứu, sẽ có sau"><ImageOff size={13} /> Chân dung AI — sắp có</span>
             </div>
           </li>
         ))}

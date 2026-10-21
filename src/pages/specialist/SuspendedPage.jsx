@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AlertTriangle, Loader2, PauseCircle, PenLine } from "lucide-react";
-import StrikeModal from "../../components/moderator/StrikeModal";
+import StrikeModal from "../../components/specialist/StrikeModal";
 import { DECISION_LABELS, REVIEW_TYPES, formatDateTime } from "../../constants/moderation";
 import { ROUTES } from "../../constants/routes";
-import { useRestrictedListings } from "../../hooks/useModerator";
+import { useRestrictedListings } from "../../hooks/useSpecialist";
 
 const TABS = [
   { value: "suspended", label: "Đang tạm gỡ" },
   { value: "archived", label: "Đã gỡ hẳn" },
 ];
 
-// Truyện tạm gỡ: ẩn khỏi chợ, không mua được, bé đã mua tạm không đọc được — chờ Moderator xem lại để giữ hoặc gỡ hẳn.
+// Truyện tạm gỡ: ẩn khỏi chợ, không mua được, bé đã mua tạm không đọc được — chờ chuyên gia xem lại để giữ hoặc gỡ hẳn.
 function SuspendedPage() {
   const [status, setStatus] = useState("suspended");
   const [strike, setStrike] = useState(null);
@@ -59,7 +59,7 @@ function SuspendedPage() {
                   )}
                 </div>
                 {open && (
-                  <Link to={ROUTES.MODERATOR.workspace(r.id)} className="btn-primary px-4 py-2 text-sm">
+                  <Link to={ROUTES.SPECIALIST.workspace(r.id)} className="btn-primary px-4 py-2 text-sm">
                     <PenLine size={15} /> {REVIEW_TYPES[r.reviewType]?.label}: xem lại
                   </Link>
                 )}

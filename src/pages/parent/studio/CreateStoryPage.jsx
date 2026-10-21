@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Bot, Check, Loader2, PenLine, Plus, Sparkles, Star } from "lucide-react";
 import Modal from "../../../components/common/Modal";
 import Switch from "../../../components/common/Switch";
@@ -8,7 +8,7 @@ import CaselTag from "../../../components/parent/library/CaselTag";
 import { fieldClass } from "../../../components/parent/studio/PageEditor";
 import { AI_LENGTHS } from "../../../constants/story";
 import { ROUTES } from "../../../constants/routes";
-import { refreshCredit, useCreateCharacter, useCharacters, useCreateStory } from "../../../hooks/useStudio";
+import { refreshCredit, useAiPricing, useCreateCharacter, useCharacters, useCreateStory } from "../../../hooks/useStudio";
 import { useTopics } from "../../../hooks/useTopics";
 import { generateStory } from "../../../services/storyService";
 import useAuthStore from "../../../stores/authStore";
@@ -94,8 +94,13 @@ function CreateStoryPage() {
   const topics = useTopics({});
   const characters = useCharacters();
   const createStory = useCreateStory();
+  const pricing = useAiPricing();
+  const priceOf = (len) => pricing.data?.lengths?.find((p) => p.length === len);
 
-  const [topicId, setTopicId] = useState(null);
+  // ?topicId= từ "Bài học nên đọc tiếp" của Báo cáo EQ → chọn sẵn bài học + chế độ AI viết
+  const [searchParams] = useSearchParams();
+  const suggestedTopicId = searchParams.get("topicId");
+  const [topicId, setTopicId] = useState(suggestedTopicId);
   const [selected, setSelected] = useState([]); // characterId theo thứ tự chọn
   const [mainId, setMainId] = useState(null);
   const [mode, setMode] = useState("ai");
@@ -103,6 +108,7 @@ function CreateStoryPage() {
   const [title, setTitle] = useState("");
   const [situation, setSituation] = useState("");
   const [useTts, setUseTts] = useState(true);
+  const [useAiImage, setUseAiImage] = useState(false);
   const [showNewCharacter, setShowNewCharacter] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -114,10 +120,27 @@ function CreateStoryPage() {
     if (!next.includes(mainId)) setMainId(next[0] ?? null);
   };
 
+  // Giá của lần AI viết này (theo độ dài đang chọn) và credit còn lại sau khi viết
+  const cost = mode === "ai" ? priceOf(length)?.credits : 0;
+  const afterCost = creditBalance != null && cost != null ? creditBalance - cost : null;
+  const notEnough = mode === "ai" && afterCost != null && afterCost < 0;
+
+  // Tranh AI (chỉ truyện AI viết): tối đa `maxScenes` cảnh + chân dung còn thiếu của nhân vật đã chọn.
+  // Trừ dần khi vẽ (sau khi AI viết xong chữ); thiếu credit thì truyện vẫn viết, chỉ vẽ được đến đâu hay đến đó.
+  const imageCosts = pricing.data?.images;
+  const missingPortraits = (characters.data ?? []).filter(
+    (c) => selected.includes(c.id) && !c.portraitImageUrl && c.portraitStatus === "none",
+  ).length;
+  const imagesMax =
+    mode === "ai" && useAiImage && imageCosts ? imageCosts.maxScenes * imageCosts.scene + missingPortraits * imageCosts.characterPortrait : 0;
+
+  // topicId lấy từ URL có thể là bài học đã tắt → chỉ coi là đã chọn khi có trong danh sách
+  const chosenTopicId = (topics.data ?? []).some((t) => t.id === topicId) ? topicId : null;
   const missing =
-    (!topicId && "Ba mẹ chọn một bài học nhé") ||
+    (mode === "ai" && !chosenTopicId && "Ba mẹ chọn một bài học nhé") ||
     (selected.length === 0 && "Ba mẹ chọn ít nhất một nhân vật nhé") ||
     (!title.trim() && "Ba mẹ đặt tên cho truyện nhé") ||
+    (notEnough && `Truyện này cần ${cost} credit, ba mẹ còn ${creditBalance} credit`) ||
     "";
 
   const submit = async () => {
@@ -128,18 +151,20 @@ function CreateStoryPage() {
     const ordered = [mainId, ...selected.filter((id) => id !== mainId)];
     try {
       const story = await createStory.mutateAsync({
-        topicId,
+        // Truyện tự viết có thể không gắn bài học
+        ...(chosenTopicId && { topicId: chosenTopicId }),
         length: mode === "ai" ? length : "custom",
         title: title.trim(),
         ...(situation.trim() && { situation: situation.trim() }),
         characters: ordered.map((characterId) => ({ characterId, isMain: characterId === mainId })),
-        useAiImage: false,
+        useAiImage: mode === "ai" && useAiImage,
         useTts,
       });
       if (mode === "ai") {
         try {
           await generateStory(story.id);
           refreshCredit(queryClient); // credit vừa bị giữ
+          if (cost > 0) toast.success(`Đã dùng ${cost} credit — AI đang viết truyện`);
         } catch (err) {
           // Truyện đã tạo; báo lỗi rồi để trang editor cho bấm "Cho AI viết" lại
           toast.error(err.status === 402 ? "Ba mẹ không đủ credit để AI viết truyện" : err.message);
@@ -160,9 +185,37 @@ function CreateStoryPage() {
       </Link>
       <h1 className="text-3xl">Sáng tác truyện mới</h1>
 
-      <Section step={1} title="Chọn bài học" hint="Bài học do chuyên gia soạn, mỗi bài gắn một năng lực cảm xúc (CASEL).">
+      <Section
+        step={1}
+        title="Chọn bài học"
+        hint={
+          mode === "ai"
+            ? "Bài học do chuyên gia soạn, mỗi bài gắn một năng lực cảm xúc (CASEL)."
+            : "Truyện tự viết không bắt buộc chọn bài học."
+        }
+      >
+        {mode !== "ai" && (
+          <>
+            <button
+              type="button"
+              onClick={() => setTopicId(null)}
+              aria-pressed={!topicId}
+              className={`rounded-full px-4 py-2 text-sm font-bold ${!topicId ? "bg-secondary text-white" : "bg-surface hover:bg-secondary-tint"}`}
+            >
+              Không chọn bài học
+            </button>
+            <p className="text-sm text-navy/60">Truyện tự viết không tính vào báo cáo EQ.</p>
+          </>
+        )}
         {topics.isLoading && <Loader2 className="animate-spin text-primary" />}
         {topics.error && <p className="text-sm text-danger">{topics.error.message}</p>}
+        {suggestedTopicId && topics.data && (
+          <p className="rounded-2xl bg-secondary-tint px-4 py-2.5 text-sm text-secondary-dark">
+            {topics.data.some((t) => t.id === suggestedTopicId)
+              ? "Đã chọn sẵn bài học gợi ý từ Báo cáo EQ. Ba mẹ có thể đổi bài khác."
+              : "Bài học gợi ý không còn mở, ba mẹ chọn bài học khác nhé."}
+          </p>
+        )}
         <div className="grid gap-3 sm:grid-cols-2">
           {(topics.data ?? []).map((t) => (
             <button
@@ -171,7 +224,7 @@ function CreateStoryPage() {
               onClick={() => setTopicId(t.id)}
               aria-pressed={topicId === t.id}
               aria-label={`Bài học: ${t.title}`}
-              className={`space-y-2 rounded-2xl border-2 p-4 text-left transition ${
+              className={`flex flex-col items-start justify-start gap-2 rounded-2xl border-2 p-4 text-left transition ${
                 topicId === t.id ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"
               }`}
             >
@@ -246,7 +299,7 @@ function CreateStoryPage() {
               onClick={() => setMode(value)}
               aria-pressed={mode === value}
               aria-label={label}
-              className={`space-y-1 rounded-2xl border-2 p-4 text-left transition ${mode === value ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"}`}
+              className={`flex flex-col justify-start gap-1 rounded-2xl border-2 p-4 text-left transition ${mode === value ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"}`}
             >
               <p className="flex items-center gap-2 font-display font-bold">
                 <Icon size={18} /> {label}
@@ -265,7 +318,8 @@ function CreateStoryPage() {
                 aria-pressed={length === l.value}
                 className={`rounded-full px-4 py-2 text-sm font-bold ${length === l.value ? "bg-secondary text-white" : "bg-surface hover:bg-secondary-tint"}`}
               >
-                {l.label} · {l.pages} trang
+                {l.label} · {priceOf(l.value)?.pages ?? l.pages} trang
+                {priceOf(l.value)?.credits != null && <span className="ml-1 opacity-80">· {priceOf(l.value).credits} credit</span>}
               </button>
             ))}
           </div>
@@ -298,26 +352,55 @@ function CreateStoryPage() {
           </div>
           <Switch checked={useTts} onChange={setUseTts} label="Giọng đọc kể truyện" />
         </div>
-        <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4 opacity-60">
+        <div className={`flex items-center justify-between gap-3 rounded-2xl bg-surface p-4 ${mode === "ai" ? "" : "opacity-60"}`}>
           <div>
             <p className="font-semibold">Tranh minh họa bằng AI</p>
-            <p className="text-xs text-navy/55">Sắp có</p>
+            <p className="text-xs text-navy/55">
+              {mode !== "ai"
+                ? "Hiện chỉ dành cho truyện AI viết"
+                : imageCosts
+                  ? `AI vẽ ${imageCosts.maxScenes > 1 ? `tối đa ${imageCosts.maxScenes} cảnh` : "cảnh"} (${imageCosts.scene} credit/cảnh)${
+                      missingPortraits ? ` + ${missingPortraits} chân dung còn thiếu (${imageCosts.characterPortrait} credit/chân dung)` : ""
+                    }, vẽ sau khi chữ xong`
+                  : "AI vẽ tranh cho từng cảnh sau khi viết xong chữ"}
+            </p>
           </div>
-          <Switch checked={false} onChange={() => {}} label="Tranh minh họa bằng AI" disabled />
+          <Switch checked={mode === "ai" && useAiImage} onChange={setUseAiImage} label="Tranh minh họa bằng AI" disabled={mode !== "ai"} />
         </div>
       </Section>
 
       <div className="card flex flex-wrap items-center justify-between gap-3 p-5">
-        <p className="text-sm text-navy/65">
-          {mode === "ai" ? (
-            <>
-              AI viết truyện sẽ dùng credit. Ba mẹ đang có <span className="font-bold text-navy">{creditBalance ?? "…"}</span> credit.
-            </>
+        <div className="min-w-0 flex-1 text-sm text-navy/65">
+          {mode !== "ai" ? (
+            "Truyện tự viết không dùng credit và không tính vào báo cáo EQ."
+          ) : cost == null ? (
+            "Đang tải giá…"
+          ) : notEnough ? (
+            <p className="font-semibold text-danger">
+              Truyện {priceOf(length) ? `${priceOf(length).pages} trang` : "này"} cần {cost} credit, ba mẹ còn {creditBalance} credit. Chọn độ dài ngắn hơn hoặc{" "}
+              <Link to={ROUTES.PARENT.BILLING} className="underline">nâng gói</Link>.
+            </p>
+          ) : cost === 0 ? (
+            "Lần viết này miễn phí."
           ) : (
-            "Truyện tự viết không dùng credit."
+            <p>
+              AI viết truyện này dùng <span className="font-bold text-navy">{cost} credit</span>
+              {afterCost != null && (
+                <>
+                  {" "}— ba mẹ đang có {creditBalance}, còn <span className="font-bold text-navy">{afterCost}</span> sau khi viết
+                </>
+              )}
+              . Nếu AI viết lỗi, credit được hoàn lại.
+              {imagesMax > 0 && (
+                <span className="mt-1 block">
+                  Tranh dùng thêm <span className="font-bold text-navy">tối đa {imagesMax} credit</span>, trừ dần khi vẽ từng cảnh
+                  {afterCost != null && afterCost < imagesMax ? " — không đủ thì truyện vẫn viết, tranh vẽ được đến đâu hay đến đó" : ""}.
+                </span>
+              )}
+            </p>
           )}
-        </p>
-        <button type="button" onClick={submit} disabled={submitting} className="btn-primary disabled:opacity-60">
+        </div>
+        <button type="button" onClick={submit} disabled={submitting || notEnough} className="btn-primary disabled:opacity-60">
           {submitting ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
           {mode === "ai" ? "Tạo & cho AI viết" : "Tạo truyện"}
         </button>

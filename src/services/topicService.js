@@ -1,6 +1,6 @@
 import api, { getErrorMessage } from "./api";
 
-// Bài học (topics) — mỗi bài học gắn 1 năng lực CASEL (eq_skills). Moderator/Admin quản lý.
+// Bài học (topics) — mỗi bài học gắn 1 năng lực CASEL (eq_skills). Chuyên gia/Admin quản lý.
 
 const call = async (request) => {
   try {

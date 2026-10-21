@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, IdCard, Loader2, X } from "lucide-react";
-import { useDecideSeller, useSellerApplications } from "../../hooks/useModerator";
+import { useDecideSeller, useSellerApplications } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
 
 const TABS = [
