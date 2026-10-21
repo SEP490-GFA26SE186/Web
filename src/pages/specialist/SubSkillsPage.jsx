@@ -111,13 +111,13 @@ function SubSkillFormModal({ subSkill, skills, onClose }) {
             <option value="">{form.skillId ? "— Chọn mục CASEL —" : "Chọn năng lực trước"}</option>
             {references.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.code}
+                {r.textVi ?? r.textEn}
               </option>
             ))}
           </select>
           {selectedRef && (
             <span className="mt-2 block rounded-2xl bg-secondary-tint px-4 py-2.5 text-sm text-navy/80">
-              <span className="font-bold">{selectedRef.code}:</span> {selectedRef.textEn}
+              <span className="font-bold">Bản gốc CASEL:</span> <span className="italic">{selectedRef.textEn}</span>
             </span>
           )}
         </label>
@@ -271,7 +271,8 @@ function SubSkillsPage() {
                   <p className="mt-1 line-clamp-2 text-sm text-navy/65">{s.descriptionVi}</p>
                   {s.caselReference && (
                     <p className="mt-1 text-xs text-navy/60">
-                      <span className="font-bold">{s.caselReference.code}:</span> {s.caselReference.textEn}
+                      <span className="font-bold">Mục CASEL:</span> {s.caselReference.textVi ?? s.caselReference.textEn}{" "}
+                      <span className="italic text-navy/45">({s.caselReference.textEn})</span>
                     </p>
                   )}
                   <p className="mt-1 text-xs text-navy/50">

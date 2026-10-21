@@ -13,13 +13,13 @@ const call = async (request) => {
 
 const clean = (params) => Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== "" && v !== "all"));
 
-/** GET /eq-skills/casel-references?skillId → [{ id, skillId, code, textEn, displayOrder }] */
+/** GET /eq-skills/casel-references?skillId → [{ id, skillId, code, textEn, textVi, displayOrder }] */
 export const getCaselReferences = async (skillId) =>
   (await call(api.get("/eq-skills/casel-references", { params: clean({ skillId }) }))).data;
 
 /**
  * GET /sub-skills?skillId&isActive&search
- * → [{ id, skillId, skill, caselReference:{id,code,textEn}, code, nameVi, descriptionVi, ageMin, ageMax, isActive, displayOrder,
+ * → [{ id, skillId, skill, caselReference:{id,code,textEn,textVi}, code, nameVi, descriptionVi, ageMin, ageMax, isActive, displayOrder,
  *      templatesCount, publishedTemplatesCount, topicsCount, checkpointsCount }]
  */
 export const getSubSkills = async ({ skillId, isActive, search } = {}) =>

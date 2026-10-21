@@ -150,7 +150,7 @@ function TopicFormModal({ topic, skills, onClose }) {
                       <input type="checkbox" className="mt-1" checked={checked} disabled={disabled} onChange={() => toggleSub(s.id)} />
                       <span className="min-w-0">
                         <span className="block font-semibold">{s.nameVi}</span>
-                        <span className="block text-xs text-navy/60">{s.caselReference?.textEn}</span>
+                        <span className="block text-xs text-navy/60" title={s.caselReference?.textEn}>{s.caselReference?.textVi ?? s.caselReference?.textEn}</span>
                         {noTemplate && <span className="block text-xs font-semibold text-danger">Chưa có mẫu câu hỏi đã ban hành</span>}
                       </span>
                     </label>
