@@ -5,7 +5,6 @@ import {
   deleteSubSkill,
   deleteTemplate,
   flagCheckpoint,
-  getCaselReferences,
   getCheckpointQueue,
   getCheckpointReviewStats,
   getReportSettings,
@@ -25,15 +24,11 @@ export const pedagogyKeys = {
   subSkillList: (filters) => ["sub-skills", "list", filters],
   templates: ["question-templates"],
   templateList: (filters) => ["question-templates", "list", filters],
-  casel: (skillId) => ["casel-references", skillId],
   checkpointReview: ["checkpoint-review"],
   checkpointQueue: (filters) => ["checkpoint-review", "queue", filters],
   checkpointStats: ["checkpoint-review", "stats"],
   reportSettings: ["pedagogy", "report-settings"],
 };
-
-export const useCaselReferences = (skillId) =>
-  useQuery({ queryKey: pedagogyKeys.casel(skillId), queryFn: () => getCaselReferences(skillId), enabled: !!skillId, staleTime: 30 * 60 * 1000 });
 
 export const useSubSkills = (filters, options = {}) =>
   useQuery({ queryKey: pedagogyKeys.subSkillList(filters), queryFn: () => getSubSkills(filters), placeholderData: keepPreviousData, ...options });

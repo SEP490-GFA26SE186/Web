@@ -150,7 +150,7 @@ function TopicFormModal({ topic, skills, onClose }) {
                       <input type="checkbox" className="mt-1" checked={checked} disabled={disabled} onChange={() => toggleSub(s.id)} />
                       <span className="min-w-0">
                         <span className="block font-semibold">{s.nameVi}</span>
-                        <span className="block text-xs text-navy/60" title={s.caselReference?.textEn}>{s.caselReference?.textVi ?? s.caselReference?.textEn}</span>
+                        <span className="block text-xs italic text-navy/60">{s.caselTextEn || "Kỹ năng do chuyên gia bổ sung"}</span>
                         {noTemplate && <span className="block text-xs font-semibold text-danger">Chưa có mẫu câu hỏi đã ban hành</span>}
                       </span>
                     </label>
@@ -307,7 +307,7 @@ function TopicsPage() {
                   {t.subSkills?.length > 0 && (
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                       {t.subSkills.map((s) => (
-                        <span key={s.id} title={s.caselReference?.textEn} className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-semibold text-navy/70">
+                        <span key={s.id} title={s.caselTextEn ?? undefined} className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-semibold text-navy/70">
                           {s.nameVi}
                         </span>
                       ))}

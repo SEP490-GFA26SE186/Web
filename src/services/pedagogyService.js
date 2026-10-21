@@ -13,25 +13,22 @@ const call = async (request) => {
 
 const clean = (params) => Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== "" && v !== "all"));
 
-/** GET /eq-skills/casel-references?skillId → [{ id, skillId, code, textEn, textVi, displayOrder }] */
-export const getCaselReferences = async (skillId) =>
-  (await call(api.get("/eq-skills/casel-references", { params: clean({ skillId }) }))).data;
-
 /**
- * GET /sub-skills?skillId&isActive&search
- * → [{ id, skillId, skill, caselReference:{id,code,textEn,textVi}, code, nameVi, descriptionVi, ageMin, ageMax, isActive, displayOrder,
+ * GET /sub-skills?skillId&isActive&source&search — kỹ năng con chính là mục CASEL:
+ * source "casel" (40 mục gốc, caselTextEn = nguyên văn tiếng Anh) | "specialist" (chuyên gia bổ sung, caselTextEn tuỳ chọn)
+ * → [{ id, skillId, skill, code, nameVi, descriptionVi, caselTextEn, source, ageMin, ageMax, isActive, displayOrder,
  *      templatesCount, publishedTemplatesCount, topicsCount, checkpointsCount }]
  */
-export const getSubSkills = async ({ skillId, isActive, search } = {}) =>
-  (await call(api.get("/sub-skills", { params: clean({ skillId, isActive, search: search?.trim() }) }))).data;
+export const getSubSkills = async ({ skillId, isActive, source, search } = {}) =>
+  (await call(api.get("/sub-skills", { params: clean({ skillId, isActive, source, search: search?.trim() }) }))).data;
 
-/** POST /sub-skills { skillId, caselReferenceId, nameVi, descriptionVi, ageMin, ageMax, displayOrder, isActive } */
+/** POST /sub-skills { skillId, nameVi, descriptionVi, caselTextEn?, ageMin, ageMax, displayOrder, isActive } → luôn source "specialist" */
 export const createSubSkill = async (payload) => (await call(api.post("/sub-skills", payload))).data;
 
-/** PUT /sub-skills/:id — gửi field cần đổi (409/422 khi đã có điểm dừng dùng) */
+/** PUT /sub-skills/:id — gửi field cần đổi (422: mục gốc CASEL không đổi năng lực / mã / câu tiếng Anh; đổi năng lực khi đã có điểm dừng dùng) */
 export const updateSubSkill = async (id, payload) => (await call(api.put(`/sub-skills/${id}`, payload))).data;
 
-/** DELETE /sub-skills/:id — 409 khi đã có mẫu / bài học / điểm dừng dùng */
+/** DELETE /sub-skills/:id — 409 với mục gốc CASEL (chỉ tắt được) hoặc khi đã có mẫu / bài học / điểm dừng dùng */
 export const deleteSubSkill = async (id) => (await call(api.delete(`/sub-skills/${id}`))).data;
 
 /** GET /question-templates?subSkillId&skillId&isActive → [{ id, title, answerFormat, isActive, subSkill, latestPublished, draft }] */

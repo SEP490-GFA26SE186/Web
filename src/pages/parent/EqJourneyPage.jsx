@@ -89,7 +89,7 @@ function EvidenceModal({ subSkill, evidence, onClose }) {
       open
       onClose={onClose}
       title={subSkill.nameVi}
-      description={subSkill.caselTextEn ? `Theo khung CASEL: ${subSkill.caselTextVi ?? subSkill.caselTextEn} (${subSkill.caselTextEn})` : undefined}
+      description={subSkill.caselTextEn ? `Theo khung CASEL: ${subSkill.nameVi} (${subSkill.caselTextEn})` : "Kỹ năng do chuyên gia bổ sung"}
       size="max-w-2xl"
     >
       {evidence.length === 0 ? (
@@ -146,7 +146,7 @@ function CompetencyCard({ competency, evidenceBySub, windowSize, onShowEvidence 
               <li key={s.id} className="flex flex-col gap-2 py-2.5 sm:flex-row sm:items-center">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">{s.nameVi}</p>
-                  {s.caselTextEn && <p className="text-xs text-navy/50" title={s.caselTextEn}>{s.caselTextVi ?? s.caselTextEn}</p>}
+                  {s.caselTextEn && <p className="text-xs italic text-navy/50">{s.caselTextEn}</p>}
                 </div>
                 <div className="flex shrink-0 flex-wrap items-center gap-2">
                   <LevelBadge level={s.level} />
