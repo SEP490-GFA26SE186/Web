@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
 import { formatRelativeDay } from "../../utils/format";
 import CaselTag from "./library/CaselTag";
-import { coverGradient } from "./library/storyMeta";
+import { coverOf } from "./library/storyMeta";
 import StoryCover from "./StoryCover";
 
 // Truyện bé đang đọc dở gần nhất (bookshelf item có readingProgress chưa hoàn thành)
@@ -16,9 +16,9 @@ function ContinueReadingCard({ story }) {
       <div className="pointer-events-none absolute -top-12 -left-12 h-64 w-64 rounded-full bg-secondary/15 blur-2xl" />
       <div className="relative z-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-12 lg:gap-8">
         <StoryCover
-          emoji={story.coverEmoji}
-          gradient={coverGradient(story.storyId)}
-          alt={story.title}
+          cover={coverOf(story)}
+          title={story.title}
+          size="lg"
           className="aspect-[4/3] w-full rounded-card shadow-mid lg:col-span-4"
         >
           <span className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold">

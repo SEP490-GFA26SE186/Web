@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 import { BookOpen, CheckCircle2, Loader2 } from "lucide-react";
+import StoryCover from "../../components/parent/StoryCover";
+import { coverOf } from "../../components/parent/library/storyMeta";
 import { ROUTES } from "../../constants/routes";
 import { useKidShelf } from "../../hooks/useKid";
 import useKidSessionStore from "../../stores/kidSessionStore";
-
-const COVERS = ["from-primary-tint to-secondary-tint", "from-secondary-tint to-primary-tint", "from-navy-tint to-primary-tint"];
-const COVER_EMOJI = ["📖", "🌈", "🦉", "🌟", "🐣", "🌻"];
 
 // Tủ sách của bé (GET /kid/bookshelf): chỉ truyện ba mẹ đã hoàn tất và đủ giọng đọc
 function KidBookshelfPage() {
@@ -32,7 +31,7 @@ function KidBookshelfPage() {
       )}
 
       <ul className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item, i) => {
+        {items.map((item) => {
           const progress = item.readingProgress;
           return (
             <li key={item.storyId}>
@@ -40,13 +39,8 @@ function KidBookshelfPage() {
                 to={ROUTES.KID.story(item.storyId)}
                 className="group block overflow-hidden rounded-stage bg-white shadow-low transition hover:-translate-y-1 hover:shadow-mid"
               >
-                <div className={`grid h-40 place-items-center bg-gradient-to-br ${COVERS[i % COVERS.length]}`}>
-                  <span className="text-7xl transition-transform group-hover:scale-110" aria-hidden="true">
-                    {COVER_EMOJI[i % COVER_EMOJI.length]}
-                  </span>
-                </div>
+                <StoryCover cover={coverOf(item)} title={item.title} showTitle zoomOnHover className="aspect-square w-full" />
                 <div className="space-y-2 p-5">
-                  <h2 className="line-clamp-2 text-lg">{item.title}</h2>
                   {progress?.isCompleted ? (
                     <p className="flex items-center gap-1 text-sm font-bold text-secondary-dark">
                       <CheckCircle2 size={16} /> Đã đọc xong — đọc lại nhé!

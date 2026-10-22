@@ -4,7 +4,7 @@ import { ROUTES } from "../../../constants/routes";
 import { formatRelativeDay } from "../../../utils/format";
 import StoryCover from "../StoryCover";
 import CaselTag from "./CaselTag";
-import { coverGradient } from "./storyMeta";
+import { coverOf } from "./storyMeta";
 
 const accents = {
   primary: { bar: "bg-primary", text: "text-primary-dark", hover: "group-hover:text-primary-dark", progress: "from-primary-dark to-primary", button: "bg-primary" },
@@ -20,9 +20,8 @@ function ContinueReadingItem({ story, accent = "primary" }) {
       <span className={`absolute inset-y-0 left-0 w-2 ${a.bar}`} />
 
       <StoryCover
-        emoji={story.coverEmoji}
-        gradient={coverGradient(story.storyId)}
-        alt={story.title}
+        cover={coverOf(story)}
+        title={story.title}
         className="h-40 w-full shrink-0 rounded-2xl shadow-low sm:w-36"
       />
 

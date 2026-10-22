@@ -1,6 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BookPlus, Bot, Check, FileText, Loader2, ShieldCheck, ShoppingCart, Store, Type, Volume2 } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
+import { coverOf } from "../../../components/parent/library/storyMeta";
+import StoryCover from "../../../components/parent/StoryCover";
 import ListingReviews from "../../../components/parent/marketplace/ListingReviews";
 import ReportListingButton from "../../../components/parent/marketplace/ReportListingButton";
 import { ROUTES } from "../../../constants/routes";
@@ -63,20 +65,25 @@ function ListingDetailPage() {
         <ArrowLeft size={16} /> Chợ truyện
       </Link>
       <article className="card space-y-4 p-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <CaselTag competency={l.topic?.competency} className="bg-secondary-tint" />
-          {l.topic && <span className="tag-eq">{l.topic.ageMin}–{l.topic.ageMax} tuổi</span>}
-          {l.hasAiContent && (
-            <span className="tag-theme">
-              <Bot size={12} /> AI hỗ trợ
-            </span>
-          )}
-          <span className={l.hasNarration ? "tag-eq" : "tag-theme"}>
-            {l.hasNarration ? <Volume2 size={12} /> : <Type size={12} />} {l.hasNarration ? "Có giọng đọc" : "Chỉ có chữ — ba mẹ đọc cùng bé"}
-          </span>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+          <StoryCover cover={coverOf(l)} title={l.title} className="aspect-square w-full shrink-0 rounded-2xl shadow-low sm:w-48" />
+          <div className="min-w-0 flex-1 space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <CaselTag competency={l.topic?.competency} className="bg-secondary-tint" />
+              {l.topic && <span className="tag-eq">{l.topic.ageMin}–{l.topic.ageMax} tuổi</span>}
+              {l.hasAiContent && (
+                <span className="tag-theme">
+                  <Bot size={12} /> AI hỗ trợ
+                </span>
+              )}
+              <span className={l.hasNarration ? "tag-eq" : "tag-theme"}>
+                {l.hasNarration ? <Volume2 size={12} /> : <Type size={12} />} {l.hasNarration ? "Có giọng đọc" : "Chỉ có chữ — ba mẹ đọc cùng bé"}
+              </span>
+            </div>
+            <h1 className="text-3xl">{l.title}</h1>
+            {l.description && <p className="text-navy/70">{l.description}</p>}
+          </div>
         </div>
-        <h1 className="text-3xl">{l.title}</h1>
-        {l.description && <p className="text-navy/70">{l.description}</p>}
         <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-navy/60">
           {l.topic && <span>Bài học: {l.topic.title}</span>}
           <span className="flex items-center gap-1">
