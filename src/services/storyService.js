@@ -120,5 +120,11 @@ export const drawStoryImages = async (id) => (await call(api.post(`/stories/${id
 /** POST /stories/:id/scenes/:sceneId/image → vẽ lại một cảnh. */
 export const redrawScene = async (id, sceneId) => (await call(api.post(`/stories/${id}/scenes/${sceneId}/image`))).data;
 
+/**
+ * PUT /stories/:id/cover { sceneId: uuid|null } → story. Bìa = tranh của cảnh đã chọn; null = mặc định (cảnh 1).
+ * 422 khi cảnh chưa có tranh.
+ */
+export const setStoryCover = async (id, sceneId) => (await call(api.put(`/stories/${id}/cover`, { sceneId }))).data.story;
+
 /** DELETE /characters/:id — xoá mềm; truyện cũ giữ nguyên nhân vật. Nhân vật của bé → 422 */
 export const deleteCharacter = (id) => call(api.delete(`/characters/${id}`));

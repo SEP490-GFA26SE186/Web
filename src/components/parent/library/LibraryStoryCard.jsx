@@ -4,7 +4,7 @@ import { STORY_LENGTH_LABELS } from "../../../constants/casel";
 import { ROUTES } from "../../../constants/routes";
 import StoryCover from "../StoryCover";
 import CaselTag from "./CaselTag";
-import { actionStyles, coverGradient, getPrimaryAction, getProgressLabel, getReadingStatus } from "./storyMeta";
+import { actionStyles, coverOf, getPrimaryAction, getProgressLabel, getReadingStatus } from "./storyMeta";
 
 const actionIcons = { replay: RotateCcw, book: BookOpen };
 
@@ -59,9 +59,9 @@ function LibraryStoryCard({ story }) {
     <article className="group card flex flex-col justify-between p-4 transition duration-300 hover:-translate-y-1 hover:shadow-high">
       <div>
         <StoryCover
-          emoji={story.coverEmoji}
-          gradient={coverGradient(story.storyId)}
-          alt={story.title}
+          cover={coverOf(story)}
+          title={story.title}
+          zoomOnHover
           className="mb-4 aspect-[4/3] w-full rounded-2xl"
         >
           <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1">

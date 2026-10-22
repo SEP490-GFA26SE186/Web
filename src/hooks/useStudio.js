@@ -19,6 +19,7 @@ import {
   getStory,
   retryNarration,
   reviewStory,
+  setStoryCover,
   addToShelf,
   getShelfStatus,
   removeFromShelf,
@@ -197,6 +198,23 @@ const useEditorMutation = (storyId, mutationFn) => {
       queryClient.setQueryData(studioKeys.story(storyId), story);
       queryClient.invalidateQueries({ queryKey: ["studio", "list"] });
       queryClient.invalidateQueries({ queryKey: parentKeys.drafts });
+    },
+  });
+};
+
+/** Đổi ảnh bìa (sceneId = null → mặc định cảnh 1): bìa hiện ở studio, tủ sách, giá sách của bé, chợ truyện → làm mới hết. */
+export const useSetStoryCover = (storyId) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (sceneId) => setStoryCover(storyId, sceneId),
+    onSuccess: (story) => {
+      queryClient.setQueryData(studioKeys.story(storyId), story);
+      queryClient.invalidateQueries({ queryKey: ["studio", "list"] });
+      queryClient.invalidateQueries({ queryKey: parentKeys.drafts });
+      queryClient.invalidateQueries({ queryKey: ["children"] }); // tủ sách / đang đọc dở của từng bé
+      queryClient.invalidateQueries({ queryKey: ["kid", "shelf"] });
+      queryClient.invalidateQueries({ queryKey: ["marketplace"] });
+      queryClient.invalidateQueries({ queryKey: ["selling"] });
     },
   });
 };

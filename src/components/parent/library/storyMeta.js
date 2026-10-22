@@ -26,15 +26,7 @@ export const actionStyles = {
   neutral: "bg-surface text-navy hover:bg-outline",
 };
 
-// Màu bìa tạm khi chưa có ảnh bìa thật (cover_image_key) từ BE
-const GRADIENTS = [
-  "from-pink-300 via-rose-200 to-amber-100",
-  "from-emerald-300 via-teal-200 to-sky-100",
-  "from-indigo-400 via-purple-300 to-pink-200",
-  "from-sky-300 via-cyan-200 to-emerald-100",
-  "from-orange-300 via-amber-200 to-yellow-100",
-  "from-violet-300 via-fuchsia-200 to-rose-100",
-];
-
-export const coverGradient = (storyId) =>
-  GRADIENTS[[...storyId].reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % GRADIENTS.length];
+// Ảnh bìa của truyện / bản đăng bán: BE trả `cover: { imageUrl, competency }` (ảnh = tranh một cảnh, mặc định cảnh 1).
+// Đối tượng cũ chưa có `cover` → lấy coverImageUrl (nếu có) và năng lực của bài học để vẽ bìa dự phòng.
+export const coverOf = (item) =>
+  item?.cover ?? { imageUrl: item?.coverImageUrl ?? null, competency: item?.topic?.competency ?? null };

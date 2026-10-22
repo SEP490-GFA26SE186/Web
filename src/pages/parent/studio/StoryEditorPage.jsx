@@ -2,6 +2,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlertTriangle, ArrowLeft, Bot, CheckCircle2, Loader2, PenLine, Plus, RotateCcw, Store, Trash2 } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
+import CoverPicker from "../../../components/parent/studio/CoverPicker";
 import CheckpointEditor from "../../../components/parent/studio/CheckpointEditor";
 import GenerationPanel from "../../../components/parent/studio/GenerationPanel";
 import NarrationPanel from "../../../components/parent/studio/NarrationPanel";
@@ -314,6 +315,7 @@ function StoryEditorPage() {
         />
       )}
       {showEditor && <ShelfPanel story={story} />}
+      {showEditor && story.kind !== "published" && <CoverPicker story={story} disabled={busy} />}
 
       {showEditor && (
         <>

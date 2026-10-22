@@ -1,7 +1,7 @@
 import StoryCover from "../StoryCover";
 import CaselTag from "./CaselTag";
 import { KindBadge, StoryAction, StoryFacts } from "./LibraryStoryCard";
-import { coverGradient, getProgressLabel } from "./storyMeta";
+import { coverOf, getProgressLabel } from "./storyMeta";
 
 // Dạng danh sách của thẻ truyện (chế độ xem "list")
 function LibraryStoryRow({ story }) {
@@ -10,10 +10,9 @@ function LibraryStoryRow({ story }) {
   return (
     <article className="group card flex flex-col gap-4 p-3 transition hover:shadow-mid sm:flex-row sm:items-center">
       <StoryCover
-        emoji={story.coverEmoji}
-        gradient={coverGradient(story.storyId)}
-        alt={story.title}
-        className="aspect-[4/3] w-full shrink-0 rounded-2xl sm:w-32 [&_span[role=img]]:text-5xl"
+        cover={coverOf(story)}
+        title={story.title}
+        className="aspect-[4/3] w-full shrink-0 rounded-2xl sm:w-32"
       />
 
       <div className="min-w-0 flex-1">

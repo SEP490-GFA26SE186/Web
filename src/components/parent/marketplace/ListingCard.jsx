@@ -3,7 +3,7 @@ import { Bot, CheckCircle2, FileText, ShoppingCart, Star, Store, Type, Volume2 }
 import { ROUTES } from "../../../constants/routes";
 import { formatNumber, formatVND } from "../../../utils/format";
 import CaselTag from "../library/CaselTag";
-import { coverGradient } from "../library/storyMeta";
+import { coverOf } from "../library/storyMeta";
 import StoryCover from "../StoryCover";
 
 function PriceBadge({ priceVnd }) {
@@ -23,10 +23,10 @@ function ListingCard({ listing }) {
   return (
     <article className="group card flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-high">
       <StoryCover
-        emoji={listing.coverEmoji}
-        gradient={coverGradient(listing.id)}
-        alt={listing.title}
-        className="h-44 w-full [&>div]:transition-transform [&>div]:duration-500 group-hover:[&>div]:scale-105"
+        cover={coverOf(listing)}
+        title={listing.title}
+        zoomOnHover
+        className="h-44 w-full"
       >
         <span className="absolute top-3 left-3">
           <CaselTag competency={topic?.competency} short />

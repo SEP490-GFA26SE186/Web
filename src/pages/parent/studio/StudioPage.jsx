@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { BookOpen, Bot, ChevronRight, Loader2, PenLine, Plus } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
+import { coverOf } from "../../../components/parent/library/storyMeta";
+import StoryCover from "../../../components/parent/StoryCover";
 import { STORY_STATUS_LABELS } from "../../../constants/story";
 import { STORY_LENGTH_LABELS } from "../../../constants/casel";
 import { ROUTES } from "../../../constants/routes";
@@ -57,6 +59,7 @@ function StudioPage() {
                 to={ROUTES.PARENT.studioStory(story.id)}
                 className="card flex items-center gap-4 p-5 transition hover:-translate-y-0.5 hover:shadow-mid"
               >
+                <StoryCover cover={coverOf(story)} title={story.title} size="sm" className="h-20 w-20 shrink-0 rounded-2xl" />
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" short />

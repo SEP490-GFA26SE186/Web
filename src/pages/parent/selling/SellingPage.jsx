@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BadgeCheck, Ban, Clock, Loader2, Store } from "lucide-react";
+import { coverOf } from "../../../components/parent/library/storyMeta";
+import StoryCover from "../../../components/parent/StoryCover";
 import EarningsPanel from "../../../components/parent/selling/EarningsPanel";
 import StrikesPanel from "../../../components/parent/selling/StrikesPanel";
 import { LISTING_STATUS } from "../../../constants/moderation";
@@ -137,14 +139,17 @@ function SellingPage() {
             {listings.map((l) => {
               const s = LISTING_STATUS[l.status] ?? { label: l.status, tone: "bg-surface" };
               return (
-                <li key={l.id} className="space-y-1 py-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-bold">{l.title}</p>
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${s.tone}`}>{s.label}</span>
-                    <span className="text-sm text-navy/60">{l.priceVnd ? `${formatNumber(l.priceVnd)}đ` : "Miễn phí"}</span>
+                <li key={l.id} className="flex items-start gap-3 py-3">
+                  <StoryCover cover={coverOf(l)} title={l.title} size="sm" className="h-16 w-16 shrink-0 rounded-xl" />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-bold">{l.title}</p>
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${s.tone}`}>{s.label}</span>
+                      <span className="text-sm text-navy/60">{l.priceVnd ? `${formatNumber(l.priceVnd)}đ` : "Miễn phí"}</span>
+                    </div>
+                    <NarrationStatus listing={l} />
+                    {l.lastDecision?.comment && <p className="text-sm text-navy/70">Chuyên gia: {l.lastDecision.comment}</p>}
                   </div>
-                  <NarrationStatus listing={l} />
-                  {l.lastDecision?.comment && <p className="text-sm text-navy/70">Chuyên gia: {l.lastDecision.comment}</p>}
                 </li>
               );
             })}
