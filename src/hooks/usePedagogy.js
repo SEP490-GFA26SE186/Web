@@ -1,9 +1,8 @@
 import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createSubSkill,
   createTemplate,
-  deleteSubSkill,
   deleteTemplate,
+  duplicateTemplate,
   flagCheckpoint,
   getCheckpointQueue,
   getCheckpointReviewStats,
@@ -49,14 +48,13 @@ const SUB = pedagogyKeys.subSkills;
 const TPL = pedagogyKeys.templates;
 const TOPICS = ["topics"];
 
-export const useCreateSubSkill = () => useMutate(createSubSkill, [SUB]);
 export const useUpdateSubSkill = () => useMutate(({ id, ...payload }) => updateSubSkill(id, payload), [SUB, TPL, TOPICS]);
-export const useDeleteSubSkill = () => useMutate(deleteSubSkill, [SUB, TPL]);
 
 export const useCreateTemplate = () => useMutate(createTemplate, [TPL, SUB]);
 export const useUpdateTemplate = () => useMutate(({ id, ...payload }) => updateTemplate(id, payload), [TPL, SUB]);
 export const useSaveTemplateDraft = () => useMutate(({ id, ...payload }) => saveTemplateDraft(id, payload), [TPL]);
 export const usePublishTemplate = () => useMutate(publishTemplate, [TPL, SUB]);
+export const useDuplicateTemplate = () => useMutate(duplicateTemplate, [TPL, SUB]);
 export const useDeleteTemplate = () => useMutate(deleteTemplate, [TPL, SUB]);
 
 // ── Soát câu hỏi AI: phân trang con trỏ (nextCursor); đổi trạng thái → tải lại hàng đợi + thống kê,

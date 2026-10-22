@@ -50,7 +50,8 @@ export const getChildOverview = (childId) => call(api.get(`/children/${childId}/
 
 /**
  * GET /children/:id/eq-journey?weeks → mọi trường của eq-report, thêm:
- * evidence[{ subSkillId, answeredAt, storyTitle, question, firstChoiceText, correctFirstTry, usedHint, source }],
+ * evidence[{ subSkillId, answeredAt, storyTitle, question, firstChoiceText, correctFirstTry, usedHint, source,
+ *   momentSummary (truyện "Kể chuyện nhà mình" có khoảnh khắc thật, đã thay tên thật; còn lại null) }],
  * conversation[{ storyId, storyTitle, subSkillId, prompts[], reflection?{ question, answered } }],
  * trend[{ weekStart, competencies{ [caselCode]: { items, level } } }] — chỉ lượt đọc đầu, câu không bị gắn cờ
  */

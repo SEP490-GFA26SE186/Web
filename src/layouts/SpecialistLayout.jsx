@@ -23,7 +23,7 @@ function SpecialistLayout() {
       items: [
         { to: R.SUB_SKILLS, label: "Kỹ năng con", icon: Sprout },
         { to: R.TEMPLATES, label: "Mẫu câu hỏi", icon: FileQuestion },
-        { to: R.TOPICS, label: "Bài học", icon: Brain },
+        { to: R.TOPICS, label: "Chuyện mẫu", icon: Brain },
         { to: R.CHECKPOINT_REVIEW, label: "Soát câu hỏi AI", icon: ScanSearch },
         { to: R.REPORT_SETTINGS, label: "Tham số báo cáo", icon: SlidersHorizontal },
       ],

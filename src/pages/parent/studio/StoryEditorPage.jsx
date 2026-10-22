@@ -244,20 +244,36 @@ function StoryEditorPage() {
           <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" />
           <span className="tag-theme">
             {isCustom ? <PenLine size={12} /> : <Bot size={12} />}
-            {isCustom ? "Tự viết" : `AI viết giúp · ${STORY_LENGTH_LABELS[story.length]}`}
+            {isCustom ? "Tự viết" : `${story.entry === "family" ? "Kể chuyện nhà mình" : "AI viết giúp"} · ${STORY_LENGTH_LABELS[story.length]}`}
           </span>
+          {story.entry === "family" && story.scored === false && <span className="tag-eq">Không chấm điểm</span>}
           <span className="tag-eq">{story.reviewedAt ? "Đã hoàn tất" : STORY_STATUS_LABELS[story.status]}</span>
         </div>
         <h1 className="text-2xl">{story.title}</h1>
         <p className="text-sm text-navy/65">
           {story.topic ? (
             <>
-              Bài học: <span className="font-semibold text-navy">{story.topic.title}</span> ·{" "}
+              Chuyện mẫu: <span className="font-semibold text-navy">{story.topic.title}</span> ·{" "}
             </>
           ) : null}
           Nhân vật:{" "}
           {characters.map((c) => c.name).filter(Boolean).join(", ")}
         </p>
+        {story.entry === "family" && (story.momentSummary || story.seedEvent || story.subSkills?.length > 0) && (
+          <div className="space-y-1 rounded-2xl bg-surface px-4 py-3 text-sm text-navy/70">
+            {story.momentSummary && <p>Khoảnh khắc: <span className="font-semibold text-navy">{story.momentSummary}</span></p>}
+            {story.seedEvent && <p>Truyện thêm: <span className="font-semibold text-navy">{story.seedEvent}</span></p>}
+            {story.subSkills?.length > 0 && (
+              <p>
+                Bé tập:{" "}
+                <span className="font-semibold text-navy">
+                  {[...story.subSkills].sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).map((s) => s.nameVi).join(" · ")}
+                </span>
+              </p>
+            )}
+            <p className="text-xs text-navy/50">Muốn đổi lời kể hay nhân vật, ba mẹ hãy tạo truyện mới.</p>
+          </div>
+        )}
         {story.reviewedAt && story.kind !== "published" && (
           <Link to={ROUTES.PARENT.sellingNew(story.id)} className="mr-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
             <Store size={15} /> Đăng bán truyện này
@@ -368,6 +384,7 @@ function StoryEditorPage() {
                   <CheckpointEditor
                     key={`${cp.id}:${JSON.stringify([cp.question, cp.hint, cp.answerEmotion, cp.options])}`}
                     checkpoint={cp}
+                    storyEntry={story.entry}
                     characters={characters}
                     disabled={busy}
                     gap={gaps[`checkpoints.${cp.id}`]}

@@ -31,6 +31,38 @@ const STATUS_BADGES = {
   flagged: { label: "Đã gắn cờ", className: "bg-danger-tint text-danger-dark" },
 };
 
+// Nguồn kỹ năng con của điểm dừng trong truyện "Kể chuyện nhà mình" (story_sub_skills.source)
+const FAMILY_SOURCE_LABELS = {
+  moment: "từ khoảnh khắc trong chuyện",
+  need: "theo nhu cầu của bé",
+  parent: "phụ huynh chọn",
+};
+
+/** Ngữ cảnh chuyện nhà (tên đã che "Bạn A/B"): chỗ chuyên gia bắt lỗi "AI gán sai kỹ năng". */
+function FamilyContext({ family }) {
+  const rows = [
+    ["Lời kể", family.situation],
+    ["Khoảnh khắc", family.momentSummary],
+    ["Tình tiết thêm", family.seedEvent],
+    ["Nguồn kỹ năng", family.source && (FAMILY_SOURCE_LABELS[family.source] ?? family.source)],
+  ].filter(([, v]) => v);
+  return (
+    <div className="rounded-2xl border border-dashed border-secondary/40 bg-secondary-tint/40 px-4 py-3">
+      <p className="mb-1.5 text-xs font-bold tracking-wide text-secondary-dark uppercase">Kể chuyện nhà mình</p>
+      <dl className="grid gap-x-3 gap-y-1 text-sm sm:grid-cols-[8rem_1fr]">
+        {rows.map(([label, value]) => (
+          <div key={label} className="contents">
+            <dt className="font-semibold text-navy/60">{label}</dt>
+            <dd className={`text-navy/85 ${label === "Lời kể" ? "line-clamp-3 whitespace-pre-line" : ""}`} title={label === "Lời kể" ? value : undefined}>
+              {value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
 const REASON_MIN = 5;
 const REASON_MAX = 500;
 
@@ -139,6 +171,8 @@ function ReviewItem({ item, onFlag }) {
         )}
         <span className="ml-auto text-navy/45">{new Date(item.createdAt).toLocaleDateString("vi-VN")}</span>
       </div>
+
+      {item.family && <FamilyContext family={item.family} />}
 
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="rounded-2xl bg-surface p-4">

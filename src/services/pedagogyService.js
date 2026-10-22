@@ -23,13 +23,11 @@ export const getSubSkills = async ({ skillId, isActive, source, search } = {}) =
   (await call(api.get("/sub-skills", { params: clean({ skillId, isActive, source, search: search?.trim() }) }))).data;
 
 /** POST /sub-skills { skillId, nameVi, descriptionVi, caselTextEn?, ageMin, ageMax, displayOrder, isActive } → luôn source "specialist" */
-export const createSubSkill = async (payload) => (await call(api.post("/sub-skills", payload))).data;
 
 /** PUT /sub-skills/:id — gửi field cần đổi (422: mục gốc CASEL không đổi năng lực / mã / câu tiếng Anh; đổi năng lực khi đã có điểm dừng dùng) */
 export const updateSubSkill = async (id, payload) => (await call(api.put(`/sub-skills/${id}`, payload))).data;
 
 /** DELETE /sub-skills/:id — 409 với mục gốc CASEL (chỉ tắt được) hoặc khi đã có mẫu / bài học / điểm dừng dùng */
-export const deleteSubSkill = async (id) => (await call(api.delete(`/sub-skills/${id}`))).data;
 
 /** GET /question-templates?subSkillId&skillId&isActive → [{ id, title, answerFormat, isActive, subSkill, latestPublished, draft }] */
 export const getTemplates = async ({ subSkillId, skillId, isActive } = {}) =>
@@ -47,6 +45,9 @@ export const saveTemplateDraft = async (id, payload) => (await call(api.put(`/qu
 /** POST /question-templates/:id/publish — 422 liệt kê trường thiếu */
 export const publishTemplate = async (id) => (await call(api.post(`/question-templates/${id}/publish`))).data;
 
+/** POST /question-templates/:id/duplicate → 201 mẫu mới (cùng kỹ năng con + dạng), bản nháp v1 chép từ bản ban hành mới nhất / bản nháp */
+export const duplicateTemplate = async (id) => (await call(api.post(`/question-templates/${id}/duplicate`))).data;
+
 /** DELETE /question-templates/:id — 409 khi đã có điểm dừng dùng */
 export const deleteTemplate = async (id) => (await call(api.delete(`/question-templates/${id}`))).data;
 
@@ -55,7 +56,8 @@ export const deleteTemplate = async (id) => (await call(api.delete(`/question-te
 /**
  * GET /checkpoint-review?status&skillId&subSkillId&templateId&cursor&limit
  * → { items: [{ checkpointId, createdAt, type, skill, subSkill, template:{ id, title, version }, pageBefore, question,
- *      options:[{ text, role?, isCorrect? }], answerEmotion?, status: "pending"|"ok"|"flagged", excludedReason? }], nextCursor }
+ *      options:[{ text, role?, isCorrect? }], answerEmotion?, status: "pending"|"ok"|"flagged", excludedReason?,
+ *      family: null | { situation, momentSummary, seedEvent, source: "moment"|"need"|"parent" } }], nextCursor }
  */
 export const getCheckpointQueue = async ({ status, skillId, subSkillId, templateId, cursor, limit = 20 } = {}) => {
   const body = await call(api.get("/checkpoint-review", { params: clean({ status, skillId, subSkillId, templateId, cursor, limit }) }));

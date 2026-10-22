@@ -109,8 +109,10 @@ function LockedCheckpoint({ checkpoint: cp, characters, gap, warning }) {
   );
 }
 
-function CheckpointEditor(props) {
-  return props.checkpoint.locked ? <LockedCheckpoint {...props} /> : <EditableCheckpoint {...props} />;
+/** Truyện AI (chuyện mẫu lẫn "Kể chuyện nhà mình") khoá câu hỏi: BE trả `locked`; truyện family luôn khoá. */
+function CheckpointEditor({ storyEntry, ...props }) {
+  const locked = props.checkpoint.locked || storyEntry === "family";
+  return locked ? <LockedCheckpoint {...props} /> : <EditableCheckpoint {...props} />;
 }
 
 function EditableCheckpoint({ checkpoint: cp, characters, disabled, gap, warning, onSave, saving, onDelete, deleting }) {

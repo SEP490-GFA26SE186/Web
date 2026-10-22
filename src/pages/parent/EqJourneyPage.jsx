@@ -102,6 +102,11 @@ function EvidenceModal({ subSkill, evidence, onClose }) {
               <p className="text-xs text-navy/60">
                 Truyện “{e.storyTitle}” · {vnDate(e.answeredAt)}
               </p>
+              {e.momentSummary && (
+                <p className="rounded-xl bg-white px-3 py-1.5 text-xs text-navy/70">
+                  Từ chuyện: <span className="font-semibold text-navy">{e.momentSummary}</span>
+                </p>
+              )}
               <div className="flex flex-wrap items-center gap-2">
                 {e.firstChoiceText && (
                   <span>
@@ -172,7 +177,7 @@ function CompetencyCard({ competency, evidenceBySub, windowSize, onShowEvidence 
 }
 
 // Báo cáo EQ (luồng 5.6, spec sư phạm CASEL §7): mức độ theo kỹ năng con, gộp lên 5 năng lực; bằng chứng;
-// gợi ý trò chuyện; bài học nên đọc tiếp; theo tuần. Chỉ lượt đọc đầu, câu không bị chuyên gia gắn cờ.
+// gợi ý trò chuyện; chuyện mẫu nên đọc tiếp; theo tuần. Chỉ lượt đọc đầu, câu không bị chuyên gia gắn cờ.
 function EqJourneyPage() {
   const { child, isEmpty } = useSelectedChild();
   const [weeks, setWeeks] = useState(8);
@@ -235,10 +240,10 @@ function EqJourneyPage() {
 
         <section className="card space-y-3 p-5 xl:col-span-2">
           <h2 className="flex items-center gap-2 text-lg">
-            <BookOpenCheck size={19} className="text-primary" /> Bài học nên đọc tiếp
+            <BookOpenCheck size={19} className="text-primary" /> Chuyện mẫu nên đọc tiếp
           </h2>
           {r.recommendations.length === 0 ? (
-            <p className="text-sm text-navy/60">Chưa có bài học phù hợp để gợi ý lúc này.</p>
+            <p className="text-sm text-navy/60">Chưa có chuyện mẫu phù hợp để gợi ý lúc này.</p>
           ) : (
             <ul className="space-y-3">
               {r.recommendations.map((t) => (
@@ -260,7 +265,7 @@ function EqJourneyPage() {
               ))}
             </ul>
           )}
-          <p className="text-xs text-navy/50">Ưu tiên năng lực chưa có dữ liệu hoặc đang làm quen, bỏ qua bài học bé vừa đọc.</p>
+          <p className="text-xs text-navy/50">Ưu tiên năng lực chưa có dữ liệu hoặc đang làm quen, bỏ qua chuyện mẫu bé vừa đọc.</p>
         </section>
       </div>
 

@@ -32,10 +32,22 @@ export const getStories = ({ status, reviewed, page = 1, limit = 20 } = {}) =>
 export const getStory = async (id) => (await call(api.get(`/stories/${id}`))).data.story;
 
 /**
- * POST /stories { topicId, length, title, situation?, characters: [{ characterId, isMain }], useAiImage, useTts }
+ * POST /stories — ba lối vào:
+ * - chuyện mẫu: { entry: "topic", topicId, length, title, characters: [{ characterId, isMain }], useAiImage, useTts } (không gửi situation)
+ * - kể chuyện nhà mình: { entry: "family", length, title, situation, characters, analysisToken, scored, useAiImage, useTts }
+ * - tự viết: { length: "custom", topicId?, title, characters, useTts }
  * BE dựng khung trang + điểm dừng theo độ dài; truyện ở trạng thái draft.
+ * Chi tiết truyện có thêm entry, scored, momentSummary, seedEvent, subSkills[{ id, nameVi, source, position }].
  */
 export const createStory = async (payload) => (await call(api.post("/stories", payload))).data.story;
+
+/**
+ * POST /stories/analyze { situation (20–2000), characters: [{ characterId, isMain }], length, subSkillIds?: [1..2] }
+ * → { momentSummary|null, seedEvent|null, subSkills: [{ id, code, nameVi, descriptionVi, skill: { id, caselCode, nameVi },
+ *      source: "moment"|"need"|"parent", position }], analysisToken, expiresAt } — không trừ credit.
+ * Lỗi: 422 lời kể có từ khoá chặn / tên lạ · 429 quá lượt trong ngày · 502 AI lỗi.
+ */
+export const analyzeStory = async (payload) => (await call(api.post("/stories/analyze", payload))).data;
 
 export const deleteStory = (id) => call(api.delete(`/stories/${id}`));
 
