@@ -3,11 +3,12 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, Eye, Loader2, Lock } from "lucide-react";
 import CaselTag from "../../components/parent/library/CaselTag";
 import { DECISION_LABELS, LISTING_STATUS, REVIEW_TYPES } from "../../constants/moderation";
+import { REVIEW_CHECKLIST } from "../../constants/reviewChecklist";
 import { CHECKPOINT_TYPES, EMOTIONS } from "../../constants/story";
 import { ROUTES } from "../../constants/routes";
 import { useClaimReview, useDecideReview, useReview, useViewPage } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
-import { formatNumber } from "../../utils/format";
+import { formatListingPrice } from "../../utils/format";
 
 const DECISIONS = {
   submission: [
@@ -62,7 +63,8 @@ function CheckpointBlock({ cp, characters }) {
 }
 
 // Không gian duyệt một truyện đăng bán: nhận bài → xem từng trang (đánh dấu đã xem, nhận xét) →
-// checklist 7 nguyên tắc → quyết định. BE chỉ cho duyệt khi xem 100% trang và đạt đủ checklist.
+// checklist 7 nguyên tắc (chỉ ở web, không gửi API) → quyết định. Nút Duyệt chỉ bật khi đã xem 100% trang
+// và tick đủ checklist; BE vẫn tự kiểm số trang đã xem.
 function Workspace({ reviewId }) {
   const { data, isLoading, error } = useReview(reviewId);
   const claim = useClaimReview(reviewId);
@@ -76,12 +78,15 @@ function Workspace({ reviewId }) {
   if (isLoading) return <Loader2 size={32} className="animate-spin text-primary" />;
   if (error) return <p className="card p-6 text-danger">{error.message}</p>;
 
-  const { review, listing, seller, story, checklist, pageViews, progress } = data;
+  const { review, listing, seller, story, pageViews } = data;
   const viewed = new Map(pageViews.map((v) => [v.pageId, v]));
+  const pagesTotal = story.pages.length;
+  const pagesViewed = story.pages.filter((p) => viewed.has(p.id)).length;
+  const checklistPassed = REVIEW_CHECKLIST.filter((i) => checks[i.code]).length;
+  const canApprove = pagesViewed === pagesTotal && checklistPassed === REVIEW_CHECKLIST.length;
   const cpAfter = new Map(story.checkpoints.map((c) => [c.afterPageId, c]));
   const decided = !!review.decidedAt;
   const canAct = review.claimedByMe && !decided;
-  const passedOf = (item) => checks[item.id] ?? item.passed;
   const isFollowup = review.reviewType !== "submission";
   const decisions = DECISIONS[isFollowup ? "followup" : "submission"];
   const type = REVIEW_TYPES[review.reviewType];
@@ -92,7 +97,6 @@ function Workspace({ reviewId }) {
       {
         decision,
         comment: comment.trim() || undefined,
-        checklist: checklist.map((i) => ({ itemId: i.id, passed: passedOf(i) === true })),
         ...(decision === "rejected" && strike && { issueStrike: true }),
       },
       { onSuccess: () => toast.success("Đã lưu quyết định"), onError: (e) => toast.error(e.message) },
@@ -110,7 +114,7 @@ function Workspace({ reviewId }) {
             {type && <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${type.tone}`}>{type.label}</span>}
             {isFollowup && status && <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${status.tone}`}>{status.label}</span>}
             <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" />
-            <span className="tag-theme">{listing.priceVnd ? `${formatNumber(listing.priceVnd)}đ` : "Miễn phí"}</span>
+            <span className="tag-theme">{formatListingPrice(listing.priceVnd)}</span>
             {listing.hasAiContent && <span className="tag-eq">Có AI hỗ trợ</span>}
           </div>
           <h1 className="text-2xl">{listing.title}</h1>
@@ -133,7 +137,7 @@ function Workspace({ reviewId }) {
       </header>
 
       <p className="text-sm font-semibold text-navy/70" aria-live="polite">
-        Đã xem {progress.pagesViewed}/{progress.pagesTotal} trang • Checklist đạt {progress.checklistPassed}/{progress.checklistTotal}
+        Đã xem {pagesViewed}/{pagesTotal} trang • Checklist đạt {checklistPassed}/{REVIEW_CHECKLIST.length}
       </p>
 
       {story.pages.map((page) => {
@@ -180,13 +184,13 @@ function Workspace({ reviewId }) {
 
       <section className="card space-y-3 p-5">
         <h2 className="text-lg">Checklist 7 nguyên tắc</h2>
-        {checklist.map((item) => (
-          <label key={item.id} className="flex items-start gap-3 text-sm">
+        {REVIEW_CHECKLIST.map((item) => (
+          <label key={item.code} className="flex items-start gap-3 text-sm">
             <input
               type="checkbox"
               disabled={!canAct}
-              checked={passedOf(item) === true}
-              onChange={(e) => setChecks((m) => ({ ...m, [item.id]: e.target.checked }))}
+              checked={!!checks[item.code]}
+              onChange={(e) => setChecks((m) => ({ ...m, [item.code]: e.target.checked }))}
               className="mt-1 h-4 w-4"
             />
             {item.description}
@@ -209,12 +213,24 @@ function Workspace({ reviewId }) {
         )}
         <div className="flex flex-wrap gap-2">
           {decisions.map((d) => (
-            <button key={d.value} type="button" disabled={!canAct || decide.isPending} onClick={() => submit(d.value)} className={`${d.tone} disabled:opacity-50`}>
+            <button
+              key={d.value}
+              type="button"
+              disabled={!canAct || decide.isPending || (d.value === "approved" && !canApprove)}
+              title={d.value === "approved" && !canApprove ? "Cần xem hết các trang và tick đủ checklist" : undefined}
+              onClick={() => submit(d.value)}
+              className={`${d.tone} disabled:opacity-50`}
+            >
               {decide.isPending && decide.variables?.decision === d.value && <Loader2 size={16} className="animate-spin" />}
               {d.label}
             </button>
           ))}
         </div>
+        {canAct && !canApprove && (
+          <p className="text-xs text-navy/60">
+            Xem hết {pagesTotal} trang (bấm “Đánh dấu đã xem”) và tick đủ {REVIEW_CHECKLIST.length} mục checklist để bật nút {decisions[0].label}.
+          </p>
+        )}
         {decided && review.comment && <p className="text-sm text-navy/60">Nhận xét đã gửi: {review.comment}</p>}
       </section>
     </div>

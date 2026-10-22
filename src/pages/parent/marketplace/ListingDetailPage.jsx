@@ -9,7 +9,7 @@ import { ROUTES } from "../../../constants/routes";
 import { useCheckoutListing, useListing } from "../../../hooks/useMarketplace";
 import { useShelfStatus, useToggleShelf } from "../../../hooks/useStudio";
 import { toast } from "../../../stores/toastStore";
-import { formatNumber } from "../../../utils/format";
+import { formatListingPrice, formatNumber } from "../../../utils/format";
 
 /** Truyện đã có: đưa lên giá sách của từng bé (bản đăng bán dùng nguyên trạng, tên chung). */
 function OwnedShelf({ storyId }) {
@@ -49,7 +49,7 @@ function ListingDetailPage() {
   if (isLoading) return <Loader2 size={32} className="animate-spin text-primary" />;
   if (error) return <p className="card p-6 text-danger">{error.message}</p>;
 
-  const free = l.priceTier.priceVnd === 0;
+  const free = Number(l.priceVnd) === 0;
   const buy = () =>
     checkout.mutate(l.id, {
       onSuccess: ({ checkoutUrl }) => {
@@ -118,7 +118,7 @@ function ListingDetailPage() {
         ) : (
           <button type="button" onClick={buy} disabled={checkout.isPending} className="btn-primary px-8 py-3 text-lg">
             {checkout.isPending ? <Loader2 size={20} className="animate-spin" /> : <ShoppingCart size={20} />}
-            {free ? "Nhận miễn phí" : `Mua ${formatNumber(l.priceTier.priceVnd)}đ qua payOS`}
+            {free ? "Nhận miễn phí" : `Mua ${formatListingPrice(l.priceVnd)} qua payOS`}
           </button>
         )}
         {!l.isMine && (

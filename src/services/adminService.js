@@ -1,7 +1,7 @@
 import api, { getErrorMessage } from "./api";
 import useAuthStore from "../stores/authStore";
 
-// Quản trị (rev8): tài khoản, gói & bậc giá, cấu hình, hoàn tiền, tài chính, nhật ký. Lỗi BE giữ nguyên message.
+// Quản trị (rev8): tài khoản, gói, cấu hình, hoàn tiền, tài chính, nhật ký. Lỗi BE giữ nguyên message.
 const call = async (request) => {
   try {
     return (await request).data.data;
@@ -19,7 +19,7 @@ export const getAdminOverview = async () => {
   return { admin: { name: user?.fullName || user?.username || "Quản trị viên", role: "Quản trị viên", avatar: null }, navBadges };
 };
 
-/** range: today | 7d | 30d | 90d | year → { revenue, series, aiCost, pnl, newParents, activePaidSubscriptions, sellerFunds } */
+/** range: today | 7d | 30d | 90d | year → { revenue, series, newParents, activePaidSubscriptions, sellerFunds } */
 export const getFinanceSummary = (range = "30d") => call(api.get("/admin/finance/summary", { params: { range } }));
 export const getReconciliation = () => call(api.get("/admin/finance/reconciliation"));
 export const fixCounters = () => call(api.post("/admin/finance/reconciliation/fix-counters"));
@@ -33,9 +33,6 @@ export const createModerator = (body) => call(api.post("/admin/accounts/moderato
 export const getAdminPlans = async () => (await call(api.get("/admin/plans"))).plans;
 export const createPlan = (body) => call(api.post("/admin/plans", body));
 export const updatePlan = (planId, body) => call(api.put(`/admin/plans/${planId}`, body));
-export const getPriceTiers = async () => (await call(api.get("/admin/price-tiers"))).tiers;
-export const createPriceTier = (body) => call(api.post("/admin/price-tiers", body));
-export const updatePriceTier = (tierId, body) => call(api.put(`/admin/price-tiers/${tierId}`, body));
 
 /** → { groups: { ai, market, moderation }, settings: [{ key, group, label, hint, unit, type, min, max, value, isDefault, updatedAt, updatedBy }] } */
 export const getSettings = () => call(api.get("/admin/settings"));

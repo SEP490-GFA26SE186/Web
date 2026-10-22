@@ -13,11 +13,9 @@ const call = async (request) => {
   }
 };
 
-export const getPriceTiers = async () => (await call(api.get("/listings/price-tiers"))).priceTiers;
-
 /**
- * params: { search, competency, age, priceTierId, sort: best_selling | rating | newest | price_asc, page, limit }
- * → { items: [{ id, title, description, topic{title, competency, ageMin, ageMax}, totalPages, priceTier, seller, purchaseCount, ratingAvg, ratingCount, hasAiContent, owned, publishedStoryId }], pagination }
+ * params: { search, competency, age, priceMin?, priceMax?, sort: best_selling | rating | newest | price_asc, page, limit }
+ * → { items: [{ id, title, description, topic{title, competency, ageMin, ageMax}, totalPages, priceVnd, seller, purchaseCount, ratingAvg, ratingCount, hasAiContent, owned, publishedStoryId }], pagination }
  */
 export const getListings = (params) =>
   call(api.get("/market/listings", { params: Object.fromEntries(Object.entries(params).filter(([, v]) => v !== "" && v != null)) }));

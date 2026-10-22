@@ -5,9 +5,7 @@ import {
   Gavel,
   LayoutDashboard,
   LineChart,
-  ReceiptText,
   ScrollText,
-  TrendingUp,
   UserCog,
   Wallet,
 } from "lucide-react";
@@ -42,8 +40,6 @@ function AdminLayout() {
         { to: R.WITHDRAWALS, label: "Rút tiền người bán", icon: Wallet, badge: badges.withdrawals, badgeTone: "secondary" },
         { to: R.REFUNDS, label: "Hoàn tiền", icon: ArrowLeftRight, badge: badges.refunds, badgeTone: "danger" },
         { to: R.REVENUE, label: "Doanh thu", icon: LineChart },
-        { to: R.AI_COSTS, label: "Chi phí AI", icon: ReceiptText },
-        { to: R.PROFIT_LOSS, label: "Lãi lỗ & đối soát", icon: TrendingUp },
       ],
     },
     {

@@ -5,7 +5,7 @@ import Switch from "../../components/common/Switch";
 import SettingsGroup from "../../components/admin/SettingsGroup";
 import { LoadState, PageHeader } from "../../components/admin/AdminUi";
 import { fieldClass, money } from "../../components/admin/adminFormat";
-import { useAdminPlans, useCreatePlan, useCreatePriceTier, usePriceTiers, useUpdatePlan, useUpdatePriceTier } from "../../hooks/useAdmin";
+import { useAdminPlans, useCreatePlan, useUpdatePlan } from "../../hooks/useAdmin";
 import { toast } from "../../stores/toastStore";
 
 const NUMBER_FIELDS = [
@@ -86,52 +86,7 @@ function PlanModal({ plan, onClose }) {
   );
 }
 
-function TiersSection() {
-  const { data: tiers = [], isLoading, error } = usePriceTiers();
-  const create = useCreatePriceTier();
-  const update = useUpdatePriceTier();
-  const [form, setForm] = useState({ label: "", priceVnd: "" });
-  const add = (e) => {
-    e.preventDefault();
-    create.mutate(
-      { label: form.label, priceVnd: Number(form.priceVnd) },
-      { onSuccess: () => { toast.success("Đã thêm bậc giá"); setForm({ label: "", priceVnd: "" }); }, onError: (err) => toast.error(err.message) },
-    );
-  };
-  return (
-    <section className="card space-y-3 p-5">
-      <div>
-        <h2 className="text-lg">Bậc giá truyện</h2>
-        <p className="text-sm text-navy/60">Người bán chọn một bậc khi đăng bán. Bậc đã có truyện dùng thì không đổi số tiền — tạo bậc mới và tắt bậc cũ.</p>
-      </div>
-      <LoadState isLoading={isLoading} error={error} />
-      <ul className="divide-y divide-outline">
-        {tiers.map((t) => (
-          <li key={t.id} className="flex items-center gap-3 py-2.5 text-sm">
-            <span className="w-28 font-bold">{money(t.priceVnd)}</span>
-            <span className="flex-1">{t.label}</span>
-            <span className="text-navy/60">{t.listingsCount} truyện</span>
-            <Switch
-              checked={t.isActive}
-              disabled={update.isPending && update.variables?.id === t.id}
-              onChange={() => update.mutate({ id: t.id, isActive: !t.isActive }, { onError: (e) => toast.error(e.message) })}
-              label={t.isActive ? "Tắt bậc giá" : "Bật bậc giá"}
-            />
-          </li>
-        ))}
-      </ul>
-      <form onSubmit={add} className="flex flex-wrap gap-2">
-        <input required value={form.label} onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))} placeholder="Nhãn, VD: Truyện dài" aria-label="Nhãn bậc giá" className={`${fieldClass} min-w-48 flex-1 rounded-full`} />
-        <input required type="number" min={0} step={1000} value={form.priceVnd} onChange={(e) => setForm((f) => ({ ...f, priceVnd: e.target.value }))} placeholder="Giá (đ)" aria-label="Giá bậc" className={`${fieldClass} w-36 rounded-full`} />
-        <button type="submit" disabled={create.isPending} className="btn-primary px-4 py-2 text-sm">
-          {create.isPending ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />} Thêm bậc
-        </button>
-      </form>
-    </section>
-  );
-}
-
-// Gói & định giá: gói (giá, credit, giới hạn), bậc giá truyện, cấu hình chợ truyện + giám sát.
+// Gói & định giá: gói (giá, credit, giới hạn), cấu hình chợ truyện + giám sát. Giá truyện do người bán tự đặt.
 function PlansPage() {
   const { data: plans = [], isLoading, error } = useAdminPlans();
   const [editing, setEditing] = useState(null); // null | "new" | plan
@@ -175,13 +130,10 @@ function PlansPage() {
         )}
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <TiersSection />
-        <section className="card space-y-3 p-5">
-          <h2 className="text-lg">Chợ truyện & hoàn tiền</h2>
-          <SettingsGroup group="market" />
-        </section>
-      </div>
+      <section className="card space-y-3 p-5">
+        <h2 className="text-lg">Chợ truyện & hoàn tiền</h2>
+        <SettingsGroup group="market" />
+      </section>
       <section className="card space-y-3 p-5">
         <h2 className="text-lg">Giám sát nội dung</h2>
         <SettingsGroup group="moderation" />

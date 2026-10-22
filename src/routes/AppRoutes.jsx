@@ -7,7 +7,6 @@ import ProtectedRoute from "./ProtectedRoute";
 import { ROLES } from "../constants/roles";
 import ParentLayout from "../layouts/ParentLayout";
 import ParentDashboardPage from "../pages/parent/ParentDashboardPage";
-import ComingSoonPage from "../pages/parent/ComingSoonPage";
 import LibraryPage from "../pages/parent/LibraryPage";
 import MarketplacePage from "../pages/parent/MarketplacePage";
 import SettingsPage from "../pages/parent/SettingsPage";
@@ -24,7 +23,6 @@ const TemplatesPage = lazy(() => import("../pages/specialist/TemplatesPage"));
 const CheckpointReviewPage = lazy(() => import("../pages/specialist/CheckpointReviewPage"));
 const ReportSettingsPage = lazy(() => import("../pages/specialist/ReportSettingsPage"));
 const HelpPage = lazy(() => import("../pages/parent/HelpPage"));
-const GuidelinesPage = lazy(() => import("../pages/specialist/GuidelinesPage"));
 const PrivacyPolicyPage = lazy(() => import("../pages/legal/PrivacyPolicyPage"));
 const TermsPage = lazy(() => import("../pages/legal/TermsPage"));
 const FamilyCharactersPage = lazy(() => import("../pages/parent/FamilyCharactersPage"));
@@ -82,15 +80,6 @@ function PageLoader() {
     </div>
   );
 }
-
-const specialistPlaceholders = [
-  { path: "backgrounds", title: "Thư viện bối cảnh" },
-];
-
-const placeholderRoutes = (items) =>
-  items.map(({ path, title }) => (
-    <Route key={path} path={path} element={<ComingSoonPage title={title} />} />
-  ));
 
 /** Link cũ /moderator/* → cùng đường dẫn con dưới /specialist/*. */
 function LegacyModeratorRedirect() {
@@ -155,12 +144,10 @@ function AppRoutes() {
           <Route path="strikes" element={<StrikesPage />} />
           <Route path="audits" element={<AuditsPage />} />
           <Route path="ai-flags" element={<AiFlagsPage />} />
-          <Route path="guidelines" element={<GuidelinesPage />} />
           <Route path="workspace" element={<WorkspaceIndexRedirect />} />
           <Route path="workspace/:storyId" element={<ReviewWorkspacePage />} />
           <Route path="seller-applications" element={<SellerApplicationsPage />} />
           <Route path="queue" element={<Navigate to="/specialist" replace />} />
-          {placeholderRoutes(specialistPlaceholders)}
         </Route>
 
         {/* Chế độ Trẻ Em: cần phiên Kid Mode (ba mẹ mở ở trang Bé nhà mình); thoát ra phải qua cổng PIN */}
@@ -186,9 +173,7 @@ function AppRoutes() {
           <Route path="accounts" element={<AccountsPage />} />
           <Route path="plans" element={<PlansPage />} />
           <Route path="refunds" element={<RefundsPage />} />
-          <Route path="revenue" element={<FinanceReportPage view="revenue" />} />
-          <Route path="ai-costs" element={<FinanceReportPage view="ai-costs" />} />
-          <Route path="profit-loss" element={<FinanceReportPage view="profit-loss" />} />
+          <Route path="revenue" element={<FinanceReportPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
         </Route>
 

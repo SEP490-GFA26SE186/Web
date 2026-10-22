@@ -21,16 +21,14 @@ const exportCsv = (d, label) => {
     ["Hoa hồng nền tảng", r.commission],
     ["Đã hoàn tiền", r.refunded],
     ["Phần nền tảng giữ", r.platformRevenue],
-    ["Chi phí AI", d.aiCost.totalVnd],
-    ["Lãi gộp", d.pnl.grossProfit],
     [],
-    ["Ngày", "Gói", "Truyện", "Hoa hồng", "Chi phí AI"],
-    ...d.series.map((s) => [s.day, s.plan, s.listing, s.commission, s.aiCost]),
+    ["Ngày", "Gói", "Truyện", "Hoa hồng"],
+    ...d.series.map((s) => [s.day, s.plan, s.listing, s.commission]),
   ]);
   toast.success("Đã xuất CSV (mở được bằng Excel)");
 };
 
-// Dashboard điều hành: doanh thu thật từ đơn đã thanh toán, chi phí AI từ ai_requests, việc đang chờ.
+// Dashboard điều hành: doanh thu thật từ đơn đã thanh toán, việc đang chờ.
 function AdminDashboardPage() {
   const [range, setRange] = useState("30d");
   const { data: d, isLoading, isFetching, error } = useFinanceSummary(range);
@@ -46,7 +44,7 @@ function AdminDashboardPage() {
 
   return (
     <div className="space-y-6 pb-6">
-      <PageHeader title="Dashboard điều hành" description="Số liệu từ đơn đã thanh toán (trừ hoàn tiền) và chi phí AI thực tế. Ngày tính theo giờ Việt Nam.">
+      <PageHeader title="Dashboard điều hành" description="Số liệu từ đơn đã thanh toán (trừ hoàn tiền). Ngày tính theo giờ Việt Nam.">
         {isFetching && !isLoading && <Loader2 size={16} className="animate-spin text-primary" />}
         <Tabs value={range} onChange={setRange} items={RANGES} label="Khoảng thời gian" />
         <button type="button" onClick={() => d && exportCsv(d, label)} disabled={!d} className="btn-ghost px-4 py-2 text-sm">
@@ -58,21 +56,15 @@ function AdminDashboardPage() {
       {isLoading && <div className="h-96 animate-pulse rounded-stage bg-surface" />}
       {d && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <StatCard label="Khách đã trả" value={money(d.revenue.grossRevenue)} hint={`${formatNumber(d.revenue.orders)} mục thanh toán • hoàn ${money(d.revenue.refunded)}`} />
             <StatCard label="Phần nền tảng giữ" value={money(d.revenue.platformRevenue)} hint={`Gói ${money(d.revenue.planRevenue)} + hoa hồng ${money(d.revenue.commission)}`} tone="text-primary-dark" />
-            <StatCard label="Chi phí AI" value={money(d.aiCost.totalVnd)} hint={`${formatNumber(d.aiCost.requests)} lượt gọi • ${d.aiCost.failed} lỗi / bị chặn`} />
-            <StatCard
-              label="Lãi gộp"
-              value={money(d.pnl.grossProfit)}
-              hint={d.pnl.margin == null ? "Chưa có doanh thu" : `Biên ${Math.round(d.pnl.margin * 100)}%`}
-              tone={d.pnl.grossProfit >= 0 ? "text-secondary-dark" : "text-danger"}
-            />
+            <StatCard label="Phải trả người bán" value={money(d.revenue.sellerPayable)} hint={`Truyện bán được ${money(d.revenue.listingGross)}`} />
           </div>
 
           <div className="grid gap-6 xl:grid-cols-3">
             <section className="card space-y-3 p-5 xl:col-span-2">
-              <h2 className="text-lg">Doanh thu & chi phí AI theo ngày</h2>
+              <h2 className="text-lg">Doanh thu theo ngày</h2>
               <FinanceChart series={d.series} />
             </section>
             <div className="space-y-6">

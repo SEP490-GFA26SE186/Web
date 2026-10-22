@@ -10,7 +10,7 @@ import { LISTING_STATUS } from "../../../constants/moderation";
 import { ROUTES } from "../../../constants/routes";
 import { applySeller, getMyListings, getMySeller, retryNarration } from "../../../services/sellingService";
 import { toast } from "../../../stores/toastStore";
-import { formatNumber } from "../../../utils/format";
+import { formatListingPrice } from "../../../utils/format";
 
 
 const field = "w-full rounded-card border-2 border-outline px-4 py-2.5 focus:border-primary focus:outline-none";
@@ -145,7 +145,7 @@ function SellingPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-bold">{l.title}</p>
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${s.tone}`}>{s.label}</span>
-                      <span className="text-sm text-navy/60">{l.priceVnd ? `${formatNumber(l.priceVnd)}đ` : "Miễn phí"}</span>
+                      <span className="text-sm text-navy/60">{formatListingPrice(l.priceVnd)}</span>
                     </div>
                     <NarrationStatus listing={l} />
                     {l.lastDecision?.comment && <p className="text-sm text-navy/70">Chuyên gia: {l.lastDecision.comment}</p>}

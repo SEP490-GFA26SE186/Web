@@ -4,7 +4,7 @@ import CaselTag from "../../components/parent/library/CaselTag";
 import { REVIEW_TYPES } from "../../constants/moderation";
 import { ROUTES } from "../../constants/routes";
 import { useSpecialistOverview, useReviewQueue } from "../../hooks/useSpecialist";
-import { formatNumber } from "../../utils/format";
+import { formatListingPrice } from "../../utils/format";
 
 const since = (iso) => {
   const h = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
@@ -59,7 +59,7 @@ function SpecialistDashboardPage() {
                 <div className="min-w-0 basis-full sm:basis-0 sm:flex-1">
                   <p className="truncate font-bold">{q.title}</p>
                   <p className="text-sm text-navy/60">
-                    {q.seller} • {q.pageCount} trang • {q.priceVnd ? `${formatNumber(q.priceVnd)}đ` : "Miễn phí"} •{" "}
+                    {q.seller} • {q.pageCount} trang • {formatListingPrice(q.priceVnd)} •{" "}
                     {since(q.reviewType === "submission" ? q.submittedAt : q.createdAt)}
                   </p>
                 </div>
