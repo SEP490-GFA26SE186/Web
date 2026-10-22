@@ -1,11 +1,9 @@
 import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createSubSkill,
   createTemplate,
-  deleteSubSkill,
   deleteTemplate,
+  duplicateTemplate,
   flagCheckpoint,
-  getCaselReferences,
   getCheckpointQueue,
   getCheckpointReviewStats,
   getReportSettings,
@@ -25,15 +23,11 @@ export const pedagogyKeys = {
   subSkillList: (filters) => ["sub-skills", "list", filters],
   templates: ["question-templates"],
   templateList: (filters) => ["question-templates", "list", filters],
-  casel: (skillId) => ["casel-references", skillId],
   checkpointReview: ["checkpoint-review"],
   checkpointQueue: (filters) => ["checkpoint-review", "queue", filters],
   checkpointStats: ["checkpoint-review", "stats"],
   reportSettings: ["pedagogy", "report-settings"],
 };
-
-export const useCaselReferences = (skillId) =>
-  useQuery({ queryKey: pedagogyKeys.casel(skillId), queryFn: () => getCaselReferences(skillId), enabled: !!skillId, staleTime: 30 * 60 * 1000 });
 
 export const useSubSkills = (filters, options = {}) =>
   useQuery({ queryKey: pedagogyKeys.subSkillList(filters), queryFn: () => getSubSkills(filters), placeholderData: keepPreviousData, ...options });
@@ -54,14 +48,13 @@ const SUB = pedagogyKeys.subSkills;
 const TPL = pedagogyKeys.templates;
 const TOPICS = ["topics"];
 
-export const useCreateSubSkill = () => useMutate(createSubSkill, [SUB]);
 export const useUpdateSubSkill = () => useMutate(({ id, ...payload }) => updateSubSkill(id, payload), [SUB, TPL, TOPICS]);
-export const useDeleteSubSkill = () => useMutate(deleteSubSkill, [SUB, TPL]);
 
 export const useCreateTemplate = () => useMutate(createTemplate, [TPL, SUB]);
 export const useUpdateTemplate = () => useMutate(({ id, ...payload }) => updateTemplate(id, payload), [TPL, SUB]);
 export const useSaveTemplateDraft = () => useMutate(({ id, ...payload }) => saveTemplateDraft(id, payload), [TPL]);
 export const usePublishTemplate = () => useMutate(publishTemplate, [TPL, SUB]);
+export const useDuplicateTemplate = () => useMutate(duplicateTemplate, [TPL, SUB]);
 export const useDeleteTemplate = () => useMutate(deleteTemplate, [TPL, SUB]);
 
 // ── Soát câu hỏi AI: phân trang con trỏ (nextCursor); đổi trạng thái → tải lại hàng đợi + thống kê,

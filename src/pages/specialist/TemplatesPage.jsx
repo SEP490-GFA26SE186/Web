@@ -1,93 +1,19 @@
 import { useState } from "react";
-import { FileQuestion, Loader2, PenLine, Plus, SearchX, Trash2 } from "lucide-react";
+import { Copy, FileQuestion, Loader2, PenLine, Plus, SearchX, Trash2 } from "lucide-react";
 import Modal from "../../components/common/Modal";
 import Switch from "../../components/common/Switch";
 import TemplateVersionForm from "../../components/specialist/TemplateVersionForm";
 import { ANSWER_FORMATS } from "../../constants/story";
-import { useCreateTemplate, useDeleteTemplate, useSubSkills, useTemplates, useUpdateTemplate } from "../../hooks/usePedagogy";
+import { useDeleteTemplate, useDuplicateTemplate, useSubSkills, useTemplates, useUpdateTemplate } from "../../hooks/usePedagogy";
 import { toast } from "../../stores/toastStore";
 
 const inputClass =
   "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none transition focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
 
-function CreateTemplateModal({ subSkills, defaultSubSkillId, onClose, onCreated }) {
-  const [form, setForm] = useState({ subSkillId: defaultSubSkillId, title: "", answerFormat: "emotion_pick" });
-  const [error, setError] = useState("");
-  const create = useCreateTemplate();
-
-  const set = (key) => (e) => {
-    setForm((f) => ({ ...f, [key]: e.target.value }));
-    setError("");
-  };
-  const submit = (e) => {
-    e.preventDefault();
-    if (!form.subSkillId) return setError("Chọn kỹ năng con cho mẫu câu hỏi");
-    if (form.title.trim().length < 3) return setError("Tên mẫu tối thiểu 3 ký tự");
-    create.mutate(
-      { ...form, title: form.title.trim() },
-      {
-        onSuccess: (t) => {
-          toast.success("Đã tạo mẫu câu hỏi, hãy soạn nội dung bản nháp");
-          onCreated(t);
-        },
-        onError: (err) => setError(err.message),
-      },
-    );
-  };
-
-  return (
-    <Modal
-      open
-      onClose={onClose}
-      title="Thêm mẫu câu hỏi"
-      description="Dạng trả lời không đổi được sau khi tạo. Nội dung soạn ở bước tiếp theo."
-      footer={
-        <>
-          <button type="button" onClick={onClose} className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline">
-            Hủy
-          </button>
-          <button type="submit" form="template-form" disabled={create.isPending} className="btn-primary py-2.5 text-sm disabled:opacity-70">
-            {create.isPending && <Loader2 size={16} className="animate-spin" />} Tạo mẫu
-          </button>
-        </>
-      }
-    >
-      <form id="template-form" onSubmit={submit} noValidate className="space-y-4">
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold">Kỹ năng con</span>
-          <select value={form.subSkillId} onChange={set("subSkillId")} className={`${inputClass} cursor-pointer`}>
-            <option value="">— Chọn kỹ năng con —</option>
-            {subSkills.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.nameVi}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold">Tên mẫu</span>
-          <input value={form.title} onChange={set("title")} maxLength={200} placeholder="VD: Gọi tên cảm xúc sau khi bị giành đồ chơi" className={inputClass} />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold">Dạng trả lời</span>
-          <select value={form.answerFormat} onChange={set("answerFormat")} className={`${inputClass} cursor-pointer`}>
-            {Object.entries(ANSWER_FORMATS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
-      </form>
-    </Modal>
-  );
-}
-
 function TemplatesPage() {
   const [subSkillId, setSubSkillId] = useState("all");
   const [creating, setCreating] = useState(false);
-  const [composing, setComposing] = useState(null); // id mẫu đang soạn (lấy bản mới nhất từ danh sách)
+  const [composing, setComposing] = useState(null); // mẫu đang soạn (ưu tiên bản mới nhất trong danh sách)
   const [deleting, setDeleting] = useState(null);
   const [deleteError, setDeleteError] = useState("");
 
@@ -95,7 +21,18 @@ function TemplatesPage() {
   const { data: templates = [], isLoading, isFetching, isError, refetch } = useTemplates({ subSkillId });
   const update = useUpdateTemplate();
   const remove = useDeleteTemplate();
-  const composingTemplate = templates.find((t) => t.id === composing);
+  const duplicate = useDuplicateTemplate();
+  const composingTemplate = composing && (templates.find((t) => t.id === composing.id) ?? composing);
+
+  // Nhân bản: mẫu mới cùng kỹ năng con + dạng, bản nháp v1 chép nội dung → mở ngay để soạn tiếp
+  const onDuplicate = (t) =>
+    duplicate.mutate(t.id, {
+      onSuccess: (copy) => {
+        toast.success("Đã nhân bản mẫu, hãy chỉnh nội dung bản nháp");
+        setComposing(copy);
+      },
+      onError: (err) => toast.error(err.message),
+    });
 
   const toggleActive = (t) => update.mutate({ id: t.id, isActive: !t.isActive }, { onError: (err) => toast.error(err.message) });
 
@@ -121,7 +58,7 @@ function TemplatesPage() {
           </p>
           <h1 className="text-3xl">Mẫu câu hỏi</h1>
           <p className="mt-1 max-w-2xl text-navy/70">
-            Mẫu câu hỏi gắn với một kỹ năng con và có phiên bản. Bản đã ban hành không bị sửa; muốn đổi thì soạn bản nháp mới rồi ban hành.
+            Mẫu câu hỏi viết theo kỹ năng con (không theo sự việc), dùng cho mọi truyện AI. Bản đã ban hành không bị sửa; muốn đổi thì soạn bản nháp mới rồi ban hành.
           </p>
         </div>
         <button onClick={() => setCreating(true)} disabled={!subSkills.length} className="btn-primary shrink-0 self-start whitespace-nowrap disabled:opacity-60 md:self-auto">
@@ -186,8 +123,15 @@ function TemplatesPage() {
                   {t.latestPublished?.questionFrame && <p className="mt-1 line-clamp-1 text-xs text-navy/50">{t.latestPublished.questionFrame}</p>}
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <button onClick={() => setComposing(t.id)} className="inline-flex items-center gap-1.5 rounded-full bg-surface px-4 py-2 text-sm font-bold hover:bg-outline">
+                  <button onClick={() => setComposing(t)} className="inline-flex items-center gap-1.5 rounded-full bg-surface px-4 py-2 text-sm font-bold hover:bg-outline">
                     <PenLine size={15} /> {t.draft ? "Sửa bản nháp" : "Soạn bản mới"}
+                  </button>
+                  <button
+                    onClick={() => onDuplicate(t)}
+                    disabled={duplicate.isPending}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-surface px-4 py-2 text-sm font-bold hover:bg-outline disabled:opacity-60"
+                  >
+                    {duplicate.isPending && duplicate.variables === t.id ? <Loader2 size={15} className="animate-spin" /> : <Copy size={15} />} Nhân bản
                   </button>
                   <Switch
                     checked={t.isActive}
@@ -206,17 +150,11 @@ function TemplatesPage() {
       </section>
 
       {creating && (
-        <CreateTemplateModal
-          subSkills={subSkills}
-          defaultSubSkillId={subSkillId === "all" ? "" : subSkillId}
-          onClose={() => setCreating(false)}
-          onCreated={(t) => {
-            setCreating(false);
-            setComposing(t.id);
-          }}
-        />
+        <TemplateVersionForm subSkills={subSkills} defaultSubSkillId={subSkillId === "all" ? "" : subSkillId} onClose={() => setCreating(false)} />
       )}
-      {composingTemplate && <TemplateVersionForm key={composingTemplate.id} template={composingTemplate} onClose={() => setComposing(null)} />}
+      {composingTemplate && (
+        <TemplateVersionForm key={composingTemplate.id} template={composingTemplate} subSkills={subSkills} onClose={() => setComposing(null)} />
+      )}
 
       <Modal
         open={!!deleting}

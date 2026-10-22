@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  analyzeStory,
   createCharacter,
   createCheckpoint,
   createPage,
@@ -135,6 +136,9 @@ export const useCreateCharacter = () => {
     },
   });
 };
+
+/** Phân tích lời kể "Kể chuyện nhà mình" (10–30 giây, không trừ credit). */
+export const useAnalyzeStory = () => useMutation({ mutationFn: analyzeStory });
 
 export const useCreateStory = () => {
   const queryClient = useQueryClient();

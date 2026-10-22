@@ -9,6 +9,9 @@ export const CASEL = {
   responsible_decision_making: { label: "Ra quyết định có trách nhiệm", short: "Ra quyết định", icon: Scale },
 };
 
+// Trang khung CASEL — đường dẫn tham khảo mặc định của mẫu câu hỏi (khớp CASEL_URL của BE)
+export const CASEL_URL = "https://casel.org/fundamentals-of-sel/what-is-the-casel-framework/";
+
 export const CASEL_OPTIONS = Object.entries(CASEL).map(([value, { label }]) => ({ value, label }));
 
 // story_length: Ngắn / Vừa / Dài = 6 / 8 / 10 trang; custom = truyện tự viết (4–20 trang)
