@@ -1,10 +1,11 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, BookPlus, Bot, Check, FileText, Loader2, ShieldCheck, ShoppingCart, Store, Type, Volume2 } from "lucide-react";
+import { ArrowLeft, Bot, Check, FileText, Loader2, ShieldCheck, ShoppingCart, Store, Type, Volume2 } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
 import { coverOf } from "../../../components/parent/library/storyMeta";
 import StoryCover from "../../../components/parent/StoryCover";
 import ListingReviews from "../../../components/parent/marketplace/ListingReviews";
 import ReportListingButton from "../../../components/parent/marketplace/ReportListingButton";
+import ShelfChildList from "../../../components/parent/studio/ShelfChildList";
 import { ROUTES } from "../../../constants/routes";
 import { useCheckoutListing, useListing } from "../../../hooks/useMarketplace";
 import { useShelfStatus, useToggleShelf } from "../../../hooks/useStudio";
@@ -18,25 +19,16 @@ function OwnedShelf({ storyId }) {
   if (isLoading) return <Loader2 size={20} className="animate-spin text-primary" />;
   if (!data?.children?.length) return <p className="text-sm text-navy/60">Ba mẹ thêm hồ sơ bé để đưa truyện lên giá sách.</p>;
   return (
-    <div className="flex flex-wrap gap-2">
-      {data.children.map((c) => (
-        <button
-          key={c.childId}
-          type="button"
-          aria-pressed={c.inBookshelf}
-          disabled={toggle.isPending}
-          onClick={() =>
-            toggle.mutate(
-              { childId: c.childId, add: !c.inBookshelf },
-              { onSuccess: () => toast.success(c.inBookshelf ? `Đã bỏ khỏi giá của ${c.name}` : `Đã đưa lên giá của ${c.name}`), onError: (e) => toast.error(e.message) },
-            )
-          }
-          className={`inline-flex items-center gap-1.5 rounded-full border-2 px-4 py-2 text-sm font-bold ${c.inBookshelf ? "border-secondary bg-secondary-tint text-secondary-dark" : "border-outline bg-white hover:border-primary"}`}
-        >
-          {c.inBookshelf ? <Check size={15} /> : <BookPlus size={15} />} {c.inBookshelf ? `Đã có trên giá của ${c.name}` : `Đưa lên giá của ${c.name}`}
-        </button>
-      ))}
-    </div>
+    <ShelfChildList
+      kids={data.children}
+      busyId={toggle.isPending ? toggle.variables?.childId : null}
+      onToggle={(c) =>
+        toggle.mutate(
+          { childId: c.childId, add: !c.inBookshelf },
+          { onSuccess: () => toast.success(c.inBookshelf ? `Đã bỏ khỏi giá của ${c.name}` : `Đã đưa lên giá của ${c.name}`), onError: (e) => toast.error(e.message) },
+        )
+      }
+    />
   );
 }
 
@@ -61,8 +53,8 @@ function ListingDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
-      <Link to={ROUTES.PARENT.MARKETPLACE} className="inline-flex items-center gap-1 text-sm font-semibold text-navy/60 hover:text-primary">
-        <ArrowLeft size={16} /> Chợ truyện
+      <Link to={ROUTES.PARENT.MARKETPLACE} className="group inline-flex items-center gap-1.5 rounded-full py-1 pr-2 text-sm font-semibold text-navy/60 transition hover:text-primary-dark">
+        <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" /> Chợ truyện
       </Link>
       <article className="card space-y-4 p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
@@ -116,7 +108,7 @@ function ListingDetailPage() {
             <OwnedShelf storyId={l.publishedStoryId} />
           </div>
         ) : (
-          <button type="button" onClick={buy} disabled={checkout.isPending} className="btn-primary px-8 py-3 text-lg">
+          <button type="button" onClick={buy} disabled={checkout.isPending} className="btn-primary w-full px-8 py-3.5 text-lg sm:w-auto">
             {checkout.isPending ? <Loader2 size={20} className="animate-spin" /> : <ShoppingCart size={20} />}
             {free ? "Nhận miễn phí" : `Mua ${formatListingPrice(l.priceVnd)} qua payOS`}
           </button>

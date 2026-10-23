@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Loader2, Save, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { fillNames } from "../../../utils/storyNames";
+import { Badge } from "../../ui";
+import SaveBar from "./SaveBar";
 
 export const fieldClass =
   "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-3 outline-none transition placeholder:text-navy/40 focus:border-secondary focus:ring-[3px] focus:ring-secondary/15 disabled:bg-surface";
@@ -19,7 +21,14 @@ function PageEditor({ page, characters, disabled, gap, warning, onSave, saving, 
       className={`card space-y-3 p-5 ${gap ? "border-danger ring-2 ring-danger/20" : ""}`}
     >
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-base">Trang {page.pageOrder}</h3>
+        <h3 className="flex items-center gap-2 text-base">
+          Trang {page.pageOrder}
+          {dirty && (
+            <Badge tone="primary" size="sm">
+              Chưa lưu
+            </Badge>
+          )}
+        </h3>
         <div className="flex items-center gap-2 text-xs font-semibold text-navy/55">
           {page.origin === "ai" && <span className="tag-theme">AI viết</span>}
           {page.origin === "ai_edited" && <span className="tag-theme">AI viết, ba mẹ sửa</span>}
@@ -30,7 +39,8 @@ function PageEditor({ page, characters, disabled, gap, warning, onSave, saving, 
               onClick={onDelete}
               disabled={disabled || deleting}
               aria-label={`Xóa trang ${page.pageOrder}`}
-              className="rounded-full p-1.5 text-navy/50 hover:bg-danger-tint hover:text-danger disabled:opacity-40"
+              title={`Xóa trang ${page.pageOrder}`}
+              className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-navy/45 transition hover:bg-danger-tint hover:text-danger disabled:pointer-events-none disabled:opacity-40"
             >
               {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
             </button>
@@ -47,17 +57,7 @@ function PageEditor({ page, characters, disabled, gap, warning, onSave, saving, 
       />
       {gap && <p className="text-sm font-semibold text-danger">{gap}</p>}
       {!gap && warning && <p className="text-sm font-semibold text-amber-700">{warning}</p>}
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={() => onSave(text)}
-          disabled={disabled || !dirty || saving}
-          className="btn-primary px-5 py-2 text-sm disabled:opacity-50"
-        >
-          {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          Lưu trang
-        </button>
-      </div>
+      <SaveBar dirty={dirty} saving={saving} disabled={disabled} onSave={() => onSave(text)} onReset={() => setText(original)} label="Lưu trang" />
     </article>
   );
 }

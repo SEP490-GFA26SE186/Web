@@ -9,7 +9,7 @@ import NarrationPanel from "../../../components/parent/studio/NarrationPanel";
 import { narrationState } from "../../../components/parent/studio/narrationState";
 import ShelfPanel from "../../../components/parent/studio/ShelfPanel";
 import ScenePicture from "../../../components/parent/studio/ScenePicture";
-import PageEditor, { fieldClass } from "../../../components/parent/studio/PageEditor";
+import PageEditor from "../../../components/parent/studio/PageEditor";
 import { CHECKPOINT_TYPES, NEEDS_TARGET, STORY_STATUS_LABELS } from "../../../constants/story";
 import { STORY_LENGTH_LABELS } from "../../../constants/casel";
 import { ROUTES } from "../../../constants/routes";
@@ -24,6 +24,7 @@ import {
   useStoryImages,
 } from "../../../hooks/useStudio";
 import { toast } from "../../../stores/toastStore";
+import { Button, ConfirmDialog, Select } from "../../../components/ui";
 
 // Lỗi theo đường dẫn của BE: "pages.<id>" / "checkpoints.<id>" → câu báo, để tô đỏ đúng chỗ
 const gapsByPath = (errors) => Object.fromEntries(errors.map((e) => [e.path, e.message]));
@@ -48,73 +49,56 @@ function AddCheckpointForm({ page, characters, onAdd, adding, onCancel }) {
     <div className="ml-4 flex flex-wrap items-end gap-3 rounded-card border-2 border-dashed border-outline bg-surface p-4 sm:ml-10">
       <label className="min-w-56 flex-1">
         <span className="mb-1.5 block text-sm font-semibold">Kiểu điểm dừng sau trang {page.pageOrder}</span>
-        <select value={type} onChange={(e) => setType(e.target.value)} className={fieldClass}>
-          {Object.entries(CHECKPOINT_TYPES).map(([value, { label }]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <Select value={type} onChange={setType} options={Object.entries(CHECKPOINT_TYPES).map(([value, { label }]) => ({ value, label }))} />
       </label>
       {needsTarget && (
         <label className="min-w-44">
           <span className="mb-1.5 block text-sm font-semibold">Hỏi về</span>
-          <select value={target} onChange={(e) => setTarget(e.target.value)} className={fieldClass}>
-            {others.map((c) => (
-              <option key={c.token} value={c.token}>
-                {c.name ?? c.token}
-              </option>
-            ))}
-          </select>
+          <Select value={target} onChange={setTarget} options={others.map((c) => ({ value: c.token, label: c.name ?? c.token }))} />
         </label>
       )}
       <div className="flex gap-2">
-        <button type="button" onClick={onCancel} className="btn-ghost px-4 py-2 text-sm">
+        <Button variant="ghost" size="lg" onClick={onCancel}>
           Hủy
-        </button>
-        <button
-          type="button"
-          disabled={adding || (needsTarget && !target)}
+        </Button>
+        <Button
+          size="lg"
+          loading={adding}
+          disabled={needsTarget && !target}
           onClick={() => onAdd({ type, afterPageId: page.id, ...(needsTarget && { targetToken: target }) })}
-          className="btn-primary px-4 py-2 text-sm disabled:opacity-60"
         >
-          {adding && <Loader2 size={16} className="animate-spin" />} Thêm
-        </button>
+          Thêm điểm dừng
+        </Button>
       </div>
     </div>
   );
 }
 
-/** Xóa cả truyện: bấm lần 1 hiện xác nhận ngay tại chỗ, bấm "Xóa hẳn" mới gọi API. */
+/** Xóa cả truyện: nút phụ rõ ràng, bấm thì hỏi lại bằng hộp xác nhận. */
 function DeleteStoryButton({ onConfirm, deleting, disabled }) {
   const [confirming, setConfirming] = useState(false);
-  if (!confirming) {
-    return (
-      <button
-        type="button"
+  return (
+    <>
+      <Button
+        variant="dangerGhost"
+        size="sm"
+        icon={Trash2}
         onClick={() => setConfirming(true)}
         disabled={disabled}
-        className="inline-flex items-center gap-1 text-sm font-semibold text-danger hover:underline disabled:opacity-50"
       >
-        <Trash2 size={15} /> Xóa truyện
-      </button>
-    );
-  }
-  return (
-    <div className="flex flex-wrap items-center gap-2 text-sm">
-      <span className="font-semibold text-danger">Xóa truyện này? Không khôi phục được.</span>
-      <button type="button" onClick={() => setConfirming(false)} className="btn-ghost px-3 py-1.5 text-sm">
-        Giữ lại
-      </button>
-      <button
-        type="button"
-        onClick={onConfirm}
-        disabled={deleting}
-        className="inline-flex items-center gap-1 rounded-full bg-danger px-3 py-1.5 font-semibold text-white disabled:opacity-60"
-      >
-        {deleting ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />} Xóa hẳn
-      </button>
-    </div>
+        Xóa truyện
+      </Button>
+      <ConfirmDialog
+        open={confirming}
+        onClose={() => setConfirming(false)}
+        onConfirm={onConfirm}
+        loading={deleting}
+        title="Xóa truyện này?"
+        description="Truyện, các trang và điểm dừng sẽ bị xóa và không khôi phục được."
+        cancelLabel="Giữ lại"
+        confirmLabel="Xóa truyện"
+      />
+    </>
   );
 }
 
@@ -236,8 +220,8 @@ function StoryEditorPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 pb-4">
-      <Link to={ROUTES.PARENT.STUDIO} className="inline-flex items-center gap-1 text-sm font-semibold text-navy/60 hover:text-primary">
-        <ArrowLeft size={16} /> Truyện của ba mẹ
+      <Link to={ROUTES.PARENT.STUDIO} className="group inline-flex items-center gap-1.5 rounded-full py-1 pr-2 text-sm font-semibold text-navy/60 transition hover:text-primary-dark">
+        <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" /> Truyện của ba mẹ
       </Link>
 
       <header className="card space-y-3 p-6">
@@ -275,12 +259,15 @@ function StoryEditorPage() {
             <p className="text-xs text-navy/50">Muốn đổi lời kể hay nhân vật, ba mẹ hãy tạo truyện mới.</p>
           </div>
         )}
-        {story.reviewedAt && story.kind !== "published" && (
-          <Link to={ROUTES.PARENT.sellingNew(story.id)} className="mr-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
-            <Store size={15} /> Đăng bán truyện này
-          </Link>
-        )}
-        <DeleteStoryButton
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-navy/[0.06] pt-4">
+          {story.reviewedAt && story.kind !== "published" ? (
+            <Button variant="secondary" size="md" icon={Store} to={ROUTES.PARENT.sellingNew(story.id)}>
+              Đăng bán truyện này
+            </Button>
+          ) : (
+            <span />
+          )}
+          <DeleteStoryButton
           disabled={busy}
           deleting={removeStory.isPending}
           onConfirm={() =>
@@ -292,7 +279,8 @@ function StoryEditorPage() {
               onError: (err) => toast.error(err.message),
             })
           }
-        />
+          />
+        </div>
       </header>
 
       {!isCustom && (
@@ -337,9 +325,9 @@ function StoryEditorPage() {
                   })
                 }
                 disabled={busy || images.drawAll.isPending}
-                className="btn-primary whitespace-nowrap disabled:opacity-60"
+                className="btn-primary px-6 py-2.5 whitespace-nowrap"
               >
-                {images.drawAll.isPending ? <Loader2 size={18} className="animate-spin" /> : null} Vẽ tranh cho truyện
+                {images.drawAll.isPending && <Loader2 size={18} className="animate-spin" />} Vẽ tranh cho truyện
               </button>
             </div>
           )}
@@ -420,9 +408,12 @@ function StoryEditorPage() {
                     <button
                       type="button"
                       onClick={() => setAddingAfter(page.id)}
-                      className="ml-4 inline-flex items-center gap-1 text-sm font-semibold text-secondary-dark hover:underline sm:ml-10"
+                      className="group ml-4 flex w-[calc(100%-1rem)] cursor-pointer items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-secondary/40 bg-white/60 px-4 py-3 text-sm font-bold text-secondary-dark transition duration-200 hover:border-secondary hover:bg-secondary-tint/60 active:scale-[0.99] sm:ml-10 sm:w-[calc(100%-2.5rem)]"
                     >
-                      <Plus size={16} /> Thêm điểm dừng sau trang {page.pageOrder}
+                      <span className="grid h-6 w-6 place-items-center rounded-full bg-secondary-tint transition group-hover:bg-secondary group-hover:text-white">
+                        <Plus size={14} />
+                      </span>
+                      Thêm điểm dừng sau trang {page.pageOrder}
                     </button>
                   ))}
               </Fragment>
@@ -434,9 +425,12 @@ function StoryEditorPage() {
               type="button"
               onClick={() => run(editor.createPage, undefined, { success: "Đã thêm trang" })}
               disabled={editor.createPage.isPending}
-              className="btn-ghost w-full disabled:opacity-60"
+              className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-card border-[1.5px] border-dashed border-navy/20 bg-white/60 px-4 py-4 font-bold text-navy/65 transition duration-200 hover:border-primary hover:bg-primary-tint/40 hover:text-primary-dark active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
             >
-              {editor.createPage.isPending ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />} Thêm trang
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-navy/[0.06] transition group-hover:bg-primary group-hover:text-white">
+                {editor.createPage.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+              </span>
+              Thêm trang
             </button>
           )}
         </>

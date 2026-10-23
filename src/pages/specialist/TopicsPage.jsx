@@ -7,6 +7,8 @@ import useDebounce from "../../hooks/useDebounce";
 import { useSubSkills } from "../../hooks/usePedagogy";
 import { useCreateTopic, useDeleteTopic, useEqSkills, useTopics, useUpdateTopic } from "../../hooks/useTopics";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../../components/ui";
+import { ConfirmDialog } from "../../components/ui";
 
 const inputClass =
   "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none transition focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
@@ -107,19 +109,13 @@ function TopicFormModal({ topic, skills, onClose }) {
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Năng lực CASEL</span>
-          <select
+          <Select
             value={form.skillId}
-            onChange={setSkill}
+            onChange={(v) => setSkill({ target: { value: v } })}
             disabled={skillLocked}
-            className={`${inputClass} cursor-pointer disabled:cursor-not-allowed disabled:bg-surface disabled:text-navy/60`}
-          >
-            <option value="">— Chọn năng lực —</option>
-            {skills.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.nameVi}
-              </option>
-            ))}
-          </select>
+            placeholder="Chọn năng lực"
+            options={skills.map((s) => ({ value: s.id, label: s.nameVi }))}
+          />
           {skillLocked && (
             <span className="mt-1 block text-xs text-navy/50">
               Đã có {topic.storiesCount} truyện dùng nên không đổi được năng lực. Cần năng lực khác thì tạo chuyện mẫu mới.
@@ -251,21 +247,19 @@ function TopicsPage() {
             className={`${inputClass} rounded-full pl-11`}
           />
         </label>
-        <select value={skillId} onChange={(e) => setSkillId(e.target.value)} className={`${inputClass} cursor-pointer rounded-full lg:w-64`}>
-          <option value="all">Mọi năng lực</option>
-          {skills.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.nameVi} ({s.activeTopicsCount})
-            </option>
-          ))}
-        </select>
-        <select value={isActive} onChange={(e) => setIsActive(e.target.value)} className={`${inputClass} cursor-pointer rounded-full lg:w-48`}>
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+        <div className="lg:w-64">
+          <Select
+            label="Năng lực"
+            value={skillId}
+            onChange={setSkillId}
+            shape="pill"
+            options={[{ value: "all", label: "Mọi năng lực" }, ...skills.map((s) => ({ value: s.id, label: s.nameVi, description: `${s.activeTopicsCount} chuyện mẫu đang dùng` }))]}
+            renderValue={(o) => o.label}
+          />
+        </div>
+        <div className="lg:w-48">
+          <Select label="Trạng thái" value={isActive} onChange={setIsActive} shape="pill" options={STATUS_OPTIONS} />
+        </div>
       </div>
 
       <section className="card overflow-hidden">
@@ -340,31 +334,19 @@ function TopicsPage() {
 
       {editing && <TopicFormModal topic={editing === "new" ? null : editing} skills={skills} onClose={() => setEditing(null)} />}
 
-      <Modal
+      <ConfirmDialog
         open={!!deleting}
         onClose={() => setDeleting(null)}
-        title={`Xóa chuyện mẫu "${deleting?.title ?? ""}"?`}
+        onConfirm={confirmDelete}
+        loading={remove.isPending}
+        tone={deleting?.storiesCount ? "warning" : "danger"}
+        title={`${deleting?.storiesCount ? "Ngưng dùng" : "Xóa"} chuyện mẫu "${deleting?.title ?? ""}"?`}
         description={
           deleting?.storiesCount
             ? `Chuyện mẫu đã có ${deleting.storiesCount} truyện dùng nên sẽ chỉ chuyển sang ngưng dùng, truyện cũ không bị ảnh hưởng.`
             : "Chuyện mẫu chưa có truyện nào dùng, sẽ bị xóa hẳn."
         }
-        size="max-w-md"
-        footer={
-          <>
-            <button onClick={() => setDeleting(null)} className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline">
-              Hủy
-            </button>
-            <button
-              onClick={confirmDelete}
-              disabled={remove.isPending}
-              className="inline-flex items-center gap-1.5 rounded-full bg-danger px-5 py-2.5 text-sm font-bold text-white transition hover:bg-danger-dark disabled:opacity-70"
-            >
-              {remove.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-              {deleting?.storiesCount ? "Ngưng dùng" : "Xóa chuyện mẫu"}
-            </button>
-          </>
-        }
+        confirmLabel={deleting?.storiesCount ? "Ngưng dùng" : "Xóa"}
       />
     </div>
   );

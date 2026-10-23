@@ -14,6 +14,7 @@ import {
 } from "../../hooks/usePedagogy";
 import { useEqSkills } from "../../hooks/useTopics";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../../components/ui";
 
 const inputClass =
   "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none transition focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
@@ -105,7 +106,7 @@ function FlagModal({ item, onClose }) {
             disabled={flag.isPending}
             className="inline-flex items-center gap-1.5 rounded-full bg-danger px-5 py-2.5 text-sm font-bold text-white transition hover:bg-danger-dark disabled:opacity-70"
           >
-            {flag.isPending ? <Loader2 size={16} className="animate-spin" /> : <Flag size={16} />} Gắn cờ
+            {flag.isPending && <Loader2 size={16} className="animate-spin" />} Gắn cờ
           </button>
         </>
       }
@@ -372,30 +373,15 @@ function CheckpointReviewPage() {
                 </button>
               ))}
             </div>
-            <select aria-label="Năng lực" value={skillId} onChange={(e) => changeSkill(e.target.value)} className={`${inputClass} cursor-pointer rounded-full lg:ml-auto lg:w-52`}>
-              <option value="all">Mọi năng lực</option>
-              {skills.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.nameVi}
-                </option>
-              ))}
-            </select>
-            <select aria-label="Kỹ năng con" value={subSkillId} onChange={(e) => changeSubSkill(e.target.value)} className={`${inputClass} cursor-pointer rounded-full lg:w-60`}>
-              <option value="all">Mọi kỹ năng con</option>
-              {subSkills.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.nameVi}
-                </option>
-              ))}
-            </select>
-            <select aria-label="Mẫu câu hỏi" value={templateId} onChange={(e) => setTemplateId(e.target.value)} className={`${inputClass} cursor-pointer rounded-full lg:w-52`}>
-              <option value="all">Mọi mẫu</option>
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.title}
-                </option>
-              ))}
-            </select>
+            <div className="lg:ml-auto lg:w-52">
+              <Select label="Năng lực" value={skillId} onChange={changeSkill} shape="pill" options={[{ value: "all", label: "Mọi năng lực" }, ...skills.map((s) => ({ value: s.id, label: s.nameVi }))]} />
+            </div>
+            <div className="lg:w-60">
+              <Select label="Kỹ năng con" value={subSkillId} onChange={changeSubSkill} shape="pill" options={[{ value: "all", label: "Mọi kỹ năng con" }, ...subSkills.map((s) => ({ value: s.id, label: s.nameVi }))]} />
+            </div>
+            <div className="lg:w-52">
+              <Select label="Mẫu câu hỏi" value={templateId} onChange={setTemplateId} shape="pill" options={[{ value: "all", label: "Mọi mẫu" }, ...templates.map((t) => ({ value: t.id, label: t.title }))]} />
+            </div>
           </div>
 
           <section className="card overflow-hidden">

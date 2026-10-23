@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Ban, Loader2, Plus, Search, SearchX, ShieldAlert, Trash2, TriangleAlert } from "lucide-react";
-import Modal from "../../components/common/Modal";
 import Switch from "../../components/common/Switch";
 import useDebounce from "../../hooks/useDebounce";
 import { addKeywords, deleteKeyword, getKeywords, updateKeyword } from "../../services/keywordService";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../../components/ui";
+import { ConfirmDialog } from "../../components/ui";
 
 const inputClass =
   "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none transition focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
@@ -134,13 +135,9 @@ function KeywordsPage() {
           <Search size={18} className="absolute top-1/2 left-4 -translate-y-1/2 text-navy/40" />
           <input type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm từ khoá..." className={`${inputClass} rounded-full pl-11`} />
         </label>
-        <select value={severity} onChange={(e) => setSeverity(e.target.value)} className={`${inputClass} cursor-pointer rounded-full sm:w-48`}>
-          {FILTERS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+        <div className="sm:w-48">
+          <Select value={severity} onChange={setSeverity} options={FILTERS} label="Mức độ" shape="pill" />
+        </div>
       </div>
 
       <section className="card overflow-hidden">
@@ -200,26 +197,13 @@ function KeywordsPage() {
         )}
       </section>
 
-      <Modal
+      <ConfirmDialog
         open={!!deleting}
         onClose={() => setDeleting(null)}
+        onConfirm={confirmDelete}
+        loading={remove.isPending}
         title={`Xoá từ khoá "${deleting?.keyword ?? ""}"?`}
         description="Muốn tạm ngưng thì tắt công tắc thay vì xoá."
-        size="max-w-md"
-        footer={
-          <>
-            <button onClick={() => setDeleting(null)} className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline">
-              Hủy
-            </button>
-            <button
-              onClick={confirmDelete}
-              disabled={remove.isPending}
-              className="inline-flex items-center gap-1.5 rounded-full bg-danger px-5 py-2.5 text-sm font-bold text-white transition hover:bg-danger-dark disabled:opacity-70"
-            >
-              {remove.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} Xoá
-            </button>
-          </>
-        }
       />
     </div>
   );

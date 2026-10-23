@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { Copy, FileQuestion, Loader2, PenLine, Plus, SearchX, Trash2 } from "lucide-react";
-import Modal from "../../components/common/Modal";
 import Switch from "../../components/common/Switch";
 import TemplateVersionForm from "../../components/specialist/TemplateVersionForm";
 import { ANSWER_FORMATS } from "../../constants/story";
 import { useDeleteTemplate, useDuplicateTemplate, useSubSkills, useTemplates, useUpdateTemplate } from "../../hooks/usePedagogy";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../../components/ui";
+import { ConfirmDialog } from "../../components/ui";
 
-const inputClass =
-  "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none transition focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
 
 function TemplatesPage() {
   const [subSkillId, setSubSkillId] = useState("all");
@@ -67,14 +66,15 @@ function TemplatesPage() {
       </div>
 
       <div className="rounded-card bg-white p-4 shadow-low">
-        <select value={subSkillId} onChange={(e) => setSubSkillId(e.target.value)} className={`${inputClass} cursor-pointer rounded-full lg:w-96`} aria-label="Lọc theo kỹ năng con">
-          <option value="all">Mọi kỹ năng con</option>
-          {subSkills.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.nameVi}
-            </option>
-          ))}
-        </select>
+        <div className="lg:w-96">
+          <Select
+            label="Lọc theo kỹ năng con"
+            value={subSkillId}
+            onChange={setSubSkillId}
+            shape="pill"
+            options={[{ value: "all", label: "Mọi kỹ năng con" }, ...subSkills.map((s) => ({ value: s.id, label: s.nameVi }))]}
+          />
+        </div>
       </div>
 
       <section className="card overflow-hidden">
@@ -156,29 +156,17 @@ function TemplatesPage() {
         <TemplateVersionForm key={composingTemplate.id} template={composingTemplate} subSkills={subSkills} onClose={() => setComposing(null)} />
       )}
 
-      <Modal
+      <ConfirmDialog
         open={!!deleting}
         onClose={closeDelete}
+        onConfirm={confirmDelete}
+        loading={remove.isPending}
         title={`Xóa mẫu "${deleting?.title ?? ""}"?`}
         description="Chỉ xóa hẳn được khi chưa có điểm dừng nào dùng mẫu. Nếu đã dùng, hãy tắt mẫu."
-        size="max-w-md"
-        footer={
-          <>
-            <button onClick={closeDelete} className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline">
-              Hủy
-            </button>
-            <button
-              onClick={confirmDelete}
-              disabled={remove.isPending}
-              className="inline-flex items-center gap-1.5 rounded-full bg-danger px-5 py-2.5 text-sm font-bold text-white transition hover:bg-danger-dark disabled:opacity-70"
-            >
-              {remove.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} Xóa mẫu
-            </button>
-          </>
-        }
+        confirmLabel="Xóa mẫu"
       >
-        {deleteError && <p className="text-sm font-semibold text-red-600">{deleteError}</p>}
-      </Modal>
+        {deleteError && <p className="rounded-xl bg-danger-tint/60 px-3 py-2 text-sm font-semibold text-danger-dark">{deleteError}</p>}
+      </ConfirmDialog>
     </div>
   );
 }

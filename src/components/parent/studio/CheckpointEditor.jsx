@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { CircleHelp, Loader2, Lock, Save, Trash2 } from "lucide-react";
+import { CircleHelp, Loader2, Lock, Trash2 } from "lucide-react";
 import { CHECKPOINT_TYPES, EMOTIONS, OPTION_ROLES } from "../../../constants/story";
 import { fillNames, nameOfToken } from "../../../utils/storyNames";
 import { fieldClass } from "./PageEditor";
+import SaveBar from "./SaveBar";
+import { Select } from "../../ui";
 
 const OPTION_COUNT = 3;
 const ROLE_ORDER = ["constructive", "avoidant", "impulsive"];
@@ -155,7 +157,8 @@ function EditableCheckpoint({ checkpoint: cp, characters, disabled, gap, warning
               onClick={onDelete}
               disabled={disabled || deleting}
               aria-label="Xóa điểm dừng"
-              className="rounded-full p-1.5 text-navy/50 hover:bg-danger-tint hover:text-danger disabled:opacity-40"
+              title="Xóa điểm dừng"
+              className="grid h-8 w-8 cursor-pointer place-items-center rounded-full text-navy/45 transition hover:bg-danger-tint hover:text-danger disabled:pointer-events-none disabled:opacity-40"
             >
               {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
             </button>
@@ -170,14 +173,13 @@ function EditableCheckpoint({ checkpoint: cp, characters, disabled, gap, warning
       {isEmotion && (
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Cảm xúc đúng">
-            <select value={form.answerEmotion} onChange={set("answerEmotion")} disabled={disabled} className={fieldClass}>
-              <option value="">— Chọn cảm xúc —</option>
-              {Object.entries(EMOTIONS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={form.answerEmotion}
+              onChange={(v) => set("answerEmotion")({ target: { value: v } })}
+              disabled={disabled}
+              placeholder="Chọn cảm xúc"
+              options={Object.entries(EMOTIONS).map(([value, label]) => ({ value, label }))}
+            />
           </Field>
           <Field label="Gợi ý khi bé chọn sai">
             <input value={form.hint} onChange={set("hint")} disabled={disabled} className={fieldClass} />
@@ -245,17 +247,17 @@ function EditableCheckpoint({ checkpoint: cp, characters, disabled, gap, warning
 
       {gap && <p className="text-sm font-semibold text-danger">{gap}</p>}
       {!gap && warning && <p className="text-sm font-semibold text-amber-700">{warning}</p>}
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={() => onSave(toBody(cp.type, form), () => setDirty(false))}
-          disabled={disabled || !dirty || saving}
-          className="btn-primary px-5 py-2 text-sm disabled:opacity-50"
-        >
-          {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          Lưu điểm dừng
-        </button>
-      </div>
+      <SaveBar
+        dirty={dirty}
+        saving={saving}
+        disabled={disabled}
+        onSave={() => onSave(toBody(cp.type, form), () => setDirty(false))}
+        onReset={() => {
+          setForm(initialForm(cp, characters));
+          setDirty(false);
+        }}
+        label="Lưu điểm dừng"
+      />
     </section>
   );
 }

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Modal from "../common/Modal";
 import { STRIKE_SOURCES } from "../../constants/moderation";
 import { useIssueStrike } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../ui";
 
 /**
  * Cảnh cáo tác giả. `seller` = { id, displayName } cố định (từ báo cáo / truyện bị gỡ), hoặc truyền
@@ -47,7 +48,7 @@ function StrikeModal({ seller, sellers, source = "report", sourceId, defaultReas
             Hủy
           </button>
           <button type="submit" form="strike-form" disabled={issue.isPending} className="inline-flex items-center gap-1.5 rounded-full bg-danger px-5 py-2.5 text-sm font-bold text-white hover:bg-danger-dark disabled:opacity-70">
-            {issue.isPending ? <Loader2 size={16} className="animate-spin" /> : <AlertTriangle size={16} />} Cảnh cáo
+            {issue.isPending && <Loader2 size={16} className="animate-spin" />} Cảnh cáo
           </button>
         </>
       }
@@ -60,14 +61,12 @@ function StrikeModal({ seller, sellers, source = "report", sourceId, defaultReas
         ) : (
           <label className="block">
             <span className="mb-1.5 block text-sm font-semibold">Người bán</span>
-            <select value={sellerId} onChange={(e) => setSellerId(e.target.value)} className="w-full cursor-pointer rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm">
-              <option value="">— Chọn người bán —</option>
-              {(sellers ?? []).map((s) => (
-                <option key={s.userId} value={s.userId}>
-                  {s.displayName}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={sellerId}
+              onChange={setSellerId}
+              placeholder="Chọn người bán"
+              options={(sellers ?? []).map((s) => ({ value: s.userId, label: s.displayName }))}
+            />
           </label>
         )}
         <label className="block">

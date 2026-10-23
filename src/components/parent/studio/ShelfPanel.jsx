@@ -1,6 +1,7 @@
-import { BookPlus, Check, Loader2, Lock } from "lucide-react";
+import { BookPlus, Loader2, Lock } from "lucide-react";
 import { useShelfStatus, useToggleShelf } from "../../../hooks/useStudio";
 import { toast } from "../../../stores/toastStore";
+import ShelfChildList from "./ShelfChildList";
 
 const REASON = {
   not_reviewed: "Bấm hoàn tất truyện trước khi đưa lên giá sách.",
@@ -37,26 +38,7 @@ function ShelfPanel({ story }) {
       ) : !data?.children?.length ? (
         <p className="text-sm text-navy/65">Ba mẹ chưa thêm hồ sơ bé nào.</p>
       ) : (
-        <div className="flex flex-wrap gap-2">
-          {data.children.map((child) => {
-            const busy = toggle.isPending && toggle.variables?.childId === child.childId;
-            return (
-              <button
-                key={child.childId}
-                type="button"
-                onClick={() => onToggle(child)}
-                disabled={busy}
-                aria-pressed={child.inBookshelf}
-                className={`inline-flex items-center gap-1.5 rounded-full border-2 px-4 py-2 text-sm font-bold transition disabled:opacity-60 ${
-                  child.inBookshelf ? "border-secondary bg-secondary-tint text-secondary-dark" : "border-outline bg-white hover:border-primary"
-                }`}
-              >
-                {busy ? <Loader2 size={15} className="animate-spin" /> : child.inBookshelf ? <Check size={15} /> : <BookPlus size={15} />}
-                {child.inBookshelf ? `Đã có trên giá của ${child.name}` : `Đưa lên giá của ${child.name}`}
-              </button>
-            );
-          })}
-        </div>
+        <ShelfChildList kids={data.children} busyId={toggle.isPending ? toggle.variables?.childId : null} onToggle={onToggle} />
       )}
     </div>
   );

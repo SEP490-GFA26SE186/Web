@@ -3,6 +3,7 @@ import { Bot, Loader2, Lock, Unlock } from "lucide-react";
 import { formatDateTime } from "../../constants/moderation";
 import { useAiFlags, useSetAiBlock } from "../../hooks/useSpecialist";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../../components/ui";
 
 const WINDOWS = [7, 14, 30];
 
@@ -21,9 +22,15 @@ function BlockForm({ flag, onDone }) {
       }}
       className="flex flex-wrap items-center gap-2"
     >
-      <select value={days} onChange={(e) => setDays(Number(e.target.value))} aria-label="Số ngày khoá" className="rounded-full border-[1.5px] border-outline px-3 py-1.5 text-sm">
-        {[1, 3, 7, 14, 30].map((d) => <option key={d} value={d}>{d} ngày</option>)}
-      </select>
+      <Select
+        value={days}
+        onChange={setDays}
+        label="Số ngày khoá"
+        shape="pill"
+        size="sm"
+        width="w-28"
+        options={[1, 3, 7, 14, 30].map((d) => ({ value: d, label: `${d} ngày` }))}
+      />
       <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Lý do (ghi nhật ký)" aria-label="Lý do" className="min-w-48 flex-1 rounded-full border-[1.5px] border-outline px-4 py-1.5 text-sm" />
       <button type="submit" disabled={block.isPending} className="inline-flex items-center gap-1 rounded-full bg-danger px-4 py-1.5 text-sm font-bold text-white disabled:opacity-60">
         {block.isPending ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />} Khoá

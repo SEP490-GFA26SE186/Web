@@ -1,7 +1,7 @@
 import { BookOpen, Clock, FileText } from "lucide-react";
-import { Link } from "react-router-dom";
 import { ROUTES } from "../../constants/routes";
 import { formatRelativeDay } from "../../utils/format";
+import { Badge, Button, Card, ProgressBar } from "../ui";
 import CaselTag from "./library/CaselTag";
 import { coverOf } from "./library/storyMeta";
 import StoryCover from "./StoryCover";
@@ -11,59 +11,51 @@ function ContinueReadingCard({ story }) {
   const { currentPageOrder, progressPercentage, lastActivityAt } = story.readingProgress;
 
   return (
-    <section className="relative overflow-hidden rounded-stage bg-white p-5 shadow-mid md:p-8">
-      <div className="pointer-events-none absolute -right-16 -bottom-16 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
-      <div className="pointer-events-none absolute -top-12 -left-12 h-64 w-64 rounded-full bg-secondary/15 blur-2xl" />
-      <div className="relative z-10 grid grid-cols-1 items-center gap-6 lg:grid-cols-12 lg:gap-8">
+    <Card reveal padding="none" className="overflow-hidden rounded-stage bg-gradient-to-br from-white via-white to-primary-tint/70 p-4 md:p-6">
+      <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-12 lg:gap-8">
         <StoryCover
           cover={coverOf(story)}
           title={story.title}
           size="lg"
-          className="aspect-[4/3] w-full rounded-card shadow-mid lg:col-span-4"
+          className="group aspect-[4/3] w-full overflow-hidden rounded-card shadow-mid lg:col-span-4"
         >
-          <span className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold">
+          <span className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold tabular-nums backdrop-blur">
             <FileText size={12} className="text-primary" />
             Trang {currentPageOrder}/{story.totalPages}
           </span>
         </StoryCover>
 
-        <div className="min-w-0 lg:col-span-8">
+        <div className="min-w-0 lg:col-span-8 lg:py-2">
           <div className="mb-3 flex flex-wrap items-center gap-2">
+            <Badge tone="primary" icon={BookOpen}>
+              Đang đọc dở
+            </Badge>
             <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" />
-            <span className="flex items-center gap-1 text-xs text-navy/60">
-              <Clock size={13} /> Đọc lần cuối {formatRelativeDay(lastActivityAt)}
-            </span>
           </div>
 
-          <p className="text-xs font-extrabold tracking-wider text-primary-dark">ĐANG ĐỌC DỞ DANG</p>
-          <h2 className="mt-1 text-2xl leading-tight md:text-[28px]">{story.title}</h2>
+          <h2 className="text-2xl leading-tight tracking-tight md:text-[28px]">{story.title}</h2>
           {story.topic && (
-            <p className="mt-2 text-[15px] text-navy/75">
+            <p className="mt-2 text-[15px] text-navy/65">
               Bài học: <span className="font-semibold text-navy">{story.topic.title}</span>
             </p>
           )}
 
-          <div className="mt-5 max-w-2xl">
-            <div className="mb-1.5 flex justify-between text-xs">
-              <span className="text-navy/60">Tiến độ câu chuyện</span>
-              <span className="font-bold text-primary-dark">{progressPercentage}% hoàn thành</span>
+          <div className="mt-5 max-w-xl">
+            <div className="mb-2 flex items-baseline justify-between gap-3 text-xs">
+              <span className="flex items-center gap-1 text-navy/55">
+                <Clock size={13} /> Đọc lần cuối {formatRelativeDay(lastActivityAt)}
+              </span>
+              <span className="font-bold text-primary-dark tabular-nums">{progressPercentage}%</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-outline">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-primary-dark to-primary transition-all duration-700"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
+            <ProgressBar value={progressPercentage} label="Tiến độ câu chuyện" />
           </div>
 
-          <div className="mt-6">
-            <Link to={ROUTES.KID.story(story.storyId)} className="btn-primary text-lg">
-              <BookOpen size={20} /> Mở Kid Mode đọc tiếp
-            </Link>
-          </div>
+          <Button size="lg" icon={BookOpen} to={ROUTES.KID.story(story.storyId)} className="mt-6">
+            Đọc tiếp ở Kid Mode
+          </Button>
         </div>
       </div>
-    </section>
+    </Card>
   );
 }
 

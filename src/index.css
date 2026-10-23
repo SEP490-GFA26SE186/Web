@@ -36,12 +36,125 @@
   --shadow-mid: 0 12px 28px -4px rgba(30, 41, 59, 0.08), 0 4px 12px -2px rgba(255, 122, 0, 0.06);
   --shadow-high: 0 20px 40px -6px rgba(30, 41, 59, 0.12), 0 8px 16px -2px rgba(255, 122, 0, 0.08);
   --shadow-glow: 0 0 32px rgba(255, 122, 0, 0.15);
+  /* Viền trong 1px cho bề mặt nổi (thẻ, popover) — cho cảm giác "có cạnh" thay vì đổ bóng đậm */
+  --shadow-ring: 0 0 0 1px rgba(30, 41, 59, 0.05), 0 1px 2px rgba(30, 41, 59, 0.04);
+
+  /* Chuyển động: một đường cong duy nhất cho toàn bộ dashboard */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-rise: rise 0.5s var(--ease-out-soft) both;
+  --animate-pop-in: pop-in 0.18s var(--ease-out-soft) both;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+  --animate-toast-in: toast-in 0.35s var(--ease-out-soft) both;
+  --animate-toast-out: toast-out 0.2s ease-in both;
+  --animate-toast-timer: toast-timer linear both;
+  --animate-dialog-in: dialog-in 0.25s var(--ease-out-soft) both;
+  --animate-fade-in: fade-in 0.2s ease-out both;
+}
+
+/* Toast trượt vào từ phải, thu lại khi rời */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(16px) scale(0.98);
+  }
+}
+
+/* Thanh thời gian của toast co dần về 0 */
+@keyframes toast-timer {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Hộp thoại phóng nhẹ từ giữa */
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Thẻ hiện lần lượt khi vào trang (dùng kèm style={{ "--i": n }}) */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Popover / menu mở ra */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Ánh sáng lướt qua skeleton */
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@utility stagger {
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 @layer base {
   html,
   body {
     @apply bg-canvas font-sans text-navy antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary/60;
   }
 
   h1,
@@ -54,10 +167,11 @@
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3 font-bold text-white transition duration-200 hover:-translate-y-0.5 hover:shadow-mid;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-7 py-3 font-bold text-white shadow-[0_6px_16px_-6px_rgba(255,122,0,0.55)] transition duration-200 hover:-translate-y-0.5 hover:bg-[#f27100] hover:shadow-mid active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none;
   }
+  /* Nút phụ: nền trắng + viền rõ để nhìn ra là bấm được (trước là nền be trên nền be) */
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-outline bg-surface px-6 py-3 font-bold text-navy transition duration-200 hover:border-primary hover:bg-primary-tint;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-full border-[1.5px] border-navy/15 bg-white px-6 py-3 font-bold text-navy transition duration-200 hover:border-primary/60 hover:bg-primary-tint/40 hover:text-primary-dark active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
   }
   .card {
     @apply rounded-card border border-outline bg-white shadow-low;
