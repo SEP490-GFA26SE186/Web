@@ -1,4 +1,4 @@
-import { AlertTriangle, Ban, Bot, Brain, ClipboardList, FileQuestion, Flag, IdCard, LayoutDashboard, ListChecks, Mountain, PauseCircle, ScanSearch, SlidersHorizontal, Sprout } from "lucide-react";
+import { AlertTriangle, Ban, Bot, Brain, FileQuestion, Flag, IdCard, LayoutDashboard, ListChecks, PauseCircle, ScanSearch, SlidersHorizontal, Sprout } from "lucide-react";
 import AppShell from "../components/shell/AppShell";
 import { ROUTES } from "../constants/routes";
 import { useSpecialistOverview } from "../hooks/useSpecialist";
@@ -15,7 +15,6 @@ function SpecialistLayout() {
       items: [
         { to: R.DASHBOARD, label: "Hàng chờ duyệt", icon: LayoutDashboard, end: true, badge: badges.storyQueue },
         { to: R.SELLER_APPLICATIONS, label: "Hồ sơ người bán", icon: IdCard, badge: badges.sellerApplications, badgeTone: "secondary" },
-        { to: R.GUIDELINES, label: "Quy chuẩn kiểm duyệt", icon: ClipboardList },
       ],
     },
     {
@@ -32,7 +31,6 @@ function SpecialistLayout() {
       title: "Nội dung",
       items: [
         { to: R.KEYWORDS, label: "Từ khoá chặn", icon: Ban },
-        { to: R.BACKGROUNDS, label: "Thư viện bối cảnh", icon: Mountain, soon: true },
       ],
     },
     {

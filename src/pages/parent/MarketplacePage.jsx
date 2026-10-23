@@ -5,10 +5,20 @@ import FilterSelect from "../../components/parent/library/FilterSelect";
 import ListingCard from "../../components/parent/marketplace/ListingCard";
 import { CASEL, CASEL_OPTIONS } from "../../constants/casel";
 import useDebounce from "../../hooks/useDebounce";
-import { useListings, usePriceTiers } from "../../hooks/useMarketplace";
+import { useListings } from "../../hooks/useMarketplace";
 
 const PAGE_SIZE = 8;
-const DEFAULT_FILTERS = { competency: "all", age: "all", priceTierId: "all", narration: "all", sort: "best_selling" };
+const DEFAULT_FILTERS = { competency: "all", age: "all", price: "all", narration: "all", sort: "best_selling" };
+
+// Khoảng giá → priceMin / priceMax (VND, gồm cả hai đầu) của GET /market/listings
+const PRICE_RANGES = {
+  all: { label: "Tất cả" },
+  free: { label: "Miễn phí", priceMin: 0, priceMax: 0 },
+  under20: { label: "Dưới 20.000đ", priceMin: 1, priceMax: 19999 },
+  "20to50": { label: "20.000–50.000đ", priceMin: 20000, priceMax: 50000 },
+  over50: { label: "Trên 50.000đ", priceMin: 50001 },
+};
+const PRICE_OPTIONS = Object.entries(PRICE_RANGES).map(([value, { label }]) => ({ value, label }));
 
 const NARRATION_OPTIONS = [
   { value: "all", label: "Tất cả" },
@@ -32,10 +42,12 @@ function MarketplacePage() {
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search);
 
-  const { data: priceTiers = [] } = usePriceTiers();
+  const { price, ...rest } = filters;
   const { data, isLoading, isFetching, isError, refetch } = useListings({
     search: debouncedSearch,
-    ...filters,
+    ...rest,
+    priceMin: PRICE_RANGES[price].priceMin,
+    priceMax: PRICE_RANGES[price].priceMax,
     page,
     limit: PAGE_SIZE,
   });
@@ -49,8 +61,6 @@ function MarketplacePage() {
     setFilters(DEFAULT_FILTERS);
     setPage(1);
   };
-
-  const priceOptions = [{ value: "all", label: "Tất cả" }, ...priceTiers.map((t) => ({ value: t.id, label: t.label }))];
 
 
   return (
@@ -82,7 +92,7 @@ function MarketplacePage() {
           </label>
           <div className="flex flex-wrap items-center gap-2">
             <FilterSelect label="Độ tuổi" value={filters.age} onChange={setFilter("age")} options={AGE_OPTIONS} />
-            <FilterSelect label="Giá" value={filters.priceTierId} onChange={setFilter("priceTierId")} options={priceOptions} />
+            <FilterSelect label="Giá" value={filters.price} onChange={setFilter("price")} options={PRICE_OPTIONS} />
             <FilterSelect label="Giọng đọc" value={filters.narration} onChange={setFilter("narration")} options={NARRATION_OPTIONS} />
             <FilterSelect label="Sắp xếp" value={filters.sort} onChange={setFilter("sort")} options={SORT_OPTIONS} highlight icon={ArrowDownUp} />
           </div>

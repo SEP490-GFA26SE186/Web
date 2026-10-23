@@ -7,9 +7,6 @@ import { useFinanceSummary, useFixCounters, useReconciliation } from "../../hook
 import { toast } from "../../stores/toastStore";
 import { formatNumber } from "../../utils/format";
 
-const REQUEST_TYPES = { story_text: "Viết truyện", narration: "Giọng đọc", character_portrait: "Chân dung nhân vật", scene_image: "Tranh cảnh" };
-const STATUS = { succeeded: "Thành công", failed: "Lỗi", blocked: "Bị chặn", queued: "Đang chờ", processing: "Đang chạy" };
-
 function Revenue({ d }) {
   const r = d.revenue;
   const rows = [
@@ -35,42 +32,6 @@ function Revenue({ d }) {
             ))}
           </tbody>
         </table>
-      </section>
-    </>
-  );
-}
-
-function AiCosts({ d }) {
-  const a = d.aiCost;
-  return (
-    <>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Chi phí nhà cung cấp" value={money(a.totalVnd)} hint={`Tỉ giá ${formatNumber(a.usdVnd)} đ/USD`} />
-        <StatCard label="Lượt gọi AI" value={formatNumber(a.requests)} hint={`${a.failed} lỗi / bị chặn (credit đã hoàn)`} />
-        <StatCard label="Chi phí / phần nền tảng giữ" value={d.revenue.platformRevenue ? `${Math.round((a.totalVnd / d.revenue.platformRevenue) * 100)}%` : "—"} />
-      </div>
-      <section className="card overflow-x-auto">
-        <LoadState empty={!a.breakdown.length} emptyText="Chưa có lượt gọi AI trong khoảng này." />
-        {a.breakdown.length > 0 && (
-          <table className="w-full min-w-[640px] text-sm">
-            <thead className="border-b border-outline text-left text-xs text-navy/60">
-              <tr><th className="px-5 py-3">Loại</th><th>Nhà cung cấp</th><th>Trạng thái</th><th className="text-right">Lượt</th><th className="text-right">Credit thu</th><th className="text-right">Token vào / ra</th><th className="pr-5 text-right">Chi phí</th></tr>
-            </thead>
-            <tbody className="divide-y divide-outline">
-              {a.breakdown.map((b) => (
-                <tr key={`${b.requestType}:${b.provider}:${b.status}`}>
-                  <td className="px-5 py-2.5">{REQUEST_TYPES[b.requestType] ?? b.requestType}</td>
-                  <td>{b.provider}</td>
-                  <td>{STATUS[b.status] ?? b.status}</td>
-                  <td className="text-right">{formatNumber(b.requests)}</td>
-                  <td className="text-right">{formatNumber(b.credits)}</td>
-                  <td className="text-right">{formatNumber(b.inputTokens)} / {formatNumber(b.outputTokens)}</td>
-                  <td className="pr-5 text-right font-bold">{money(b.costVnd)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
       </section>
     </>
   );
@@ -133,53 +94,20 @@ function Reconciliation() {
   );
 }
 
-function ProfitLoss({ d }) {
-  const p = d.pnl;
-  const rows = [
-    ["Doanh thu gói", d.revenue.planRevenue],
-    ["Hoa hồng chợ truyện", d.revenue.commission],
-    ["= Doanh thu nền tảng", p.platformRevenue],
-    ["− Chi phí AI (nhà cung cấp)", -p.aiCostVnd],
-    ["= Lãi gộp", p.grossProfit],
-  ];
-  return (
-    <>
-      <section className="card space-y-3 p-5">
-        <table className="w-full max-w-xl text-sm">
-          <tbody className="divide-y divide-outline">
-            {rows.map(([label, v]) => (
-              <tr key={label} className={label.startsWith("=") ? "font-bold" : ""}><td className="py-2">{label}</td><td className={`py-2 text-right ${v < 0 ? "text-danger" : ""}`}>{money(v)}</td></tr>
-            ))}
-          </tbody>
-        </table>
-        <p className="text-sm text-navy/60">
-          Biên lãi gộp: <b>{p.margin == null ? "—" : `${Math.round(p.margin * 100)}%`}</b>. Chưa tính phí cổng thanh toán, hạ tầng, nhân sự — đây là lãi gộp theo chi phí biến đổi của AI.
-        </p>
-      </section>
-      <Reconciliation />
-    </>
-  );
-}
-
-const VIEWS = {
-  revenue: { title: "Báo cáo doanh thu", description: "Doanh thu gói và chợ truyện theo ngày; hoàn tiền đã trừ.", Body: Revenue },
-  "ai-costs": { title: "Chi phí vận hành AI", description: "Chi phí nhà cung cấp theo loại tác vụ, so với credit đã thu.", Body: AiCosts },
-  "profit-loss": { title: "Lãi lỗ & đối soát", description: "Lãi gộp theo chi phí AI và kiểm tra bất biến của sổ cái.", Body: ProfitLoss },
-};
-
-/** Ba trang tài chính dùng chung số liệu /admin/finance/summary — `view`: revenue | ai-costs | profit-loss. */
-function FinanceReportPage({ view }) {
+// Báo cáo doanh thu (/admin/finance/summary) + đối soát sổ cái ở cuối trang. Không có màn chi phí AI / lãi lỗ: chữ chạy Claude theo gói
+// thuê bao, ảnh dùng free tier — chi phí biến đổi bằng 0 nên không tính được.
+function FinanceReportPage() {
   const [range, setRange] = useState("30d");
   const { data, isLoading, isFetching, error } = useFinanceSummary(range);
-  const { title, description, Body } = VIEWS[view];
   return (
     <div className="space-y-6">
-      <PageHeader title={title} description={description}>
+      <PageHeader title="Báo cáo doanh thu" description="Doanh thu gói và chợ truyện theo ngày; hoàn tiền đã trừ. Cuối trang: đối soát sổ cái.">
         {isFetching && !isLoading && <Loader2 size={16} className="animate-spin text-primary" />}
         <Tabs value={range} onChange={setRange} items={RANGES} label="Khoảng thời gian" />
       </PageHeader>
       <LoadState isLoading={isLoading} error={error} />
-      {data && <Body d={data} />}
+      {data && <Revenue d={data} />}
+      <Reconciliation />
     </div>
   );
 }

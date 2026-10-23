@@ -1,13 +1,25 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
 import { ROUTES } from "../../../constants/routes";
 import { useStory } from "../../../hooks/useStudio";
-import { createListing, getPriceTiers } from "../../../services/sellingService";
+import Switch from "../../../components/common/Switch";
+import { createListing } from "../../../services/sellingService";
 import { toast } from "../../../stores/toastStore";
 
 const field = "w-full rounded-card border-2 border-outline px-4 py-2.5 focus:border-primary focus:outline-none";
+
+// Giá do người bán tự đặt: 0 (miễn phí) hoặc 5.000–500.000đ, bội số 1.000
+const PRICE_MIN = 5000;
+const PRICE_MAX = 500000;
+const PRICE_STEP = 1000;
+const priceError = (v) => {
+  if (v === "" || !Number.isInteger(v)) return "Nhập giá bằng số (đồng).";
+  if (v < PRICE_MIN || v > PRICE_MAX) return "Giá từ 5.000đ đến 500.000đ, hoặc chọn Miễn phí.";
+  if (v % PRICE_STEP !== 0) return "Giá phải là bội số của 1.000đ.";
+  return null;
+};
 
 // Đăng bán một truyện riêng đã hoàn tất: tên mới, mô tả, giá, tên chung cho từng nhân vật.
 // BE tạo bản sao đã gỡ cá nhân hoá (không chuyện thật, không giọng đọc) và gửi chuyên gia duyệt.
@@ -17,8 +29,7 @@ function NewListingPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: story, isLoading } = useStory(storyId);
-  const { data: tiers = [] } = useQuery({ queryKey: ["selling", "tiers"], queryFn: getPriceTiers });
-  const [form, setForm] = useState({ title: "", description: "", priceTierId: "" });
+  const [form, setForm] = useState({ title: "", description: "", free: false, price: "" });
   const [aliases, setAliases] = useState({});
   const [errors, setErrors] = useState({});
   const create = useMutation({ mutationFn: createListing });
@@ -28,13 +39,19 @@ function NewListingPage() {
 
   const submit = (e) => {
     e.preventDefault();
+    const priceVnd = form.free ? 0 : form.price === "" ? "" : Number(form.price);
+    const priceMsg = form.free ? null : priceError(priceVnd);
+    if (priceMsg) {
+      setErrors({ "listing.priceVnd": priceMsg });
+      return;
+    }
     setErrors({});
     create.mutate(
       {
         storyId,
         title: form.title,
         description: form.description || undefined,
-        priceTierId: form.priceTierId,
+        priceVnd,
         aliases: story.characters.map((c) => ({ token: c.token, aliasName: aliases[c.token] ?? "" })),
       },
       {
@@ -50,6 +67,8 @@ function NewListingPage() {
       },
     );
   };
+
+  const priceErr = errors["listing.priceVnd"] ?? errors.priceVnd;
 
   return (
     <div className="mx-auto max-w-2xl space-y-5">
@@ -73,17 +92,37 @@ function NewListingPage() {
           <span className="mb-1 block text-sm font-semibold">Mô tả (không bắt buộc)</span>
           <textarea rows={3} maxLength={2000} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className={field} />
         </label>
-        <label className="block">
-          <span className="mb-1 block text-sm font-semibold">Giá</span>
-          <select required value={form.priceTierId} onChange={(e) => setForm({ ...form, priceTierId: e.target.value })} className={field}>
-            <option value="">— Chọn giá —</option>
-            {tiers.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <label htmlFor="listing-price" className="text-sm font-semibold">
+              Giá (đồng)
+            </label>
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              Miễn phí <Switch checked={form.free} onChange={(free) => setForm({ ...form, free })} label="Miễn phí" />
+            </span>
+          </div>
+          {!form.free && (
+            <input
+              id="listing-price"
+              type="number"
+              inputMode="numeric"
+              required
+              min={PRICE_MIN}
+              max={PRICE_MAX}
+              step={PRICE_STEP}
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              placeholder="VD: 29000"
+              aria-invalid={!!priceErr}
+              aria-describedby="listing-price-help"
+              className={field}
+            />
+          )}
+          <p id="listing-price-help" className="text-xs text-navy/60">
+            {form.free ? "Truyện miễn phí: phụ huynh nhận ngay, không qua thanh toán." : "Từ 5.000đ đến 500.000đ, bội số 1.000đ."} Chuyên gia sẽ xem cả giá khi duyệt.
+          </p>
+          {priceErr && <span className="block text-sm text-danger">{priceErr}</span>}
+        </div>
         <fieldset className="space-y-2">
           <legend className="mb-1 text-sm font-semibold">Tên chung cho nhân vật</legend>
           <p className="mb-2 text-xs text-navy/60">{story.useTts ? "Truyện có giọng đọc: hệ thống đọc lại bằng tên chung này (vài phút) trước khi chuyên gia duyệt." : "Truyện đang tắt giọng đọc: bản đăng bán chỉ có chữ, người mua sẽ thấy nhãn \"Chỉ có chữ\"."}</p>

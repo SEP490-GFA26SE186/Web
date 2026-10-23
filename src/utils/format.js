@@ -4,6 +4,9 @@ export const formatVND = (n) => `${Math.round(n).toLocaleString("vi-VN")} đ`;
 
 export const formatNumber = (n) => n.toLocaleString("vi-VN");
 
+// Giá truyện trên Chợ (listings.priceVnd, số nguyên VND): 0 → "Miễn phí", còn lại "29.000đ"
+export const formatListingPrice = (priceVnd) => (Number(priceVnd) ? `${formatNumber(Number(priceVnd))}đ` : "Miễn phí");
+
 // ISO time → "hôm nay" / "hôm qua" / "3 ngày trước" / "12/09/2026"
 export const formatRelativeDay = (iso) => {
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());

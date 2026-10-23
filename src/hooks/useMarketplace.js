@@ -1,8 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { checkoutListing, getListing, getListings, getPriceTiers } from "../services/marketplaceService";
-
-export const usePriceTiers = () =>
-  useQuery({ queryKey: ["marketplace", "price-tiers"], queryFn: getPriceTiers, staleTime: 10 * 60 * 1000 });
+import { checkoutListing, getListing, getListings } from "../services/marketplaceService";
 
 export const useListings = (params) =>
   useQuery({

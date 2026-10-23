@@ -1,7 +1,7 @@
 import api, { getErrorMessage } from "./api";
 import useAuthStore from "../stores/authStore";
 
-// Kiểm duyệt (rev8): hàng đợi truyện đăng bán, nhận bài, xem trang, checklist, quyết định;
+// Kiểm duyệt (rev8): hàng đợi truyện đăng bán, nhận bài, xem trang, quyết định (checklist chỉ ở web);
 // hồ sơ người bán. Lỗi BE (422 kèm errors) giữ nguyên message tiếng Việt.
 const call = async (request) => {
   try {
@@ -38,13 +38,13 @@ export const getSpecialistOverview = async () => {
   };
 };
 
-/** Chi tiết lượt duyệt: { review, listing, seller, story, checklist, pageViews, progress } */
+/** Chi tiết lượt duyệt: { review, listing, seller, story, pageViews, progress } */
 export const getReview = (reviewId) => call(api.get(`/moderation/submissions/${reviewId}`));
 export const claimReview = (reviewId) => call(api.post(`/moderation/submissions/${reviewId}/claim`));
 export const viewPage = (reviewId, pageId, comment) =>
   call(api.post(`/moderation/submissions/${reviewId}/pages/${pageId}/view`, comment === undefined ? {} : { comment }));
 /**
- * Lượt nộp bán: { decision: approved|changes_requested|rejected, comment?, checklist, issueStrike? }.
+ * Lượt nộp bán: { decision: approved|changes_requested|rejected, comment?, issueStrike? }.
  * Lượt hậu kiểm (report_followup / random_audit): approved = giữ, taken_down = gỡ hẳn (BE tự cảnh cáo).
  */
 export const decideReview = (reviewId, body) => call(api.post(`/moderation/submissions/${reviewId}/decision`, body));

@@ -2,7 +2,6 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import {
   createModerator,
   createPlan,
-  createPriceTier,
   decideRefund,
   fixCounters,
   getAccounts,
@@ -10,13 +9,11 @@ import {
   getAdminPlans,
   getAuditLogs,
   getFinanceSummary,
-  getPriceTiers,
   getReconciliation,
   getRefunds,
   getSettings,
   setAccountActive,
   updatePlan,
-  updatePriceTier,
   updateSetting,
 } from "../services/adminService";
 
@@ -27,7 +24,6 @@ export const adminKeys = {
   reconciliation: ["admin", "reconciliation"],
   accounts: (params) => ["admin", "accounts", params],
   plans: ["admin", "plans"],
-  tiers: ["admin", "tiers"],
   settings: ["admin", "settings"],
   refunds: (status) => ["admin", "refunds", status],
   auditLogs: (params) => ["admin", "audit-logs", params],
@@ -42,6 +38,7 @@ const useAdminMutation = (mutationFn) => {
 export const useAdminOverview = () => useQuery({ queryKey: adminKeys.overview, queryFn: getAdminOverview, refetchInterval: 60_000 });
 export const useFinanceSummary = (range) =>
   useQuery({ queryKey: adminKeys.finance(range), queryFn: () => getFinanceSummary(range), placeholderData: keepPreviousData });
+
 export const useReconciliation = () => useQuery({ queryKey: adminKeys.reconciliation, queryFn: getReconciliation });
 export const useFixCounters = () => useAdminMutation(fixCounters);
 
@@ -52,9 +49,6 @@ export const useCreateModerator = () => useAdminMutation(createModerator);
 export const useAdminPlans = () => useQuery({ queryKey: adminKeys.plans, queryFn: getAdminPlans });
 export const useCreatePlan = () => useAdminMutation(createPlan);
 export const useUpdatePlan = () => useAdminMutation(({ id, ...body }) => updatePlan(id, body));
-export const usePriceTiers = () => useQuery({ queryKey: adminKeys.tiers, queryFn: getPriceTiers });
-export const useCreatePriceTier = () => useAdminMutation(createPriceTier);
-export const useUpdatePriceTier = () => useAdminMutation(({ id, ...body }) => updatePriceTier(id, body));
 
 export const useSettings = () => useQuery({ queryKey: adminKeys.settings, queryFn: getSettings });
 export const useUpdateSetting = () => useAdminMutation(({ key, value }) => updateSetting(key, value));

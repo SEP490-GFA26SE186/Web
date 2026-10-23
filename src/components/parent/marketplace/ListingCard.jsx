@@ -18,7 +18,7 @@ function PriceBadge({ priceVnd }) {
 
 // Thẻ truyện đang bán trên chợ (listing đã được chuyên gia duyệt)
 function ListingCard({ listing }) {
-  const { topic, priceTier, seller } = listing;
+  const { topic, priceVnd, seller } = listing;
 
   return (
     <article className="group card flex flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:shadow-high">
@@ -32,7 +32,7 @@ function ListingCard({ listing }) {
           <CaselTag competency={topic?.competency} short />
         </span>
         <span className="absolute top-3 right-3">
-          <PriceBadge priceVnd={priceTier.priceVnd} />
+          <PriceBadge priceVnd={Number(priceVnd)} />
         </span>
       </StoryCover>
 
@@ -92,7 +92,7 @@ function ListingCard({ listing }) {
               </>
             ) : (
               <>
-                <ShoppingCart size={15} /> {priceTier.priceVnd === 0 ? "Nhận miễn phí" : "Xem & mua"}
+                <ShoppingCart size={15} /> {Number(priceVnd) === 0 ? "Nhận miễn phí" : "Xem & mua"}
               </>
             )}
           </Link>

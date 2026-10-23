@@ -23,10 +23,9 @@ const call = async (request) => {
 export const getMySeller = () => call(api.get("/sellers/me"));
 export const applySeller = (payload) => call(api.post("/sellers/apply", payload));
 
-export const getPriceTiers = async () => (await call(api.get("/listings/price-tiers"))).priceTiers;
 export const getMyListings = async () => (await call(api.get("/listings/mine"))).listings;
 
-/** { storyId, title, description?, priceTierId, aliases: [{ token, aliasName }] } → { listing } */
+/** { storyId, title, description?, priceVnd (0 hoặc 5.000–500.000, bội số 1.000), aliases: [{ token, aliasName }] } → { listing } */
 export const createListing = (payload) => call(api.post("/listings", payload));
 
 /** → { sellerStatus, strikeLimit, activeStrikes, strikes: [{ id, source, reason, issuedAt, expiresAt, revokedAt, active, appeal }] } */

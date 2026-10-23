@@ -2,8 +2,8 @@ import { useState } from "react";
 import { LineChart, Table2 } from "lucide-react";
 import { formatVND } from "../../utils/format";
 
-// Doanh thu theo ngày (cột chồng: gói + truyện) và chi phí AI (đường nét đứt). Một trục Y (VND).
-const COLORS = { plan: "#994700", listing: "#e08a2c", cost: "#008a7a", grid: "#f1e8dc" };
+// Doanh thu theo ngày (cột chồng: gói + truyện). Một trục Y (VND).
+const COLORS = { plan: "#994700", listing: "#e08a2c", grid: "#f1e8dc" };
 const W = 640;
 const H = 240;
 const PAD = { top: 16, right: 12, bottom: 28, left: 56 };
@@ -20,7 +20,7 @@ function FinanceChart({ series }) {
   const [view, setView] = useState("chart");
   const [hover, setHover] = useState(null);
   const n = series.length;
-  const max = niceMax(Math.max(...series.map((d) => Math.max(d.plan + d.listing, d.aiCost ?? 0))));
+  const max = niceMax(Math.max(...series.map((d) => d.plan + d.listing)));
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
   const band = innerW / n;
@@ -35,7 +35,6 @@ function FinanceChart({ series }) {
         <div className="flex flex-wrap items-center gap-4">
           <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm" style={{ background: COLORS.plan }} /> Gói</span>
           <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-sm" style={{ background: COLORS.listing }} /> Truyện (giá bán)</span>
-          <span className="flex items-center gap-1.5 text-navy/70"><span className="w-5 border-t-2 border-dashed" style={{ borderColor: COLORS.cost }} /> Chi phí AI</span>
         </div>
         <div className="flex rounded-full bg-white p-0.5 shadow-low" role="tablist" aria-label="Kiểu hiển thị">
           {[{ v: "chart", icon: LineChart, label: "Biểu đồ" }, { v: "table", icon: Table2, label: "Bảng số liệu" }].map(({ v, icon: Icon, label }) => (
@@ -50,7 +49,7 @@ function FinanceChart({ series }) {
         <div className="max-h-72 overflow-auto">
           <table className="w-full text-sm">
             <thead className="text-left text-xs text-navy/60">
-              <tr><th className="py-1">Ngày</th><th className="text-right">Gói</th><th className="text-right">Truyện</th><th className="text-right">Hoa hồng</th><th className="text-right">Chi phí AI</th></tr>
+              <tr><th className="py-1">Ngày</th><th className="text-right">Gói</th><th className="text-right">Truyện</th><th className="text-right">Hoa hồng</th></tr>
             </thead>
             <tbody className="divide-y divide-outline">
               {series.map((d) => (
@@ -59,7 +58,6 @@ function FinanceChart({ series }) {
                   <td className="text-right">{formatVND(d.plan)}</td>
                   <td className="text-right">{formatVND(d.listing)}</td>
                   <td className="text-right">{formatVND(d.commission)}</td>
-                  <td className="text-right">{formatVND(d.aiCost ?? 0)}</td>
                 </tr>
               ))}
             </tbody>
@@ -67,7 +65,7 @@ function FinanceChart({ series }) {
         </div>
       ) : (
         <div className="relative">
-          <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Doanh thu và chi phí AI theo ngày" onMouseLeave={() => setHover(null)}>
+          <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Doanh thu theo ngày" onMouseLeave={() => setHover(null)}>
             {[0, 0.25, 0.5, 0.75, 1].map((t) => (
               <g key={t}>
                 <line x1={PAD.left} x2={W - PAD.right} y1={y(max * t)} y2={y(max * t)} stroke={COLORS.grid} />
@@ -82,21 +80,12 @@ function FinanceChart({ series }) {
                 {i % every === 0 && <text x={cx(i)} y={H - 8} textAnchor="middle" className="fill-navy/50 text-[10px]">{dayLabel(d.day)}</text>}
               </g>
             ))}
-            <path
-              d={series.map((d, i) => `${i ? "L" : "M"} ${cx(i)} ${y(d.aiCost ?? 0)}`).join(" ")}
-              fill="none"
-              stroke={COLORS.cost}
-              strokeWidth="2"
-              strokeDasharray="6 4"
-              pointerEvents="none"
-            />
           </svg>
           {hover != null && (
             <div className="pointer-events-none absolute top-2 rounded-card bg-white p-2.5 text-xs shadow-mid" style={{ left: `${(cx(hover) / W) * 100}%`, transform: `translateX(${hover > n / 2 ? "-105%" : "5%"})` }}>
               <p className="mb-1 font-bold">{dayLabel(series[hover].day)}</p>
               <p>Gói: <b>{formatVND(series[hover].plan)}</b></p>
               <p>Truyện: <b>{formatVND(series[hover].listing)}</b></p>
-              <p>Chi phí AI: <b>{formatVND(series[hover].aiCost ?? 0)}</b></p>
             </div>
           )}
         </div>
