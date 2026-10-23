@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BookMarked, Loader2, Pencil, Plus, Search, SearchX, Trash2 } from "lucide-react";
 import Modal from "../../components/common/Modal";
 import Switch from "../../components/common/Switch";
 import CaselTag from "../../components/parent/library/CaselTag";
 import useDebounce from "../../hooks/useDebounce";
 import { useSubSkills } from "../../hooks/usePedagogy";
+import { PaginationBar } from "../../components/common/Pagination";
+import useClientPage from "../../hooks/useClientPage";
 import { useCreateTopic, useDeleteTopic, useEqSkills, useTopics, useUpdateTopic } from "../../hooks/useTopics";
 import { toast } from "../../stores/toastStore";
 import { Select } from "../../components/ui";
@@ -203,6 +205,12 @@ function TopicsPage() {
   const { data: topics = [], isLoading, isFetching, isError, refetch } = useTopics({ search: debouncedSearch, skillId, isActive });
   const update = useUpdateTopic();
   const remove = useDeleteTopic();
+  const listRef = useRef(null);
+  const paged = useClientPage(topics, 10, `${debouncedSearch}|${skillId}|${isActive}`);
+  const goPage = (p) => {
+    paged.setPage(p);
+    listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const toggleActive = (topic) =>
     update.mutate(
@@ -262,7 +270,7 @@ function TopicsPage() {
         </div>
       </div>
 
-      <section className="card overflow-hidden">
+      <section ref={listRef} className="card scroll-mt-24 overflow-hidden">
         <div className="flex items-center gap-2 border-b border-outline px-5 py-3">
           <h2 className="text-lg">Chuyện mẫu</h2>
           <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-bold text-navy/70">{topics.length}</span>
@@ -289,7 +297,7 @@ function TopicsPage() {
           </div>
         ) : (
           <ul className={`divide-y divide-outline transition-opacity ${isFetching ? "opacity-60" : ""}`}>
-            {topics.map((t) => (
+            {paged.pageItems.map((t) => (
               <li key={t.id} className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -330,6 +338,7 @@ function TopicsPage() {
             ))}
           </ul>
         )}
+        <PaginationBar {...paged} unit="chuyện mẫu" onChange={goPage} />
       </section>
 
       {editing && <TopicFormModal topic={editing === "new" ? null : editing} skills={skills} onClose={() => setEditing(null)} />}

@@ -10,35 +10,49 @@ const getPages = (page, totalPages) => {
 
 function Pagination({ page, totalPages, onChange }) {
   const navBtn =
-    "grid h-10 w-10 place-items-center rounded-full bg-surface text-navy/70 transition hover:bg-outline disabled:cursor-not-allowed disabled:opacity-40";
+    "grid h-9 w-9 cursor-pointer place-items-center rounded-full border-[1.5px] border-navy/12 bg-white text-navy/70 transition hover:border-primary/50 hover:text-primary-dark active:scale-95 disabled:pointer-events-none disabled:opacity-35";
 
   return (
-    <nav className="flex items-center gap-1.5" aria-label="Phân trang">
-      <button className={navBtn} disabled={page <= 1} onClick={() => onChange(page - 1)} aria-label="Trang trước">
-        <ChevronLeft size={18} />
+    <nav className="flex items-center gap-1" aria-label="Phân trang">
+      <button type="button" className={navBtn} disabled={page <= 1} onClick={() => onChange(page - 1)} aria-label="Trang trước">
+        <ChevronLeft size={17} />
       </button>
       {getPages(page, totalPages).map((p, i) =>
         p === "…" ? (
-          <span key={`gap-${i}`} className="px-1 text-navy/40">
+          <span key={`gap-${i}`} className="w-6 text-center text-navy/40">
             …
           </span>
         ) : (
           <button
             key={p}
+            type="button"
             onClick={() => onChange(p)}
             aria-current={p === page ? "page" : undefined}
-            className={`grid h-10 w-10 place-items-center rounded-full text-sm transition ${
-              p === page ? "bg-primary font-bold text-white shadow-low" : "font-semibold hover:bg-surface"
+            className={`grid h-9 min-w-9 cursor-pointer place-items-center rounded-full px-2 text-sm tabular-nums transition active:scale-95 ${
+              p === page ? "bg-primary font-bold text-white shadow-low" : "font-semibold text-navy/70 hover:bg-navy/[0.05] hover:text-navy"
             }`}
           >
             {p}
           </button>
         ),
       )}
-      <button className={navBtn} disabled={page >= totalPages} onClick={() => onChange(page + 1)} aria-label="Trang sau">
-        <ChevronRight size={18} />
+      <button type="button" className={navBtn} disabled={page >= totalPages} onClick={() => onChange(page + 1)} aria-label="Trang sau">
+        <ChevronRight size={17} />
       </button>
     </nav>
+  );
+}
+
+/** Chân danh sách: "Hiển thị 11–20 trong 36 mẫu" + số trang. Chỉ hiện khi có hơn một trang. */
+export function PaginationBar({ page, totalPages, from, to, total, unit = "mục", onChange }) {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex flex-col items-center justify-between gap-3 border-t border-navy/[0.06] px-5 py-3 sm:flex-row">
+      <p className="text-sm text-navy/55 tabular-nums">
+        Hiển thị <span className="font-semibold text-navy">{from}–{to}</span> trong {total} {unit}
+      </p>
+      <Pagination page={page} totalPages={totalPages} onChange={onChange} />
+    </div>
   );
 }
 

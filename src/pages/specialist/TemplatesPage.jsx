@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Copy, FileQuestion, Loader2, PenLine, Plus, SearchX, Trash2 } from "lucide-react";
 import Switch from "../../components/common/Switch";
 import TemplateVersionForm from "../../components/specialist/TemplateVersionForm";
 import { ANSWER_FORMATS } from "../../constants/story";
+import { PaginationBar } from "../../components/common/Pagination";
+import useClientPage from "../../hooks/useClientPage";
 import { useDeleteTemplate, useDuplicateTemplate, useSubSkills, useTemplates, useUpdateTemplate } from "../../hooks/usePedagogy";
 import { toast } from "../../stores/toastStore";
 import { Select } from "../../components/ui";
@@ -21,6 +23,12 @@ function TemplatesPage() {
   const update = useUpdateTemplate();
   const remove = useDeleteTemplate();
   const duplicate = useDuplicateTemplate();
+  const listRef = useRef(null);
+  const paged = useClientPage(templates, 10, subSkillId);
+  const goPage = (p) => {
+    paged.setPage(p);
+    listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   const composingTemplate = composing && (templates.find((t) => t.id === composing.id) ?? composing);
 
   // Nhân bản: mẫu mới cùng kỹ năng con + dạng, bản nháp v1 chép nội dung → mở ngay để soạn tiếp
@@ -77,7 +85,7 @@ function TemplatesPage() {
         </div>
       </div>
 
-      <section className="card overflow-hidden">
+      <section ref={listRef} className="card scroll-mt-24 overflow-hidden">
         <div className="flex items-center gap-2 border-b border-outline px-5 py-3">
           <h2 className="text-lg">Mẫu câu hỏi</h2>
           <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-bold text-navy/70">{templates.length}</span>
@@ -104,7 +112,7 @@ function TemplatesPage() {
           </div>
         ) : (
           <ul className={`divide-y divide-outline transition-opacity ${isFetching ? "opacity-60" : ""}`}>
-            {templates.map((t) => (
+            {paged.pageItems.map((t) => (
               <li key={t.id} className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -147,6 +155,7 @@ function TemplatesPage() {
             ))}
           </ul>
         )}
+        <PaginationBar {...paged} unit="mẫu" onChange={goPage} />
       </section>
 
       {creating && (

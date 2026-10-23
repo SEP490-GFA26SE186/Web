@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Loader2, Save, SlidersHorizontal } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { Button, Card, EmptyState, PageHeader, Skeleton } from "../../components/ui";
+import { EQ_LEVELS } from "../../constants/eqLevels";
 import { useReportSettings, useUpdateReportSettings } from "../../hooks/usePedagogy";
 import { toast } from "../../stores/toastStore";
-
-const inputClass =
-  "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none transition focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
 
 // Ngưỡng lưu dạng tỉ lệ 0..1, Specialist nhập theo % cho dễ đọc (phụ huynh không thấy %)
 const toForm = (s) => ({
@@ -29,10 +28,89 @@ const validate = (f) => {
   return "";
 };
 
+/** Ô số có đơn vị nằm trong ô (câu / %), không mũi tên tăng giảm; chú thích giữ chỗ cố định để các ô thẳng hàng. */
+function NumberField({ label, unit, hint, value, onChange, min, max }) {
+  return (
+    <label className="flex flex-col">
+      <span className="mb-1.5 text-sm font-semibold">{label}</span>
+      <span className="relative">
+        <input
+          type="number"
+          inputMode="numeric"
+          min={min}
+          max={max}
+          value={value}
+          onChange={onChange}
+          className="h-11 w-full [appearance:textfield] rounded-2xl border-[1.5px] border-outline bg-white pr-14 pl-4 text-sm font-semibold tabular-nums outline-none transition hover:border-navy/20 focus:border-secondary focus:ring-[3px] focus:ring-secondary/15 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
+        <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm text-navy/45">{unit}</span>
+      </span>
+      <span className="mt-1.5 min-h-8 text-xs leading-4 text-navy/55">{hint}</span>
+    </label>
+  );
+}
+
+function FieldGroup({ title, description, children }) {
+  return (
+    <fieldset className="space-y-4">
+      <div>
+        <legend className="font-display text-base font-bold">{title}</legend>
+        <p className="mt-0.5 text-sm text-navy/60">{description}</p>
+      </div>
+      <div className="grid gap-x-4 gap-y-1 sm:grid-cols-2">{children}</div>
+    </fieldset>
+  );
+}
+
+const LEVELS = [
+  { key: "emerging", label: "Đang làm quen", color: EQ_LEVELS.emerging.fill },
+  { key: "developing", label: "Đang phát triển", color: EQ_LEVELS.developing.fill },
+  { key: "secure", label: "Vững", color: EQ_LEVELS.secure.fill },
+];
+
+/** Thanh 0–100% chia 3 mức theo ngưỡng đang nhập: thấy ngay quy tắc sẽ áp dụng. */
+function LevelPreview({ dev, sec, window: win, minItems, valid }) {
+  const widths = valid ? [dev, sec - dev, 100 - sec] : [33.3, 33.3, 33.4];
+  const ranges = valid ? [`dưới ${dev}%`, `${dev}% đến dưới ${sec}%`, `từ ${sec}%`] : ["…", "…", "…"];
+  return (
+    <aside className="card h-fit space-y-5 p-6 xl:sticky xl:top-24">
+      <div>
+        <h2 className="text-lg">Xem trước quy tắc</h2>
+        <p className="mt-0.5 text-sm text-navy/60">Cập nhật theo số đang nhập, chưa lưu.</p>
+      </div>
+      <div>
+        <div className="flex h-3 overflow-hidden rounded-full" aria-hidden="true">
+          {LEVELS.map((l, i) => (
+            <span key={l.key} className="h-full transition-[width] duration-500 ease-(--ease-out-soft)" style={{ width: `${widths[i]}%`, background: l.color }} />
+          ))}
+        </div>
+        <div className="mt-1.5 flex justify-between text-[11px] font-semibold text-navy/45 tabular-nums">
+          <span>0%</span>
+          <span>100%</span>
+        </div>
+      </div>
+      <ul className="space-y-3">
+        {LEVELS.map((l, i) => (
+          <li key={l.key} className="flex items-center gap-3">
+            <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: l.color }} />
+            <span className="flex-1 text-sm font-semibold">{l.label}</span>
+            <span className="text-sm text-navy/60 tabular-nums">{ranges[i]}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="border-t border-navy/[0.06] pt-4 text-sm leading-relaxed text-navy/65">
+        Mỗi kỹ năng con xét <span className="font-bold text-navy">{win || "…"} câu</span> chấm gần nhất. Có ít hơn{" "}
+        <span className="font-bold text-navy">{minItems || "…"} câu</span> thì phụ huynh thấy “Chưa có dữ liệu”.
+      </p>
+    </aside>
+  );
+}
+
 function SettingsForm({ settings }) {
   const [form, setForm] = useState(() => toForm(settings));
   const [error, setError] = useState("");
   const update = useUpdateReportSettings();
+  const dirty = JSON.stringify(form) !== JSON.stringify(toForm(settings));
 
   const set = (key) => (e) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -59,44 +137,44 @@ function SettingsForm({ settings }) {
 
   const dev = Number(form.developingFrom);
   const sec = Number(form.secureFrom);
+  const valid = !validate(form);
 
   return (
-    <form onSubmit={submit} noValidate className="card max-w-3xl space-y-5 p-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold">Số câu gần nhất được xét</span>
-          <input type="number" min={1} max={20} value={form.window} onChange={set("window")} className={inputClass} />
-          <span className="mt-1 block text-xs text-navy/55">Mức của mỗi kỹ năng con tính trên chừng này câu chấm gần nhất (1–20).</span>
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold">Số câu tối thiểu để xếp mức</span>
-          <input type="number" min={1} max={20} value={form.minItems} onChange={set("minItems")} className={inputClass} />
-          <span className="mt-1 block text-xs text-navy/55">Ít hơn → phụ huynh thấy “Chưa có dữ liệu”.</span>
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold">“Đang phát triển” từ (%)</span>
-          <input type="number" min={1} max={99} value={form.developingFrom} onChange={set("developingFrom")} className={inputClass} />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-semibold">“Vững” từ (%)</span>
-          <input type="number" min={2} max={100} value={form.secureFrom} onChange={set("secureFrom")} className={inputClass} />
-        </label>
-      </div>
+    <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+      <form onSubmit={submit} noValidate className="card space-y-7 p-6 md:p-7">
+        <FieldGroup title="Dữ liệu được xét" description="Bao nhiêu câu trả lời gần nhất dùng để xếp mức một kỹ năng con.">
+          <NumberField label="Số câu gần nhất được xét" unit="câu" min={1} max={20} value={form.window} onChange={set("window")} hint="Từ 1 đến 20 câu." />
+          <NumberField label="Số câu tối thiểu để xếp mức" unit="câu" min={1} max={20} value={form.minItems} onChange={set("minItems")} hint="Ít hơn thì phụ huynh thấy “Chưa có dữ liệu”." />
+        </FieldGroup>
 
-      {Number.isFinite(dev) && Number.isFinite(sec) && dev < sec && (
-        <p className="rounded-2xl bg-surface px-4 py-3 text-sm text-navy/75">
-          Điểm trung bình dưới {dev}% → <span className="font-bold">Đang làm quen</span>; từ {dev}% đến dưới {sec}% →{" "}
-          <span className="font-bold">Đang phát triển</span>; từ {sec}% → <span className="font-bold">Vững</span>.
-        </p>
-      )}
-      {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+        <FieldGroup title="Ngưỡng xếp mức" description="Điểm trung bình của các câu được xét quyết định kỹ năng con ở mức nào.">
+          <NumberField label="“Đang phát triển” từ" unit="%" min={1} max={99} value={form.developingFrom} onChange={set("developingFrom")} hint="Dưới ngưỡng này là “Đang làm quen”." />
+          <NumberField label="“Vững” từ" unit="%" min={2} max={100} value={form.secureFrom} onChange={set("secureFrom")} hint="Phải lớn hơn ngưỡng “Đang phát triển”." />
+        </FieldGroup>
 
-      <div className="flex justify-end">
-        <button type="submit" disabled={update.isPending} className="btn-primary py-2.5 text-sm disabled:opacity-70">
-          {update.isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Lưu tham số
-        </button>
-      </div>
-    </form>
+        {error && <p className="rounded-2xl bg-danger-tint/60 px-4 py-3 text-sm font-semibold text-danger-dark">{error}</p>}
+
+        <div className="flex flex-wrap items-center justify-end gap-3 border-t border-navy/[0.06] pt-5">
+          {dirty && <span className="mr-auto text-xs font-semibold text-primary-dark">Có thay đổi chưa lưu</span>}
+          {dirty && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setForm(toForm(settings));
+                setError("");
+              }}
+            >
+              Hoàn tác
+            </Button>
+          )}
+          <Button type="submit" size="lg" loading={update.isPending} disabled={!dirty}>
+            Lưu tham số
+          </Button>
+        </div>
+      </form>
+
+      <LevelPreview dev={dev} sec={sec} window={form.window} minItems={form.minItems} valid={valid} />
+    </div>
   );
 }
 
@@ -106,25 +184,29 @@ function ReportSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="mb-1 flex items-center gap-1.5 text-sm font-bold text-secondary-dark">
-          <SlidersHorizontal size={16} /> Chương trình sư phạm
-        </p>
-        <h1 className="text-3xl">Tham số báo cáo</h1>
-        <p className="mt-1 max-w-2xl text-navy/70">
-          Quy tắc xếp mức “Đang làm quen / Đang phát triển / Vững” cho từng kỹ năng con trong báo cáo EQ của phụ huynh. Đổi tham số áp dụng ngay cho mọi báo cáo.
-        </p>
-      </div>
+      <PageHeader
+        title="Tham số báo cáo"
+        description="Quy tắc xếp mức “Đang làm quen / Đang phát triển / Vững” cho từng kỹ năng con trong báo cáo EQ của phụ huynh. Đổi tham số áp dụng ngay cho mọi báo cáo."
+      />
       {isLoading ? (
-        <div className="card h-64 max-w-3xl animate-pulse" />
-      ) : isError ? (
-        <div className="card max-w-3xl p-8 text-center">
-          <p className="font-display font-bold">Không tải được tham số</p>
-          <p className="mt-1 text-sm text-navy/60">{error.message}</p>
-          <button onClick={() => refetch()} className="btn-primary mt-4">
-            Thử lại
-          </button>
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <Skeleton className="h-96 rounded-card" />
+          <Skeleton className="h-72 rounded-card" />
         </div>
+      ) : isError ? (
+        <Card>
+          <EmptyState
+            icon={AlertCircle}
+            tone="danger"
+            title="Không tải được tham số"
+            description={error.message}
+            action={
+              <Button variant="secondary" size="sm" onClick={() => refetch()}>
+                Thử lại
+              </Button>
+            }
+          />
+        </Card>
       ) : (
         <SettingsForm key={JSON.stringify(data)} settings={data} />
       )}
