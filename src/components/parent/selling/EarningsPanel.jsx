@@ -16,7 +16,7 @@ const call = async (request) => {
 };
 
 const STATUS = {
-  requested: { label: "Chờ Admin duyệt", tone: "bg-navy-tint text-navy" },
+  requested: { label: "Chờ chuyển khoản", tone: "bg-navy-tint text-navy" },
   processing: { label: "Đang chuyển tiền", tone: "bg-primary-tint text-primary-dark" },
   paid: { label: "Đã chuyển", tone: "bg-secondary-tint text-secondary-dark" },
   rejected: { label: "Bị từ chối", tone: "bg-danger-tint text-danger" },
@@ -60,7 +60,7 @@ function BankForm({ current, onDone }) {
   );
 }
 
-// Doanh thu người bán: chờ (giữ vài ngày) → rút được → rút qua chi hộ payOS (Admin duyệt).
+// Doanh thu người bán: chờ (giữ vài ngày) → rút được → Admin chuyển khoản tay vào tài khoản đã khai.
 function EarningsPanel() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["selling", "earnings"], queryFn: () => call(api.get("/sellers/me/earnings")) });

@@ -43,7 +43,7 @@ const SECTIONS = [
       [
         "Cần gói có quyền bán (gói Gia đình) và hồ sơ người bán được kiểm duyệt viên duyệt.",
         "Bản đăng bán dùng tên chung thay cho tên thật của gia đình. Kiểm duyệt viên đọc 100% số trang theo checklist sư phạm trước khi truyện lên Chợ; truyện có giọng đọc chỉ được duyệt khi giọng đọc đã tạo xong.",
-        `Người bán nhận ${N.sellerSharePercent}% giá niêm yết của mỗi lượt bán. Doanh thu được giữ ${N.earningHoldDays} ngày (để xử lý hoàn tiền) rồi mới rút được; mức rút tối thiểu ${vnd(N.minWithdrawalVnd)}. Tiền được chi về tài khoản ngân hàng của người bán qua payOS sau khi quản trị viên duyệt.`,
+        `Người bán nhận ${N.sellerSharePercent}% giá niêm yết của mỗi lượt bán. Doanh thu được giữ ${N.earningHoldDays} ngày (để xử lý hoàn tiền) rồi mới rút được; mức rút tối thiểu ${vnd(N.minWithdrawalVnd)}. Quản trị viên chuyển khoản số tiền rút về tài khoản ngân hàng người bán đã khai.`,
         "Giá chọn theo các bậc giá do nền tảng quy định.",
       ],
     ],
