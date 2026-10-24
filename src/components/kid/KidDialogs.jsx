@@ -1,6 +1,6 @@
+import { Check, Delete, Loader2, Lock, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Delete, Loader2, Lock, X } from "lucide-react";
 import { useExitKidMode } from "../../hooks/useKid";
 
 // Khung hộp thoại to, bo tròn, thân thiện với bé
@@ -13,7 +13,12 @@ function KidDialog({ children, onClose, labelledBy }) {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/40 p-4 backdrop-blur-sm">
-      <div role="dialog" aria-modal="true" aria-labelledby={labelledBy} className="relative flex w-full max-w-md flex-col items-center rounded-stage bg-white p-6 text-center shadow-high">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={labelledBy}
+        className="relative flex w-full max-w-md flex-col items-center rounded-stage bg-white p-6 text-center shadow-high"
+      >
         {children}
       </div>
     </div>,
@@ -24,20 +29,28 @@ function KidDialog({ children, onClose, labelledBy }) {
 export function StoryCompleteDialog({ childName, onReadAgain, onBookshelf }) {
   return (
     <KidDialog onClose={onBookshelf} labelledBy="complete-title">
-      <span className="mb-3 grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-primary-tint to-secondary-tint text-5xl shadow-glow">
-        🎉
+      <span className="text-sm font-bold tracking-wider text-secondary-dark uppercase">
+        Hoàn thành câu chuyện!
       </span>
-      <span className="text-sm font-bold tracking-wider text-secondary-dark uppercase">Hoàn thành câu chuyện!</span>
       <h4 id="complete-title" className="mt-1 text-2xl">
         {childName} đã đọc xong truyện rồi!
       </h4>
-      <p className="mt-2 text-navy/70">Con muốn đọc lại từ đầu hay chọn truyện khác trên giá sách?</p>
+      <p className="mt-2 text-navy/70">
+        Con muốn đọc lại từ đầu hay chọn truyện khác trên giá sách?
+      </p>
       <div className="mt-6 flex w-full flex-col gap-2 sm:flex-row">
-        <button onClick={onReadAgain} className="flex-1 rounded-full bg-surface px-5 py-3 font-bold transition hover:bg-outline">
+        <button
+          onClick={onReadAgain}
+          className="flex-1 rounded-full bg-surface px-5 py-3 font-bold transition hover:bg-outline"
+        >
           Đọc lại từ đầu
         </button>
-        <button onClick={onBookshelf} autoFocus className="btn-primary flex-1 py-3">
-          Về Tủ Sách 📚
+        <button
+          onClick={onBookshelf}
+          autoFocus
+          className="btn-primary flex-1 py-3"
+        >
+          Về Tủ Sách
         </button>
       </div>
     </KidDialog>
@@ -85,7 +98,11 @@ export function ParentGateDialog({ onClose, onUnlock }) {
 
   return (
     <KidDialog onClose={onClose} labelledBy="gate-title">
-      <button onClick={onClose} className="absolute top-4 right-4 rounded-full p-1.5 hover:bg-surface" aria-label="Đóng">
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 rounded-full p-1.5 hover:bg-surface"
+        aria-label="Đóng"
+      >
         <X size={20} />
       </button>
       <span className="mb-3 grid h-14 w-14 place-items-center rounded-full bg-navy-tint text-navy-soft">
@@ -94,18 +111,32 @@ export function ParentGateDialog({ onClose, onUnlock }) {
       <h4 id="gate-title" className="text-xl">
         Dành cho Ba Mẹ
       </h4>
-      <p className="mt-1 text-sm text-navy/60">Nhập mã PIN phụ huynh để thoát Chế độ Trẻ Em</p>
+      <p className="mt-1 text-sm text-navy/60">
+        Nhập mã PIN phụ huynh để thoát Chế độ Trẻ Em
+      </p>
 
-      <div className={`my-5 flex gap-3 ${error ? "animate-[wiggle_0.4s_ease-in-out_2]" : ""}`} aria-live="polite">
+      <div
+        className={`my-5 flex gap-3 ${error ? "animate-[wiggle_0.4s_ease-in-out_2]" : ""}`}
+        aria-live="polite"
+      >
         {Array.from({ length: Math.max(PIN_MIN, pin.length) }).map((_, i) => (
-          <span key={i} className={`h-4 w-4 rounded-full transition ${i < pin.length ? "bg-primary" : error ? "bg-danger/40" : "bg-outline"}`} />
+          <span
+            key={i}
+            className={`h-4 w-4 rounded-full transition ${i < pin.length ? "bg-primary" : error ? "bg-danger/40" : "bg-outline"}`}
+          />
         ))}
       </div>
-      <p className="-mt-2 mb-3 h-5 text-sm font-semibold text-danger">{error ? "Mã PIN chưa đúng, thử lại nhé" : ""}</p>
+      <p className="-mt-2 mb-3 h-5 text-sm font-semibold text-danger">
+        {error ? "Mã PIN chưa đúng, thử lại nhé" : ""}
+      </p>
 
       <div className="grid w-full max-w-64 grid-cols-3 gap-3">
         {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
-          <button key={d} onClick={() => press(d)} className="h-14 rounded-2xl bg-surface font-display text-xl font-bold transition hover:bg-outline active:scale-95">
+          <button
+            key={d}
+            onClick={() => press(d)}
+            className="h-14 rounded-2xl bg-surface font-display text-xl font-bold transition hover:bg-outline active:scale-95"
+          >
             {d}
           </button>
         ))}
@@ -115,9 +146,16 @@ export function ParentGateDialog({ onClose, onUnlock }) {
           aria-label="Xác nhận"
           className="grid h-14 place-items-center rounded-2xl bg-primary text-white transition hover:bg-primary-dark active:scale-95 disabled:bg-outline disabled:text-navy/40"
         >
-          {verify.isPending ? <Loader2 className="animate-spin" /> : <Check size={22} />}
+          {verify.isPending ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <Check size={22} />
+          )}
         </button>
-        <button onClick={() => press("0")} className="h-14 rounded-2xl bg-surface font-display text-xl font-bold transition hover:bg-outline active:scale-95">
+        <button
+          onClick={() => press("0")}
+          className="h-14 rounded-2xl bg-surface font-display text-xl font-bold transition hover:bg-outline active:scale-95"
+        >
           0
         </button>
         <button

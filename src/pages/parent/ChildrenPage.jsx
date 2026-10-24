@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Leaf, Loader2, PlusCircle, Trash2 } from "lucide-react";
-import Modal from "../../components/common/Modal";
+import { Leaf, PlusCircle } from "lucide-react";
 import CharacterCard from "../../components/parent/children/CharacterCard";
 import { ActiveChildCard, AddChildCard, OtherChildCard } from "../../components/parent/children/ChildCards";
 import ChildFormModal from "../../components/parent/children/ChildFormModal";
@@ -11,6 +10,7 @@ import ReadingSettingsCard from "../../components/parent/children/ReadingSetting
 import { useCreateChild, useDeleteChild, useSelectedChild, useUpdateChild } from "../../hooks/useChildProfile";
 import useParentStore from "../../stores/parentStore";
 import { toast as notify } from "../../stores/toastStore";
+import { ConfirmDialog } from "../../components/ui";
 
 function ChildrenPage() {
   const setSelectedChildId = useParentStore((s) => s.setSelectedChildId);
@@ -133,26 +133,15 @@ function ChildrenPage() {
         />
       )}
 
-      <Modal
+      <ConfirmDialog
         open={modal === "delete" && !!active}
         onClose={() => setModal(null)}
+        onConfirm={handleDelete}
+        loading={deleteChild.isPending}
         title={`Xóa hồ sơ ${active?.name ?? ""}?`}
         description="Giá sách, lịch sử đọc và nhân vật của bé sẽ không còn hiển thị. Phiên Chế độ Trẻ Em đang mở của bé cũng bị đăng xuất."
-        size="max-w-md"
-        footer={
-          <>
-            <button onClick={() => setModal(null)} className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline">
-              Giữ lại
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={deleteChild.isPending}
-              className="inline-flex items-center gap-1.5 rounded-full bg-danger px-5 py-2.5 text-sm font-bold text-white transition hover:bg-danger-dark disabled:opacity-70"
-            >
-              {deleteChild.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} Xóa hồ sơ
-            </button>
-          </>
-        }
+        cancelLabel="Giữ lại"
+        confirmLabel="Xóa hồ sơ"
       />
     </div>
   );

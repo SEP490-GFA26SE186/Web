@@ -4,9 +4,8 @@ import { VOICES } from "../../../constants/voices";
 import { useUpdateChild } from "../../../hooks/useChildProfile";
 import { toast } from "../../../stores/toastStore";
 import SectionCard from "./SectionCard";
+import { Select } from "../../ui";
 
-const selectClass =
-  "w-full cursor-pointer rounded-2xl border-[1.5px] border-outline bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
 
 /** Giọng đọc mặc định của bé (child_profiles). Rev8 bỏ giới hạn thời gian đọc / giờ ngủ. */
 function ReadingSettingsCard({ child }) {
@@ -31,18 +30,11 @@ function ReadingSettingsCard({ child }) {
           <span className="mb-2 flex items-center gap-1.5 text-sm font-bold">
             <Mic size={17} className="text-secondary" /> Giọng đọc truyện
           </span>
-          <select
+          <Select
             value={form.preferredVoice}
-            onChange={(e) => setForm((f) => ({ ...f, preferredVoice: e.target.value }))}
-            className={selectClass}
-          >
-            <option value="">Giọng mặc định</option>
-            {VOICES.map((v) => (
-              <option key={v.value} value={v.value}>
-                {v.label}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => setForm((f) => ({ ...f, preferredVoice: v }))}
+            options={[{ value: "", label: "Giọng mặc định" }, ...VOICES]}
+          />
           <span className="mt-1.5 block text-xs text-navy/60">Dùng cho truyện có bật giọng đọc (AI đọc bằng tiếng Việt)</span>
         </label>
 

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Eye, Loader2, Plus, Rocket, Save, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Eye, Loader2, Plus, X } from "lucide-react";
 import Modal from "../common/Modal";
 import { CASEL_URL } from "../../constants/casel";
 import { ANSWER_FORMATS, EMOTIONS, OPTION_ROLES } from "../../constants/story";
 import { useCreateTemplate, usePublishTemplate, useSaveTemplateDraft, useUpdateTemplate } from "../../hooks/usePedagogy";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../ui";
 
 const inputClass =
   "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none transition focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
@@ -309,10 +310,10 @@ function TemplateVersionForm({ template, subSkills = [], defaultSubSkillId = "",
             disabled={pending}
             className="inline-flex items-center gap-1.5 rounded-full bg-secondary-tint px-5 py-2.5 text-sm font-bold text-secondary-dark hover:opacity-80 disabled:opacity-70"
           >
-            {pending && !publishing ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Lưu bản nháp
+            {pending && !publishing && <Loader2 size={16} className="animate-spin" />} Lưu bản nháp
           </button>
           <button type="button" onClick={() => submit(true)} disabled={pending} className="btn-primary py-2.5 text-sm disabled:opacity-70">
-            {pending && publishing ? <Loader2 size={16} className="animate-spin" /> : <Rocket size={16} />} Ban hành
+            {pending && publishing && <Loader2 size={16} className="animate-spin" />} Ban hành
           </button>
         </>
       }
@@ -321,27 +322,23 @@ function TemplateVersionForm({ template, subSkills = [], defaultSubSkillId = "",
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Kỹ năng con">
             {isNew ? (
-              <select value={meta.subSkillId} onChange={setMetaField("subSkillId")} className={`${inputClass} cursor-pointer`}>
-                <option value="">— Chọn kỹ năng con —</option>
-                {subSkills.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.nameVi}
-                  </option>
-                ))}
-              </select>
+              <Select
+                value={meta.subSkillId}
+                onChange={(v) => setMetaField("subSkillId")({ target: { value: v } })}
+                placeholder="Chọn kỹ năng con"
+                options={subSkills.map((s) => ({ value: s.id, label: s.nameVi }))}
+              />
             ) : (
               <p className="rounded-2xl bg-surface px-4 py-2.5 text-sm">{subSkill?.nameVi ?? "—"}</p>
             )}
           </Field>
           <Field label="Dạng trả lời" hint={isNew ? "Không đổi được sau khi tạo" : undefined}>
             {isNew ? (
-              <select value={meta.answerFormat} onChange={setMetaField("answerFormat")} className={`${inputClass} cursor-pointer`}>
-                {Object.entries(ANSWER_FORMATS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+              <Select
+                value={meta.answerFormat}
+                onChange={(v) => setMetaField("answerFormat")({ target: { value: v } })}
+                options={Object.entries(ANSWER_FORMATS).map(([value, label]) => ({ value, label }))}
+              />
             ) : (
               <p className="rounded-2xl bg-surface px-4 py-2.5 text-sm">{ANSWER_FORMATS[format]}</p>
             )}

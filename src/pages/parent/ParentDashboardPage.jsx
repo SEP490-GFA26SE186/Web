@@ -1,16 +1,15 @@
-import { ChevronRight, ClipboardCheck, Hourglass, Library, Timer, TrendingDown, TrendingUp } from "lucide-react";
-import { Link } from "react-router-dom";
+import { AlertCircle, ArrowRight, ClipboardCheck, Hourglass, Library, RotateCw, Timer } from "lucide-react";
 import ContinueReadingCard from "../../components/parent/ContinueReadingCard";
 import DraftReviewCard from "../../components/parent/DraftReviewCard";
 import EqRadarCard from "../../components/parent/EqRadarCard";
 import ListingCard from "../../components/parent/marketplace/ListingCard";
 import NoChildState from "../../components/parent/NoChildState";
-import StatCard from "../../components/parent/StatCard";
+import { Button, Card, EmptyState, Skeleton, StatTile } from "../../components/ui";
 import { ROUTES } from "../../constants/routes";
 import { useChildBookshelf, useChildOverview, useChildUsage, useSelectedChild } from "../../hooks/useChildProfile";
 import { useListings } from "../../hooks/useMarketplace";
 import { usePendingDrafts, useParentProfile } from "../../hooks/useParent";
-import { childEmoji, vnDateOffset } from "../../utils/child";
+import { vnDateOffset } from "../../utils/child";
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -22,17 +21,20 @@ const getGreeting = () => {
 
 function DashboardSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
-      <div className="h-16 w-2/3 rounded-2xl bg-surface" />
-      <div className="h-72 rounded-stage bg-surface" />
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+    <div className="space-y-6" aria-busy="true">
+      <div className="space-y-2">
+        <Skeleton className="h-9 w-80 max-w-full" />
+        <Skeleton className="h-5 w-64 max-w-full" />
+      </div>
+      <Skeleton className="h-64 rounded-stage" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-28 rounded-card bg-surface" />
+          <Skeleton key={i} className="h-[132px] rounded-card" />
         ))}
       </div>
       <div className="grid gap-6 xl:grid-cols-12">
-        <div className="h-[520px] rounded-card bg-surface xl:col-span-7" />
-        <div className="h-[520px] rounded-card bg-surface xl:col-span-5" />
+        <Skeleton className="h-[520px] rounded-card xl:col-span-7" />
+        <Skeleton className="h-[520px] rounded-card xl:col-span-5" />
       </div>
     </div>
   );
@@ -52,12 +54,19 @@ function ParentDashboardPage() {
 
   if (overview.isError) {
     return (
-      <div className="card mx-auto mt-20 max-w-md p-8 text-center">
-        <p className="font-display text-lg font-bold">Ôi, có lỗi xảy ra rồi 😢</p>
-        <button onClick={() => overview.refetch()} className="btn-primary mt-4">
-          Thử lại
-        </button>
-      </div>
+      <Card className="mx-auto mt-16 max-w-md">
+        <EmptyState
+          icon={AlertCircle}
+          tone="danger"
+          title="Không tải được tổng quan"
+          description="Kết nối có thể đang chập chờn. Ba mẹ thử tải lại nhé."
+          action={
+            <Button icon={RotateCw} onClick={() => overview.refetch()}>
+              Thử lại
+            </Button>
+          }
+        />
+      </Card>
     );
   }
 
@@ -69,71 +78,59 @@ function ParentDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Lời chào */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl md:text-[34px]">
-            {getGreeting()}, {parent.name}! 👋
-          </h1>
-          <p className="mt-2 text-navy/70">
-            {todayUsage.sessionsCount
-              ? <>Hôm nay {child.name} đã đọc <span className="font-bold text-primary">{todayUsage.usedMinutes} phút</span> ({todayUsage.sessionsCount} lượt đọc).</>
-              : `Hôm nay ${child.name} chưa đọc truyện nào.`}
-          </p>
-        </div>
-        <div className="hidden items-center gap-3 rounded-full border border-outline bg-white py-2 pr-5 pl-2 shadow-low md:flex">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-secondary-tint text-xl">{childEmoji(child)}</span>
-          <div className="leading-tight">
-            <p className="text-sm font-bold">
-              {child.name}
-              {child.age != null && ` • ${child.age} tuổi`}
-            </p>
-            <p className="text-xs text-secondary-dark">📚 {readingStats.booksInBookshelf} truyện trên giá sách</p>
-          </div>
-        </div>
-      </div>
+      <header className="animate-rise">
+        <h1 className="text-2xl leading-tight tracking-tight md:text-[32px]">
+          {getGreeting()}, {parent.name}
+        </h1>
+        <p className="mt-2 text-[15px] text-navy/60">
+          {todayUsage.sessionsCount ? (
+            <>
+              Hôm nay {child.name} đã đọc <span className="font-bold text-primary-dark">{todayUsage.usedMinutes} phút</span> qua {todayUsage.sessionsCount} lượt đọc.
+            </>
+          ) : (
+            `Hôm nay ${child.name} chưa đọc truyện nào.`
+          )}
+        </p>
+      </header>
 
       {continueReading && <ContinueReadingCard story={continueReading} />}
 
       {/* Thống kê nhanh */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <StatTile
+          index={0}
           icon={Timer}
-          tone="orange"
+          tone="primary"
           label="Thời gian đọc hôm nay"
           value={`${todayUsage.usedMinutes} phút`}
-          hint={
-            usageDelta == null ? null : (
-              <span className="inline-flex items-center gap-1">
-                {usageDelta >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                {usageDelta >= 0 ? "+" : ""}
-                {usageDelta}m so với hôm qua
-              </span>
-            )
-          }
+          trend={usageDelta}
+          trendLabel={usageDelta == null ? null : "phút so với hôm qua"}
         />
-        <StatCard
+        <StatTile
+          index={1}
           icon={Hourglass}
-          tone="teal"
+          tone="secondary"
           label="Lượt đọc hôm nay"
           value={`${todayUsage.sessionsCount} lượt`}
           hint={`${todayUsage.completedCount} lượt đọc hết truyện`}
-          hintClassName="text-navy/60"
         />
-        <StatCard
+        <StatTile
+          index={2}
           icon={Library}
           tone="navy"
           label="Truyện đã đọc xong"
           value={`${readingStats.completedStories} truyện`}
           hint={`${readingStats.booksInBookshelf} truyện trên giá sách`}
-          hintClassName="text-navy/60"
+          to={ROUTES.PARENT.LIBRARY}
         />
-        <StatCard
+        <StatTile
+          index={3}
           icon={ClipboardCheck}
-          tone="orange"
+          tone="primary"
           label="Truyện chờ xem lại"
           value={`${pendingDrafts.length} truyện`}
-          hint={pendingDrafts.length ? "Xem lại xong mới đưa lên giá sách ✨" : "Đã xem lại hết 🎉"}
-          hintClassName="text-primary-dark"
+          hint={pendingDrafts.length ? "Xem lại xong mới lên giá sách" : "Đã xem lại hết"}
+          to={ROUTES.PARENT.STUDIO}
         />
       </div>
 
@@ -142,29 +139,26 @@ function ParentDashboardPage() {
         <div className="xl:col-span-7">
           <EqRadarCard childName={child.name} report={eqReport} />
         </div>
-        <div className="flex flex-col gap-4 xl:col-span-5">
+        <div className="flex flex-col xl:col-span-5 xl:self-start">
           <DraftReviewCard draft={pendingDrafts[0]} moreCount={Math.max(0, pendingDrafts.length - 1)} />
         </div>
       </div>
 
       {/* Nổi bật trên chợ truyện */}
       {featured.data?.items.length > 0 && (
-        <section>
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
+        <section className="animate-rise">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-2xl">Bán chạy trên Chợ truyện</h2>
+              <h2 className="text-xl md:text-2xl">Bán chạy trên Chợ truyện</h2>
               <p className="mt-1 text-sm text-navy/60">Truyện từ các gia đình khác, đã được chuyên gia duyệt từng trang</p>
             </div>
-            <Link to={ROUTES.PARENT.MARKETPLACE} className="inline-flex items-center gap-1 text-sm font-bold text-primary-dark hover:text-primary">
-              Xem chợ truyện <ChevronRight size={16} />
-            </Link>
+            <Button variant="ghost" size="sm" to={ROUTES.PARENT.MARKETPLACE} iconRight={ArrowRight} className="text-primary-dark hover:text-primary-dark">
+              Xem chợ truyện
+            </Button>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {featured.data.items.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-              />
+              <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
         </section>

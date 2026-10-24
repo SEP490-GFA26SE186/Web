@@ -55,7 +55,7 @@ function ReportListingButton({ listingId }) {
               Hủy
             </button>
             <button type="submit" form="report-form" disabled={report.isPending} className="inline-flex items-center gap-1.5 rounded-full bg-danger px-5 py-2.5 text-sm font-bold text-white hover:bg-danger-dark disabled:opacity-70">
-              {report.isPending ? <Loader2 size={16} className="animate-spin" /> : <Flag size={16} />} Gửi báo cáo
+              {report.isPending && <Loader2 size={16} className="animate-spin" />} Gửi báo cáo
             </button>
           </>
         }

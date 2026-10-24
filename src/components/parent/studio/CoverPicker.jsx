@@ -54,8 +54,8 @@ function CoverPicker({ story, disabled }) {
                       disabled={disabled || setCover.isPending}
                       aria-pressed={selected}
                       aria-label={`Dùng tranh cảnh ${scene.sceneOrder} làm bìa`}
-                      className={`relative block aspect-square w-full overflow-hidden rounded-xl border-2 transition disabled:opacity-60 ${
-                        selected ? "border-primary shadow-mid" : "border-outline hover:border-primary/60"
+                      className={`relative block aspect-square w-full cursor-pointer overflow-hidden rounded-xl border-2 transition duration-200 disabled:pointer-events-none disabled:opacity-60 ${
+                        selected ? "border-primary shadow-[0_0_0_3px_rgba(255,122,0,0.15)]" : "border-navy/10 hover:-translate-y-0.5 hover:border-primary/60 hover:shadow-mid"
                       }`}
                     >
                       <img src={scene.imageUrl} alt="" loading="lazy" className="h-full w-full object-cover" />

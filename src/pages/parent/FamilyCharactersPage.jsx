@@ -9,6 +9,7 @@ import { parentKeys, useSubscription } from "../../hooks/useParent";
 import { createCharacter, deleteCharacter, updateCharacter } from "../../services/storyService";
 import { toast } from "../../stores/toastStore";
 import { Link } from "react-router-dom";
+import { ConfirmDialog } from "../../components/ui";
 
 const fieldClass = "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none focus:border-primary";
 
@@ -151,25 +152,21 @@ function FamilyCharactersPage() {
       </ul>
 
       {editing && <CharacterModal character={editing === "new" ? null : editing} onClose={() => setEditing(null)} />}
-      <Modal
+      <ConfirmDialog
         open={!!deleting}
         onClose={() => setDeleting(null)}
+        onConfirm={() =>
+          remove.mutate(deleting.id, {
+            onSuccess: () => {
+              toast.success("Đã xoá nhân vật");
+              setDeleting(null);
+            },
+            onError: (e) => toast.error(e.message),
+          })
+        }
+        loading={remove.isPending}
         title={`Xoá nhân vật “${deleting?.name ?? ""}”?`}
         description={deleting?.storiesCount ? `Các truyện đã viết (${deleting.storiesCount}) vẫn giữ nguyên nhân vật này; chỉ không chọn được cho truyện mới.` : "Nhân vật chưa có trong truyện nào."}
-        size="max-w-md"
-        footer={
-          <>
-            <button type="button" onClick={() => setDeleting(null)} className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline">Hủy</button>
-            <button
-              type="button"
-              disabled={remove.isPending}
-              onClick={() => remove.mutate(deleting.id, { onSuccess: () => { toast.success("Đã xoá nhân vật"); setDeleting(null); }, onError: (e) => toast.error(e.message) })}
-              className="inline-flex items-center gap-1.5 rounded-full bg-danger px-5 py-2.5 text-sm font-bold text-white disabled:opacity-70"
-            >
-              {remove.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} Xoá
-            </button>
-          </>
-        }
       />
     </div>
   );

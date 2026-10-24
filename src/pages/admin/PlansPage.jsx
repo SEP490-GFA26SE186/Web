@@ -7,6 +7,7 @@ import { LoadState, PageHeader } from "../../components/admin/AdminUi";
 import { fieldClass, money } from "../../components/admin/adminFormat";
 import { useAdminPlans, useCreatePlan, useUpdatePlan } from "../../hooks/useAdmin";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../../components/ui";
 
 const NUMBER_FIELDS = [
   ["priceVnd", "Giá (đ)"],
@@ -58,10 +59,14 @@ function PlanModal({ plan, onClose }) {
             </label>
             <label className="block">
               <span className="mb-1 block text-sm font-semibold">Thời hạn</span>
-              <select value={form.durationMonths} onChange={set("durationMonths", true)} className={fieldClass}>
-                <option value={1}>1 tháng</option>
-                <option value={12}>12 tháng</option>
-              </select>
+              <Select
+                value={form.durationMonths}
+                onChange={(v) => setForm((f) => ({ ...f, durationMonths: v }))}
+                options={[
+                  { value: 1, label: "1 tháng" },
+                  { value: 12, label: "12 tháng" },
+                ]}
+              />
             </label>
           </div>
         )}

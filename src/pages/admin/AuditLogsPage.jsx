@@ -3,6 +3,7 @@ import Pagination from "../../components/common/Pagination";
 import { LoadState, PageHeader } from "../../components/admin/AdminUi";
 import { formatDateTime } from "../../components/admin/adminFormat";
 import { useAuditLogs } from "../../hooks/useAdmin";
+import { Select } from "../../components/ui";
 
 const ACTION_LABELS = {
   "account.lock": "Khoá tài khoản",
@@ -41,9 +42,18 @@ function AuditLogsPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Nhật ký kiểm toán" description="Mọi thao tác thay đổi tiền, quyền và nội dung của Admin / Chuyên gia sư phạm.">
-        <select value={action} onChange={(e) => { setAction(e.target.value); setPage(1); }} aria-label="Loại thao tác" className="cursor-pointer rounded-full border-[1.5px] border-outline bg-white px-4 py-2 text-sm">
-          {["all", ...(data?.prefixes ?? [])].map((p) => <option key={p} value={p}>{PREFIX_LABELS[p] ?? p}</option>)}
-        </select>
+        <Select
+          value={action}
+          onChange={(v) => {
+            setAction(v);
+            setPage(1);
+          }}
+          label="Loại thao tác"
+          shape="pill"
+          width="w-auto"
+          className="min-w-48"
+          options={["all", ...(data?.prefixes ?? [])].map((p) => ({ value: p, label: PREFIX_LABELS[p] ?? p }))}
+        />
       </PageHeader>
       <section className={`card overflow-x-auto transition-opacity ${isFetching && !isLoading ? "opacity-60" : ""}`}>
         <LoadState isLoading={isLoading} error={error} empty={!logs.length} emptyText="Chưa có thao tác nào." />

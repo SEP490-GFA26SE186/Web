@@ -7,6 +7,7 @@ import useDebounce from "../../hooks/useDebounce";
 import { useSubSkills, useUpdateSubSkill } from "../../hooks/usePedagogy";
 import { useEqSkills } from "../../hooks/useTopics";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../../components/ui";
 
 const inputClass =
   "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none transition focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
@@ -158,21 +159,12 @@ function SubSkillsPage() {
             className={`${inputClass} rounded-full pl-11`}
           />
         </label>
-        <select value={skillId} onChange={(e) => setSkillId(e.target.value)} className={`${inputClass} cursor-pointer rounded-full lg:w-64`}>
-          <option value="all">Mọi năng lực</option>
-          {skills.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.nameVi}
-            </option>
-          ))}
-        </select>
-        <select value={isActive} onChange={(e) => setIsActive(e.target.value)} className={`${inputClass} cursor-pointer rounded-full lg:w-48`}>
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+        <div className="lg:w-64">
+          <Select label="Năng lực" value={skillId} onChange={setSkillId} shape="pill" options={[{ value: "all", label: "Mọi năng lực" }, ...skills.map((s) => ({ value: s.id, label: s.nameVi }))]} />
+        </div>
+        <div className="lg:w-48">
+          <Select label="Trạng thái" value={isActive} onChange={setIsActive} shape="pill" options={STATUS_OPTIONS} />
+        </div>
       </div>
 
       <section className="card overflow-hidden">

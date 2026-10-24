@@ -1,4 +1,5 @@
 import { AlertTriangle, ImageIcon, Loader2, RefreshCw } from "lucide-react";
+import { Button } from "../../ui";
 
 /**
  * Tranh AI của một cảnh, đặt trên trang đầu tiên của cảnh đó (các trang cùng cảnh dùng chung tranh).
@@ -42,16 +43,10 @@ function ScenePicture({ scene, pageRange, cost, onRedraw, redrawing, disabled })
           Tranh cảnh {scene.sceneOrder} · {pageRange}
         </span>
         {canDraw && !drawing && (
-          <button
-            type="button"
-            onClick={onRedraw}
-            disabled={disabled || redrawing}
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary-tint px-3 py-1.5 font-bold whitespace-nowrap text-primary-dark transition hover:bg-primary hover:text-white disabled:opacity-50"
-          >
-            {redrawing ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+          <Button variant={scene.imageUrl ? "secondary" : "primary"} size="sm" icon={RefreshCw} loading={redrawing} onClick={onRedraw} disabled={disabled}>
             {scene.imageUrl ? "Vẽ lại cảnh" : "Vẽ tranh"}
-            {cost > 0 && <span className="opacity-80">· {cost} credit</span>}
-          </button>
+            {cost > 0 && <span className="font-semibold opacity-70">· {cost} credit</span>}
+          </Button>
         )}
       </figcaption>
     </figure>

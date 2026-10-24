@@ -4,6 +4,7 @@ import { Flag, Loader2, MessageSquareReply, Star } from "lucide-react";
 import { REPORT_CATEGORIES } from "../../../constants/moderation";
 import { getReviews, replyReview, reportReview, saveReview } from "../../../services/marketplaceService";
 import { toast } from "../../../stores/toastStore";
+import { Select } from "../../ui";
 
 const REVIEW_TAG_LABELS = {
   child_liked: "Bé rất thích",
@@ -110,9 +111,15 @@ function ReportReview({ reviewId }) {
   }
   return (
     <span className="inline-flex items-center gap-2 text-xs">
-      <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Loại vi phạm" className="rounded-full border border-outline px-2 py-0.5">
-        {Object.entries(REPORT_CATEGORIES).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-      </select>
+      <Select
+        value={category}
+        onChange={setCategory}
+        label="Loại vi phạm"
+        shape="pill"
+        size="sm"
+        width="w-auto"
+        options={Object.entries(REPORT_CATEGORIES).map(([value, label]) => ({ value, label }))}
+      />
       <button type="button" onClick={() => report.mutate()} disabled={report.isPending} className="font-bold text-danger">Gửi</button>
       <button type="button" onClick={() => setOpen(false)} className="text-navy/50">Huỷ</button>
     </span>

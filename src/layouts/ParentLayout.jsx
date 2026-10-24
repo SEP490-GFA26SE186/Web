@@ -81,9 +81,10 @@ function ParentLayout() {
             <Link
               to={R.BILLING}
               title="Credit AI còn lại trong tháng"
-              className="hidden items-center gap-1.5 rounded-full border border-outline bg-white px-3 py-2 text-xs font-bold hover:bg-surface sm:flex"
+              className="group hidden h-9 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-bold shadow-ring transition duration-200 hover:bg-surface active:scale-[0.97] sm:flex"
             >
-              <Coins size={15} className="text-primary" /> {parent.creditBalance} credit
+              <Coins size={15} className="text-primary transition-transform duration-300 group-hover:rotate-12" />
+              <span className="tabular-nums">{parent.creditBalance}</span> credit
             </Link>
           )}
         </>

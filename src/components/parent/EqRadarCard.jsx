@@ -1,8 +1,8 @@
-import { ArrowRight, Info } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, Info, Sprout } from "lucide-react";
 import { CASEL } from "../../constants/casel";
 import { EQ_LEVELS, EQ_REPORT_NOTE, levelLabel } from "../../constants/eqLevels";
 import { ROUTES } from "../../constants/routes";
+import { Button, Card, CardHeader, EmptyState } from "../ui";
 
 // Khung rộng hơn chiều cao để nhãn 2 dòng ở trục trái / phải không bị cắt
 const WIDTH = 560;
@@ -53,7 +53,7 @@ export function RadarChart({ competencies }) {
         {competencies.map((c) => `${CASEL[c.caselCode]?.label ?? c.nameVi}: ${levelLabel(c.level)}`).join("; ")}
       </title>
       {RINGS.map((lv) => (
-        <polygon key={lv} points={toPath(competencies.map((_, i) => pointAt(i, n, lv)))} fill="none" stroke="#f1e8dc" strokeWidth="1.5" />
+        <polygon key={lv} points={toPath(competencies.map((_, i) => pointAt(i, n, lv)))} fill="none" stroke="rgba(30, 41, 59, 0.08)" strokeWidth="1.5" />
       ))}
       {competencies.map((c, i) => {
         const [x, y] = pointAt(i, n, 3);
@@ -117,47 +117,45 @@ function EqRadarCard({ childName, report }) {
   const hasAnyLevel = competencies.some((c) => c.level);
 
   return (
-    <section className="card flex flex-col p-6 md:p-7">
-      <div>
-        <h3 className="text-xl">Báo cáo EQ của {childName}</h3>
-        <p className="mt-1 text-sm text-navy/60">Mức hiểu ở 5 năng lực CASEL, từ câu trả lời lần đọc đầu của các truyện AI</p>
-      </div>
+    <Card reveal index={4} className="flex h-full flex-col md:p-7">
+      <CardHeader
+        title={`Báo cáo EQ của ${childName}`}
+        description="Mức hiểu ở 5 năng lực CASEL, từ câu trả lời lần đọc đầu của các truyện AI"
+        action={
+          <Button variant="ghost" size="sm" to={ROUTES.PARENT.EQ_JOURNEY} iconRight={ArrowRight} className="text-primary-dark hover:text-primary-dark">
+            Chi tiết
+          </Button>
+        }
+      />
 
       {hasAnyLevel ? (
         <div className="my-4">
           <RadarChart competencies={competencies} />
         </div>
       ) : (
-        <div className="my-6 rounded-2xl bg-surface p-6 text-center">
-          <p className="text-4xl">🌱</p>
-          <p className="mt-2 font-display font-bold">Chưa có dữ liệu để vẽ biểu đồ</p>
-          <p className="mt-1 text-sm text-navy/60">
-            Mỗi kỹ năng cần ít nhất {report?.settings?.minItems ?? 3} câu trả lời. Biểu đồ sẽ hiện khi bé đọc thêm truyện có câu hỏi.
-          </p>
-        </div>
+        <EmptyState
+          icon={Sprout}
+          tone="secondary"
+          title="Chưa có dữ liệu để vẽ biểu đồ"
+          description={`Mỗi kỹ năng cần ít nhất ${report?.settings?.minItems ?? 3} câu trả lời. Biểu đồ sẽ hiện khi bé đọc thêm truyện có câu hỏi.`}
+          className="my-5 rounded-2xl bg-surface/70"
+        />
       )}
 
       <ul className="grid gap-1.5 text-sm sm:grid-cols-2">
         {competencies.map((c) => (
-          <li key={c.caselCode} className="flex items-center justify-between gap-2 rounded-xl bg-surface px-3 py-2">
+          <li key={c.caselCode} className="flex items-center justify-between gap-2 rounded-xl border border-navy/[0.05] bg-surface/50 px-3 py-2 transition-colors hover:bg-surface">
             <span className="font-semibold">{c.nameVi}</span>
             <LevelBadge level={c.level} />
           </li>
         ))}
       </ul>
 
-      <p className="mt-4 flex items-start gap-2 text-xs text-navy/60">
+      <p className="mt-4 flex items-start gap-2 text-xs text-navy/55">
         <Info size={14} className="mt-0.5 shrink-0" />
         {EQ_REPORT_NOTE}
       </p>
-
-      <Link
-        to={ROUTES.PARENT.EQ_JOURNEY}
-        className="mt-4 inline-flex items-center gap-1.5 self-start text-sm font-bold text-primary-dark hover:gap-2.5 hover:text-primary"
-      >
-        Xem báo cáo chi tiết <ArrowRight size={16} />
-      </Link>
-    </section>
+    </Card>
   );
 }
 

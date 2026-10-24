@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Copy, FileQuestion, Loader2, PenLine, Plus, SearchX, Trash2 } from "lucide-react";
-import Modal from "../../components/common/Modal";
 import Switch from "../../components/common/Switch";
 import TemplateVersionForm from "../../components/specialist/TemplateVersionForm";
 import { ANSWER_FORMATS } from "../../constants/story";
+import { PaginationBar } from "../../components/common/Pagination";
+import useClientPage from "../../hooks/useClientPage";
 import { useDeleteTemplate, useDuplicateTemplate, useSubSkills, useTemplates, useUpdateTemplate } from "../../hooks/usePedagogy";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../../components/ui";
+import { ConfirmDialog } from "../../components/ui";
 
-const inputClass =
-  "w-full rounded-2xl border-[1.5px] border-outline bg-white px-4 py-2.5 text-sm outline-none transition focus:border-secondary focus:ring-[3px] focus:ring-secondary/15";
 
 function TemplatesPage() {
   const [subSkillId, setSubSkillId] = useState("all");
@@ -22,6 +23,12 @@ function TemplatesPage() {
   const update = useUpdateTemplate();
   const remove = useDeleteTemplate();
   const duplicate = useDuplicateTemplate();
+  const listRef = useRef(null);
+  const paged = useClientPage(templates, 10, subSkillId);
+  const goPage = (p) => {
+    paged.setPage(p);
+    listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   const composingTemplate = composing && (templates.find((t) => t.id === composing.id) ?? composing);
 
   // Nhân bản: mẫu mới cùng kỹ năng con + dạng, bản nháp v1 chép nội dung → mở ngay để soạn tiếp
@@ -67,17 +74,18 @@ function TemplatesPage() {
       </div>
 
       <div className="rounded-card bg-white p-4 shadow-low">
-        <select value={subSkillId} onChange={(e) => setSubSkillId(e.target.value)} className={`${inputClass} cursor-pointer rounded-full lg:w-96`} aria-label="Lọc theo kỹ năng con">
-          <option value="all">Mọi kỹ năng con</option>
-          {subSkills.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.nameVi}
-            </option>
-          ))}
-        </select>
+        <div className="lg:w-96">
+          <Select
+            label="Lọc theo kỹ năng con"
+            value={subSkillId}
+            onChange={setSubSkillId}
+            shape="pill"
+            options={[{ value: "all", label: "Mọi kỹ năng con" }, ...subSkills.map((s) => ({ value: s.id, label: s.nameVi }))]}
+          />
+        </div>
       </div>
 
-      <section className="card overflow-hidden">
+      <section ref={listRef} className="card scroll-mt-24 overflow-hidden">
         <div className="flex items-center gap-2 border-b border-outline px-5 py-3">
           <h2 className="text-lg">Mẫu câu hỏi</h2>
           <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-bold text-navy/70">{templates.length}</span>
@@ -104,7 +112,7 @@ function TemplatesPage() {
           </div>
         ) : (
           <ul className={`divide-y divide-outline transition-opacity ${isFetching ? "opacity-60" : ""}`}>
-            {templates.map((t) => (
+            {paged.pageItems.map((t) => (
               <li key={t.id} className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -147,6 +155,7 @@ function TemplatesPage() {
             ))}
           </ul>
         )}
+        <PaginationBar {...paged} unit="mẫu" onChange={goPage} />
       </section>
 
       {creating && (
@@ -156,29 +165,17 @@ function TemplatesPage() {
         <TemplateVersionForm key={composingTemplate.id} template={composingTemplate} subSkills={subSkills} onClose={() => setComposing(null)} />
       )}
 
-      <Modal
+      <ConfirmDialog
         open={!!deleting}
         onClose={closeDelete}
+        onConfirm={confirmDelete}
+        loading={remove.isPending}
         title={`Xóa mẫu "${deleting?.title ?? ""}"?`}
         description="Chỉ xóa hẳn được khi chưa có điểm dừng nào dùng mẫu. Nếu đã dùng, hãy tắt mẫu."
-        size="max-w-md"
-        footer={
-          <>
-            <button onClick={closeDelete} className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline">
-              Hủy
-            </button>
-            <button
-              onClick={confirmDelete}
-              disabled={remove.isPending}
-              className="inline-flex items-center gap-1.5 rounded-full bg-danger px-5 py-2.5 text-sm font-bold text-white transition hover:bg-danger-dark disabled:opacity-70"
-            >
-              {remove.isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} Xóa mẫu
-            </button>
-          </>
-        }
+        confirmLabel="Xóa mẫu"
       >
-        {deleteError && <p className="text-sm font-semibold text-red-600">{deleteError}</p>}
-      </Modal>
+        {deleteError && <p className="rounded-xl bg-danger-tint/60 px-3 py-2 text-sm font-semibold text-danger-dark">{deleteError}</p>}
+      </ConfirmDialog>
     </div>
   );
 }

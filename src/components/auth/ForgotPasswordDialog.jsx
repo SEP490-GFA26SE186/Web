@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { CheckCircle2, Eye, EyeOff, KeyRound, Loader2, Send } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Modal from "../common/Modal";
 import { EMAIL_REGEX, MIN_REGISTER_PASSWORD, requestPasswordReset, resetPassword } from "../../services/authService";
 
@@ -49,13 +49,14 @@ function ForgotPasswordDialog({ defaultIdentity = "", onClose }) {
   if (step === "done") {
     return (
       <Modal open onClose={onClose} title="Đặt lại mật khẩu" size="max-w-md">
-        <div role="status" className="flex flex-col items-center gap-2 py-4 text-center">
-          <CheckCircle2 size={44} className="text-secondary" />
+        <div role="status">
           <p className="font-display text-lg font-bold">Đã đặt lại mật khẩu!</p>
-          <p className="text-sm text-navy/70">Ba mẹ đăng nhập lại bằng mật khẩu mới nhé.</p>
-          <button onClick={onClose} className="btn-primary mt-3 py-2.5">
-            Quay lại đăng nhập
-          </button>
+          <p className="mt-1.5 text-[15px] text-navy/65">Ba mẹ đăng nhập lại bằng mật khẩu mới nhé.</p>
+          <div className="mt-6 flex justify-end">
+            <button onClick={onClose} className="btn-primary py-2.5">
+              Quay lại đăng nhập
+            </button>
+          </div>
         </div>
       </Modal>
     );
@@ -102,7 +103,7 @@ function ForgotPasswordDialog({ defaultIdentity = "", onClose }) {
           </label>
           {errorText}
           <button type="submit" disabled={reset.isPending} className="btn-primary mt-1 w-full py-3 disabled:opacity-60">
-            {reset.isPending ? <Loader2 size={18} className="animate-spin" /> : <KeyRound size={18} />} Đặt lại mật khẩu
+            {reset.isPending && <Loader2 size={18} className="animate-spin" />} Đặt lại mật khẩu
           </button>
           <button
             type="button"
@@ -138,7 +139,7 @@ function ForgotPasswordDialog({ defaultIdentity = "", onClose }) {
         </label>
         {errorText}
         <button type="submit" disabled={!email.trim() || request.isPending} className="btn-primary mt-1 w-full py-3 disabled:opacity-60">
-          {request.isPending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />} Gửi mã khôi phục
+          {request.isPending && <Loader2 size={18} className="animate-spin" />} Gửi mã khôi phục
         </button>
         <button
           type="button"

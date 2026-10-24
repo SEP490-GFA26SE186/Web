@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeftRight, Download, Gavel, Loader2, Wallet } from "lucide-react";
+import { AlertCircle, ArrowLeftRight, Banknote, Download, Gavel, HandCoins, Landmark, Loader2, Wallet } from "lucide-react";
 import FinanceChart from "../../components/admin/FinanceChart";
-import { PageHeader, StatCard, Tabs } from "../../components/admin/AdminUi";
 import { RANGES, money } from "../../components/admin/adminFormat";
+import { Badge, Button, Card, CardHeader, EmptyState, KeyValueList, ListRow, PageHeader, SegmentedControl, Skeleton, StatTile } from "../../components/ui";
 import { ROUTES } from "../../constants/routes";
 import { useAdminOverview, useFinanceSummary } from "../../hooks/useAdmin";
 import { toast } from "../../stores/toastStore";
@@ -28,69 +27,146 @@ const exportCsv = (d, label) => {
   toast.success("Đã xuất CSV (mở được bằng Excel)");
 };
 
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6" aria-busy="true">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-[132px] rounded-card" />
+        ))}
+      </div>
+      <div className="grid gap-6 xl:grid-cols-3">
+        <Skeleton className="h-[380px] rounded-card xl:col-span-2" />
+        <div className="space-y-6">
+          <Skeleton className="h-52 rounded-card" />
+          <Skeleton className="h-52 rounded-card" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Dashboard điều hành: doanh thu thật từ đơn đã thanh toán, việc đang chờ.
 function AdminDashboardPage() {
   const [range, setRange] = useState("30d");
-  const { data: d, isLoading, isFetching, error } = useFinanceSummary(range);
+  const { data: d, isLoading, isFetching, error, refetch } = useFinanceSummary(range);
   const { data: overview } = useAdminOverview();
   const badges = overview?.navBadges ?? {};
   const label = RANGES.find((r) => r.value === range).label;
 
   const queues = [
-    { to: ROUTES.ADMIN.WITHDRAWALS, icon: Wallet, label: "Yêu cầu rút tiền chờ duyệt", count: badges.withdrawals },
-    { to: ROUTES.ADMIN.REFUNDS, icon: ArrowLeftRight, label: "Yêu cầu hoàn tiền chờ xử lý", count: badges.refunds },
-    { to: ROUTES.ADMIN.APPEALS, icon: Gavel, label: "Kháng nghị cảnh cáo chờ xét", count: badges.appeals },
+    { to: ROUTES.ADMIN.WITHDRAWALS, icon: Wallet, label: "Rút tiền chờ duyệt", count: badges.withdrawals },
+    { to: ROUTES.ADMIN.REFUNDS, icon: ArrowLeftRight, label: "Hoàn tiền chờ xử lý", count: badges.refunds },
+    { to: ROUTES.ADMIN.APPEALS, icon: Gavel, label: "Kháng nghị chờ xét", count: badges.appeals },
   ];
+  const pendingTotal = queues.reduce((sum, q) => sum + (q.count ?? 0), 0);
 
   return (
     <div className="space-y-6 pb-6">
       <PageHeader title="Dashboard điều hành" description="Số liệu từ đơn đã thanh toán (trừ hoàn tiền). Ngày tính theo giờ Việt Nam.">
-        {isFetching && !isLoading && <Loader2 size={16} className="animate-spin text-primary" />}
-        <Tabs value={range} onChange={setRange} items={RANGES} label="Khoảng thời gian" />
-        <button type="button" onClick={() => d && exportCsv(d, label)} disabled={!d} className="btn-ghost px-4 py-2 text-sm">
-          <Download size={16} /> CSV
-        </button>
+        {isFetching && !isLoading && <Loader2 size={16} className="animate-spin text-primary" aria-label="Đang cập nhật" />}
+        <SegmentedControl value={range} onChange={setRange} items={RANGES} label="Khoảng thời gian" />
+        <Button variant="secondary" icon={Download} onClick={() => d && exportCsv(d, label)} disabled={!d}>
+          Xuất CSV
+        </Button>
       </PageHeader>
 
-      {error && <p className="card p-5 text-danger">{error.message}</p>}
-      {isLoading && <div className="h-96 animate-pulse rounded-stage bg-surface" />}
+      {error && (
+        <Card>
+          <EmptyState
+            icon={AlertCircle}
+            tone="danger"
+            title="Không tải được số liệu tài chính"
+            description={error.message}
+            action={
+              <Button variant="secondary" size="sm" onClick={() => refetch()}>
+                Thử lại
+              </Button>
+            }
+          />
+        </Card>
+      )}
+      {isLoading && <DashboardSkeleton />}
       {d && (
-        <>
+        <div className={`space-y-6 transition-opacity duration-300 ${isFetching && !isLoading ? "opacity-70" : ""}`}>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <StatCard label="Khách đã trả" value={money(d.revenue.grossRevenue)} hint={`${formatNumber(d.revenue.orders)} mục thanh toán • hoàn ${money(d.revenue.refunded)}`} />
-            <StatCard label="Phần nền tảng giữ" value={money(d.revenue.platformRevenue)} hint={`Gói ${money(d.revenue.planRevenue)} + hoa hồng ${money(d.revenue.commission)}`} tone="text-primary-dark" />
-            <StatCard label="Phải trả người bán" value={money(d.revenue.sellerPayable)} hint={`Truyện bán được ${money(d.revenue.listingGross)}`} />
+            <StatTile
+              index={0}
+              icon={Banknote}
+              tone="navy"
+              label="Khách đã trả"
+              value={money(d.revenue.grossRevenue)}
+              hint={`${formatNumber(d.revenue.orders)} mục thanh toán, hoàn ${money(d.revenue.refunded)}`}
+            />
+            <StatTile
+              index={1}
+              icon={Landmark}
+              tone="primary"
+              emphasis
+              label="Phần nền tảng giữ"
+              value={money(d.revenue.platformRevenue)}
+              hint={`Gói ${money(d.revenue.planRevenue)} + hoa hồng ${money(d.revenue.commission)}`}
+            />
+            <StatTile
+              index={2}
+              icon={HandCoins}
+              tone="secondary"
+              label="Phải trả người bán"
+              value={money(d.revenue.sellerPayable)}
+              hint={`Truyện bán được ${money(d.revenue.listingGross)}`}
+              className="sm:col-span-2 xl:col-span-1"
+            />
           </div>
 
           <div className="grid gap-6 xl:grid-cols-3">
-            <section className="card space-y-3 p-5 xl:col-span-2">
-              <h2 className="text-lg">Doanh thu theo ngày</h2>
+            <Card reveal index={3} className="xl:col-span-2 xl:self-start">
+              <CardHeader title="Doanh thu theo ngày" description={`${label}, cột chồng theo nguồn doanh thu`} className="mb-4" />
               <FinanceChart series={d.series} />
-            </section>
+            </Card>
+
             <div className="space-y-6">
-              <section className="card space-y-2 p-5">
-                <h2 className="text-lg">Việc đang chờ</h2>
-                {queues.map((q) => (
-                  <Link key={q.to} to={q.to} className="flex items-center gap-3 rounded-card px-2 py-2 hover:bg-surface">
-                    <q.icon size={18} className="text-primary" />
-                    <span className="flex-1 text-sm">{q.label}</span>
-                    <span className={`rounded-full px-2.5 py-0.5 text-sm font-bold ${q.count ? "bg-danger text-white" : "bg-surface text-navy/60"}`}>{q.count ?? "—"}</span>
-                  </Link>
-                ))}
-              </section>
-              <section className="card space-y-2 p-5 text-sm">
-                <h2 className="text-lg">Người dùng & tiền người bán</h2>
-                <p>Phụ huynh mới ({label.toLowerCase()}): <b>{formatNumber(d.newParents)}</b></p>
-                <p>Gói trả phí đang dùng: {d.activePaidSubscriptions.length ? d.activePaidSubscriptions.map((s) => `${s.plan} (${s.count})`).join(", ") : "chưa có"}</p>
-                <p>Doanh thu người bán đang giữ: <b>{money(d.sellerFunds.pendingVnd)}</b></p>
-                <p>Người bán rút được: <b>{money(d.sellerFunds.availableVnd)}</b></p>
-                <p>
-                  Đang rút: <b>{money(d.sellerFunds.lockedVnd)}</b> ({d.sellerFunds.withdrawalsInFlight.count} yêu cầu)
-                </p>
-              </section>
+              <Card reveal index={4}>
+                <CardHeader
+                  title="Việc đang chờ"
+                  action={pendingTotal > 0 ? <Badge tone="danger">{pendingTotal} việc</Badge> : <Badge tone="secondary">Đã xong</Badge>}
+                  className="mb-2"
+                />
+                <div>
+                  {queues.map((q) => (
+                    <ListRow
+                      key={q.to}
+                      to={q.to}
+                      icon={q.icon}
+                      iconTone={q.count ? "bg-primary-tint text-primary-dark" : "bg-navy/[0.05] text-navy/45"}
+                      title={q.label}
+                      trailing={<Badge tone={q.count ? "solidDanger" : "neutral"}>{q.count ?? 0}</Badge>}
+                    />
+                  ))}
+                </div>
+              </Card>
+
+              <Card reveal index={5}>
+                <CardHeader title="Người dùng & tiền người bán" className="mb-4" />
+                <KeyValueList
+                  items={[
+                    { label: `Phụ huynh mới (${label.toLowerCase()})`, value: formatNumber(d.newParents) },
+                    {
+                      label: "Gói trả phí đang dùng",
+                      value: d.activePaidSubscriptions.length ? d.activePaidSubscriptions.map((s) => `${s.plan}: ${s.count}`) : "Chưa có",
+                    },
+                    { label: "Doanh thu người bán đang giữ", value: money(d.sellerFunds.pendingVnd) },
+                    { label: "Người bán rút được", value: money(d.sellerFunds.availableVnd) },
+                    {
+                      label: "Đang rút",
+                      value: money(d.sellerFunds.lockedVnd),
+                      hint: `${d.sellerFunds.withdrawalsInFlight.count} yêu cầu`,
+                    },
+                  ]}
+                />
+              </Card>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

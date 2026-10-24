@@ -1,29 +1,32 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, BookMarked, BookOpen, Check, House, Lightbulb, Loader2, PenLine, Plus, Shuffle, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookMarked, House, Loader2, PenLine, Plus, Sparkles } from "lucide-react";
 import Modal from "../../../components/common/Modal";
 import Switch from "../../../components/common/Switch";
 import CaselTag from "../../../components/parent/library/CaselTag";
 import { fieldClass } from "../../../components/parent/studio/PageEditor";
 import SubSkillPicker from "../../../components/parent/studio/SubSkillPicker";
+import TopicPicker from "../../../components/parent/studio/TopicPicker";
 import { AI_LENGTHS } from "../../../constants/story";
 import { ROUTES } from "../../../constants/routes";
 import { refreshCredit, useAiPricing, useCreateCharacter, useCharacters, useCreateStory, useAnalyzeStory } from "../../../hooks/useStudio";
 import { useTopics } from "../../../hooks/useTopics";
+import { useSelectedChild } from "../../../hooks/useChildProfile";
 import { generateStory } from "../../../services/storyService";
 import useAuthStore from "../../../stores/authStore";
 import { toast } from "../../../stores/toastStore";
+import { Badge, Button, ChoiceCard, SegmentedControl } from "../../../components/ui";
 
 function Section({ step, title, hint, children }) {
   return (
-    <section className="card space-y-4 p-6">
-      <div>
-        <h2 className="flex items-center gap-2 text-lg">
-          <span className="grid h-7 w-7 place-items-center rounded-full bg-primary text-sm text-white">{step}</span>
-          {title}
-        </h2>
-        {hint && <p className="mt-1 text-sm text-navy/60">{hint}</p>}
+    <section className="card space-y-4 p-5 md:p-6">
+      <div className="flex items-start gap-3">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white">{step}</span>
+        <div>
+          <h2 className="text-lg leading-7">{title}</h2>
+          {hint && <p className="mt-0.5 text-sm text-navy/60">{hint}</p>}
+        </div>
       </div>
       {children}
     </section>
@@ -53,17 +56,12 @@ function NewCharacterModal({ open, onClose, onCreated }) {
       description="Ông bà, anh chị em, bạn bè… Tên thật không gửi cho AI, chỉ mô tả ngoại hình."
       footer={
         <>
-          <button type="button" onClick={onClose} className="rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline">
+          <Button variant="ghost" onClick={onClose}>
             Hủy
-          </button>
-          <button
-            type="submit"
-            form="character-form"
-            disabled={create.isPending || !form.name.trim() || !form.appearance.trim()}
-            className="btn-primary py-2.5 text-sm disabled:opacity-60"
-          >
-            {create.isPending && <Loader2 size={16} className="animate-spin" />} Thêm nhân vật
-          </button>
+          </Button>
+          <Button type="submit" form="character-form" loading={create.isPending} disabled={!form.name.trim() || !form.appearance.trim()}>
+            Thêm nhân vật
+          </Button>
         </>
       }
     >
@@ -135,6 +133,7 @@ function CreateStoryPage() {
   const queryClient = useQueryClient();
   const creditBalance = useAuthStore((s) => s.user?.wallet?.creditBalance);
   const topics = useTopics({});
+  const { child } = useSelectedChild();
   const characters = useCharacters();
   const createStory = useCreateStory();
   const analyze = useAnalyzeStory();
@@ -315,19 +314,6 @@ function CreateStoryPage() {
       title={entry === "topic" ? "Chọn chuyện mẫu" : "Chọn chuyện mẫu (không bắt buộc)"}
       hint={entry === "topic" ? "Chuyện mẫu do chuyên gia soạn, mỗi chuyện gắn một năng lực cảm xúc (CASEL)." : "Truyện tự viết không bắt buộc chọn chuyện mẫu."}
     >
-      {entry !== "topic" && (
-        <>
-          <button
-            type="button"
-            onClick={() => setTopicId(null)}
-            aria-pressed={!topicId}
-            className={`rounded-full px-4 py-2 text-sm font-bold ${!topicId ? "bg-secondary text-white" : "bg-surface hover:bg-secondary-tint"}`}
-          >
-            Không chọn chuyện mẫu
-          </button>
-          <p className="text-sm text-navy/60">Truyện tự viết không tính vào báo cáo EQ.</p>
-        </>
-      )}
       {topics.isLoading && <Loader2 className="animate-spin text-primary" />}
       {topics.error && <p className="text-sm text-danger">{topics.error.message}</p>}
       {suggestedTopicId && topics.data && (
@@ -337,26 +323,16 @@ function CreateStoryPage() {
             : "Chuyện mẫu gợi ý không còn mở, ba mẹ chọn chuyện khác nhé."}
         </p>
       )}
-      <div className="grid gap-3 sm:grid-cols-2">
-        {(topics.data ?? []).map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTopicId(t.id)}
-            aria-pressed={topicId === t.id}
-            aria-label={`Chuyện mẫu: ${t.title}`}
-            className={`flex flex-col items-start justify-start gap-2 rounded-2xl border-2 p-4 text-left transition ${
-              topicId === t.id ? "border-primary bg-primary-tint" : "border-outline hover:border-primary/50"
-            }`}
-          >
-            <CaselTag competency={t.skill?.caselCode} className="bg-secondary-tint" />
-            <p className="font-display font-bold">{t.title}</p>
-            <p className="text-xs text-navy/55">
-              {t.ageMin}–{t.ageMax} tuổi
-            </p>
-          </button>
-        ))}
-      </div>
+      {topics.data && (
+        <TopicPicker
+          topics={topics.data}
+          value={chosenTopicId}
+          onChange={setTopicId}
+          childAge={child?.age ?? null}
+          childName={child?.name}
+          allowNone={entry !== "topic"}
+        />
+      )}
     </Section>
   );
 
@@ -431,37 +407,27 @@ function CreateStoryPage() {
 
       <div className="text-sm text-navy/65">{costNote}</div>
 
-      <div className="flex flex-wrap gap-2">
-        <button type="button" onClick={() => createFamily(true)} disabled={busy || notEnough} className="btn-primary disabled:opacity-60">
-          {submitting ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />} Tạo truyện
-        </button>
-        <button
-          type="button"
-          onClick={() => setPicking(true)}
-          disabled={busy}
-          className="inline-flex items-center gap-1.5 rounded-full bg-secondary-tint px-5 py-2.5 text-sm font-bold text-secondary-dark hover:opacity-80 disabled:opacity-60"
-        >
-          <Shuffle size={16} /> Đổi kỹ năng
-        </button>
-        <button
-          type="button"
-          onClick={() => createFamily(false)}
-          disabled={busy || notEnough}
-          className="inline-flex items-center gap-1.5 rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline disabled:opacity-60"
-        >
-          <BookOpen size={16} /> Chỉ kể truyện, không chấm điểm
-        </button>
-        <button
-          type="button"
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="lg" icon={Sparkles} loading={submitting} onClick={() => createFamily(true)} disabled={busy || notEnough}>
+          Tạo truyện
+        </Button>
+        <Button size="lg" variant="secondary" onClick={() => setPicking(true)} disabled={busy}>
+          Đổi kỹ năng
+        </Button>
+        <Button size="lg" variant="secondary" onClick={() => createFamily(false)} disabled={busy || notEnough}>
+          Chỉ kể truyện, không chấm điểm
+        </Button>
+        <Button
+          size="lg"
+          variant="ghost"
           onClick={() => {
             setAnalysis(null);
             setError("");
           }}
           disabled={busy}
-          className="inline-flex items-center gap-1.5 rounded-full bg-surface px-5 py-2.5 text-sm font-semibold hover:bg-outline disabled:opacity-60"
         >
-          <PenLine size={16} /> Sửa lời kể
-        </button>
+          Sửa lời kể
+        </Button>
       </div>
       <p className="text-xs text-navy/55">
         “Chỉ kể truyện”: truyện vẫn bám chuyện ba mẹ kể nhưng không có câu hỏi chấm điểm, chỉ có câu suy ngẫm cuối truyện. Credit chỉ bị trừ khi ba mẹ tạo truyện.
@@ -477,42 +443,53 @@ function CreateStoryPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 pb-10">
-      <Link to={ROUTES.PARENT.STUDIO} className="inline-flex items-center gap-1 text-sm font-semibold text-navy/60 hover:text-primary">
-        <ArrowLeft size={16} /> Truyện của ba mẹ
+      <Link to={ROUTES.PARENT.STUDIO} className="group inline-flex items-center gap-1.5 rounded-full py-1 pr-2 text-sm font-semibold text-navy/60 transition hover:text-primary-dark">
+        <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" /> Truyện của ba mẹ
       </Link>
       <h1 className="text-3xl">Sáng tác truyện mới</h1>
 
       {!entry ? (
-        <section className="card space-y-4 p-6">
+        <section className="space-y-4">
           <h2 className="text-lg">Ba mẹ muốn bắt đầu thế nào?</h2>
           <div className="grid gap-3 sm:grid-cols-3">
-            {ENTRIES.map(({ value, icon: Icon, title: label, text, note }) => (
+            {ENTRIES.map(({ value, icon: Icon, title: label, text, note }, i) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => pickEntry(value)}
                 aria-label={label}
-                className="flex flex-col justify-start gap-2 rounded-2xl border-2 border-outline p-4 text-left transition hover:border-primary hover:bg-primary-tint/40"
+                style={{ "--i": i }}
+                className="group flex animate-rise cursor-pointer flex-col gap-2 rounded-card border-[1.5px] border-navy/12 bg-white p-5 text-left shadow-low transition duration-300 ease-(--ease-out-soft) stagger hover:-translate-y-1 hover:border-primary/60 hover:shadow-mid active:translate-y-0 active:scale-[0.99]"
               >
-                <span className="grid h-10 w-10 place-items-center rounded-2xl bg-primary-tint text-primary-dark">
-                  <Icon size={20} />
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary-tint text-primary-dark transition-colors duration-300 group-hover:bg-primary group-hover:text-white">
+                  <Icon size={21} />
                 </span>
-                <p className="font-display font-bold">{label}</p>
-                <p className="text-sm text-navy/60">{text}</p>
-                <p className="mt-auto text-xs font-semibold text-secondary-dark">{note}</p>
+                <p className="mt-1 font-display text-lg font-bold">{label}</p>
+                <p className="text-sm leading-relaxed text-navy/60">{text}</p>
+                <p className="text-xs font-semibold text-secondary-dark">{note}</p>
+                <span className="mt-auto inline-flex items-center gap-1.5 pt-3 text-sm font-bold text-primary-dark">
+                  Chọn cách này <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
+                </span>
               </button>
             ))}
           </div>
         </section>
       ) : (
         <>
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="tag-theme">
-              {EntryIcon && <EntryIcon size={12} />} {entryMeta?.title}
-            </span>
-            <button type="button" onClick={() => pickEntry(null)} disabled={busy} className="font-semibold text-primary hover:underline disabled:opacity-60">
-              Đổi cách tạo truyện
-            </button>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-navy/[0.08] bg-white px-4 py-3">
+            <div className="flex items-center gap-3 text-sm">
+              {EntryIcon && (
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary-tint text-primary-dark">
+                  <EntryIcon size={18} />
+                </span>
+              )}
+              <span className="text-navy/60">
+                Cách tạo: <span className="font-bold text-navy">{entryMeta?.title}</span>
+              </span>
+            </div>
+            <Button variant="secondary" size="sm" onClick={() => pickEntry(null)} disabled={busy}>
+              Đổi cách tạo
+            </Button>
           </div>
 
           {entry === "family" && analysis ? (
@@ -523,67 +500,67 @@ function CreateStoryPage() {
 
               <Section step={2} title="Chọn nhân vật" hint="Chọn các nhân vật xuất hiện trong truyện và một nhân vật chính (thường là bé).">
                 {characters.isLoading && <Loader2 className="animate-spin text-primary" />}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {(characters.data ?? []).map((c) => {
-                    const on = selected.includes(c.id);
-                    return (
-                      <div
-                        key={c.id}
-                        className={`flex items-start gap-3 rounded-2xl border-2 p-3 transition ${on ? "border-secondary bg-secondary-tint/60" : "border-outline"}`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => toggleCharacter(c.id)}
-                          aria-pressed={on}
-                          aria-label={`Chọn ${c.name}`}
-                          className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg border-2 ${on ? "border-secondary bg-secondary text-white" : "border-outline"}`}
-                        >
-                          {on && <Check size={14} />}
-                        </button>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-bold">
-                            {c.name} {c.childId && <span className="text-xs font-semibold text-secondary-dark">(con)</span>}
-                          </p>
-                          <p className="line-clamp-2 text-xs text-navy/55">{c.appearance}</p>
-                        </div>
-                        {on && (
-                          <button
-                            type="button"
-                            onClick={() => setMainId(c.id)}
-                            className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
-                              mainId === c.id ? "bg-primary text-white" : "bg-surface text-navy/60 hover:bg-primary-tint"
-                            }`}
-                          >
-                            <Star size={12} /> {mainId === c.id ? "Nhân vật chính" : "Đặt làm chính"}
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
+                <div role="group" aria-label="Nhân vật trong truyện" className="grid gap-3 sm:grid-cols-2">
+                  {(characters.data ?? []).map((c) => (
+                    <ChoiceCard
+                      key={c.id}
+                      multiple
+                      compact
+                      selected={selected.includes(c.id)}
+                      onClick={() => toggleCharacter(c.id)}
+                      aria-label={`Chọn ${c.name}`}
+                      title={
+                        <span className="flex flex-wrap items-center gap-1.5">
+                          {c.name}
+                          {c.childId && <span className="text-xs font-semibold text-secondary-dark">(con)</span>}
+                          {mainId === c.id && (
+                            <Badge tone="solidPrimary" size="sm">
+                              Nhân vật chính
+                            </Badge>
+                          )}
+                        </span>
+                      }
+                      description={<span className="line-clamp-2 text-xs">{c.appearance}</span>}
+                    />
+                  ))}
                   <button
                     type="button"
                     onClick={() => setShowNewCharacter(true)}
-                    className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-outline p-3 font-semibold text-navy/60 hover:border-primary hover:text-primary"
+                    className="group flex min-h-20 cursor-pointer items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-navy/20 bg-white/60 p-4 text-sm font-bold text-navy/60 transition duration-200 hover:border-primary hover:bg-primary-tint/40 hover:text-primary-dark active:scale-[0.99]"
                   >
-                    <Plus size={18} /> Thêm nhân vật
+                    <span className="grid h-7 w-7 place-items-center rounded-full bg-navy/[0.06] transition group-hover:bg-primary group-hover:text-white">
+                      <Plus size={16} />
+                    </span>
+                    Thêm nhân vật
                   </button>
                 </div>
+                {selected.length > 1 && (
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-surface/70 px-4 py-3">
+                    <span className="text-sm font-semibold">Nhân vật chính</span>
+                    <SegmentedControl
+                      value={mainId}
+                      onChange={setMainId}
+                      label="Nhân vật chính"
+                      size="sm"
+                      items={selected.map((id) => ({ value: id, label: (characters.data ?? []).find((c) => c.id === id)?.name ?? "…" }))}
+                    />
+                  </div>
+                )}
               </Section>
 
               {isAi && (
                 <Section step={3} title="Độ dài truyện" hint="AI viết cả truyện một lần, ba mẹ xem và sửa lại.">
-                  <div className="flex flex-wrap gap-2">
+                  <div role="radiogroup" aria-label="Độ dài truyện" className="grid grid-cols-3 gap-3">
                     {AI_LENGTHS.map((l) => (
-                      <button
+                      <ChoiceCard
                         key={l.value}
-                        type="button"
+                        compact
+                        selected={length === l.value}
                         onClick={() => setLength(l.value)}
-                        aria-pressed={length === l.value}
-                        className={`rounded-full px-4 py-2 text-sm font-bold ${length === l.value ? "bg-secondary text-white" : "bg-surface hover:bg-secondary-tint"}`}
-                      >
-                        {l.label} · {priceOf(l.value)?.pages ?? l.pages} trang
-                        {priceOf(l.value)?.credits != null && <span className="ml-1 opacity-80">· {priceOf(l.value).credits} credit</span>}
-                      </button>
+                        title={l.label}
+                        description={`${priceOf(l.value)?.pages ?? l.pages} trang`}
+                        footer={priceOf(l.value)?.credits != null && <span className="text-primary-dark">{priceOf(l.value).credits} credit</span>}
+                      />
                     ))}
                   </div>
                 </Section>
@@ -632,14 +609,13 @@ function CreateStoryPage() {
                   )}
                 </div>
                 {entry === "family" ? (
-                  <button type="button" onClick={() => runAnalyze()} disabled={busy} className="btn-primary disabled:opacity-60">
-                    {analyze.isPending ? <Loader2 size={18} className="animate-spin" /> : <Lightbulb size={18} />} Xem bé sẽ tập gì
-                  </button>
+                  <Button size="lg" iconRight={ArrowRight} loading={analyze.isPending} onClick={() => runAnalyze()} disabled={busy}>
+                    Xem bé sẽ tập gì
+                  </Button>
                 ) : (
-                  <button type="button" onClick={submit} disabled={busy || notEnough} className="btn-primary disabled:opacity-60">
-                    {submitting ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+                  <Button size="lg" icon={Sparkles} loading={submitting} onClick={submit} disabled={busy || notEnough}>
                     {isAi ? "Tạo & cho AI viết" : "Tạo truyện"}
-                  </button>
+                  </Button>
                 )}
                 {analyze.isPending && (
                   <p className="flex w-full items-center gap-2 rounded-2xl bg-secondary-tint px-4 py-2.5 text-sm font-semibold text-secondary-dark">

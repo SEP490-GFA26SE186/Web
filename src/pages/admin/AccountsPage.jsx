@@ -8,6 +8,7 @@ import useDebounce from "../../hooks/useDebounce";
 import { useAccounts, useCreateModerator, useSetAccountActive } from "../../hooks/useAdmin";
 import useAuthStore from "../../stores/authStore";
 import { toast } from "../../stores/toastStore";
+import { Select } from "../../components/ui";
 
 const ROLES = [
   { value: "all", label: "Tất cả" },
@@ -105,9 +106,7 @@ function AccountsPage() {
           <input type="search" value={search} onChange={(e) => change(setSearch)(e.target.value)} placeholder="Tìm email, tên đăng nhập, họ tên..." className={`${fieldClass} rounded-full pl-11`} />
         </label>
         <Tabs value={role} onChange={change(setRole)} items={ROLES} label="Vai trò" />
-        <select value={status} onChange={(e) => change(setStatus)(e.target.value)} className={`${fieldClass} cursor-pointer rounded-full lg:w-48`}>
-          {STATUS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-        </select>
+        <Select value={status} onChange={change(setStatus)} options={STATUS} label="Trạng thái" shape="pill" className="lg:w-48" />
       </div>
 
       <section className={`card overflow-x-auto transition-opacity ${isFetching && !isLoading ? "opacity-60" : ""}`}>

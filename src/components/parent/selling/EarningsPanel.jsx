@@ -5,6 +5,7 @@ import api, { getErrorMessage } from "../../../services/api";
 import { BANKS } from "../../../constants/banks";
 import { toast } from "../../../stores/toastStore";
 import { formatNumber } from "../../../utils/format";
+import { Select } from "../../ui";
 
 const call = async (request) => {
   try {
@@ -37,14 +38,19 @@ function BankForm({ current, onDone }) {
   };
   return (
     <form onSubmit={submit} className="grid gap-3 sm:grid-cols-3">
-      <select required value={form.bankBin} onChange={(e) => setForm({ ...form, bankBin: e.target.value })} className={field} aria-label="Ngân hàng">
-        <option value="">— Ngân hàng —</option>
-        {BANKS.map((b) => (
-          <option key={b.bin} value={b.bin}>
-            {b.name}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
+        <Select
+          required
+          name="bankBin"
+          value={form.bankBin}
+          onChange={(v) => setForm({ ...form, bankBin: v })}
+          label="Ngân hàng"
+          placeholder="Chọn ngân hàng"
+          shape="pill"
+          size="lg"
+          options={BANKS.map((b) => ({ value: b.bin, label: b.name }))}
+        />
+      </div>
       <input required inputMode="numeric" value={form.accountNumber} onChange={(e) => setForm({ ...form, accountNumber: e.target.value.trim() })} placeholder="Số tài khoản" aria-label="Số tài khoản" className={field} />
       <input required value={form.accountHolder} onChange={(e) => setForm({ ...form, accountHolder: e.target.value })} placeholder="Tên chủ tài khoản" aria-label="Tên chủ tài khoản" className={field} />
       <button type="submit" disabled={save.isPending} className="btn-primary sm:col-span-3 sm:justify-self-start">

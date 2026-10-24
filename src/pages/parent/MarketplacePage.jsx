@@ -99,7 +99,7 @@ function MarketplacePage() {
         </div>
 
         {/* Lọc theo năng lực CASEL */}
-        <div className="relative -mx-1 mt-4 flex items-center gap-2 overflow-x-auto px-1 pb-1" role="tablist">
+        <div className="relative -mx-1 mt-4 flex items-center gap-2 scrollbar-none overflow-x-auto px-1 pb-1" role="tablist">
           {[{ value: "all", label: "Tất cả năng lực" }, ...CASEL_OPTIONS].map(({ value, label }) => {
             const Icon = CASEL[value]?.icon;
             const active = filters.competency === value;

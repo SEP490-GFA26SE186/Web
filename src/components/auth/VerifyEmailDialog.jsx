@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Loader2, MailCheck, RotateCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Modal from "../common/Modal";
 import { sendVerificationEmail, verifyEmail } from "../../services/authService";
 import useAuthStore from "../../stores/authStore";
@@ -45,13 +45,14 @@ function VerifyEmailDialog({ onClose }) {
   if (verify.isSuccess) {
     return (
       <Modal open onClose={onClose} title="Xác thực email" size="max-w-md">
-        <div role="status" className="flex flex-col items-center gap-2 py-4 text-center">
-          <CheckCircle2 size={44} className="text-secondary" />
+        <div role="status">
           <p className="font-display text-lg font-bold">Email đã được xác thực!</p>
-          <p className="text-sm text-navy/70">Cảm ơn ba mẹ, tài khoản đã sẵn sàng.</p>
-          <button onClick={onClose} className="btn-primary mt-3 py-2.5">
-            Đóng
-          </button>
+          <p className="mt-1.5 text-[15px] text-navy/65">Cảm ơn ba mẹ, tài khoản đã sẵn sàng.</p>
+          <div className="mt-6 flex justify-end">
+            <button onClick={onClose} className="btn-primary py-2.5">
+              Đóng
+            </button>
+          </div>
         </div>
       </Modal>
     );
@@ -81,7 +82,7 @@ function VerifyEmailDialog({ onClose }) {
         </label>
         {error && <p className="text-sm font-semibold text-danger">{error}</p>}
         <button type="submit" disabled={verify.isPending} className="btn-primary mt-1 w-full py-3 disabled:opacity-60">
-          {verify.isPending ? <Loader2 size={18} className="animate-spin" /> : <MailCheck size={18} />} Xác thực
+          {verify.isPending && <Loader2 size={18} className="animate-spin" />} Xác thực
         </button>
         <button
           type="button"
@@ -89,7 +90,7 @@ function VerifyEmailDialog({ onClose }) {
           disabled={resend.isPending}
           className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-primary-dark hover:underline disabled:opacity-60"
         >
-          {resend.isPending ? <Loader2 size={14} className="animate-spin" /> : <RotateCw size={14} />} Không thấy email? Gửi lại mã
+          {resend.isPending && <Loader2 size={14} className="animate-spin" />} Không thấy email? Gửi lại mã
         </button>
       </form>
     </Modal>
