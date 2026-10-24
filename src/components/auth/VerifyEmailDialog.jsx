@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import Modal from "../common/Modal";
@@ -9,6 +9,7 @@ import { toast } from "../../stores/toastStore";
 /**
  * Xác thực email: BE gửi mã (hạn 24 giờ) qua email lúc đăng ký / khi bấm gửi lại.
  * Người dùng dán mã vào đây → POST /auth/verify-email. Gửi lại mã thì mã cũ hết hiệu lực.
+ * BE chặn gửi lại trong 60 giây từ mã gần nhất (429 kèm retryAfterSeconds) → nút gửi lại đếm ngược.
  */
 function VerifyEmailDialog({ onClose }) {
   const queryClient = useQueryClient();
@@ -16,6 +17,13 @@ function VerifyEmailDialog({ onClose }) {
   const setUser = useAuthStore((s) => s.setUser);
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return undefined;
+    const timer = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const verify = useMutation({
     mutationFn: verifyEmail,
@@ -27,13 +35,18 @@ function VerifyEmailDialog({ onClose }) {
   });
 
   const resend = useMutation({
-    mutationFn: () => sendVerificationEmail(user.email),
-    onSuccess: () => {
+    mutationFn: sendVerificationEmail,
+    onSuccess: (data) => {
       setToken("");
       setError("");
+      setCooldown(data?.retryAfterSeconds ?? 60);
       toast.success(`Đã gửi mã mới tới ${user.email}`);
     },
-    onError: (err) => setError(err.message),
+    onError: (err) => {
+      // 429: chưa đủ 60 giây → chỉ đếm ngược trên nút, không hiện như lỗi
+      if (err.retryAfterSeconds) return setCooldown(err.retryAfterSeconds);
+      setError(err.message);
+    },
   });
 
   const submit = (e) => {
@@ -87,10 +100,11 @@ function VerifyEmailDialog({ onClose }) {
         <button
           type="button"
           onClick={() => resend.mutate()}
-          disabled={resend.isPending}
-          className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-primary-dark hover:underline disabled:opacity-60"
+          disabled={resend.isPending || cooldown > 0}
+          className="inline-flex items-center justify-center gap-1.5 text-sm font-semibold text-primary-dark hover:underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
         >
-          {resend.isPending && <Loader2 size={14} className="animate-spin" />} Không thấy email? Gửi lại mã
+          {resend.isPending && <Loader2 size={14} className="animate-spin" />}
+          {cooldown > 0 ? `Gửi lại mã sau ${cooldown} giây` : "Không thấy email? Gửi lại mã"}
         </button>
       </form>
     </Modal>

@@ -21,10 +21,10 @@ const VI_MESSAGES = {
   "Username can only contain letters, numbers, and underscores": "Tên đăng nhập chỉ gồm chữ không dấu, số và dấu _",
   "Password must be at least 8 characters": "Mật khẩu có ít nhất 8 ký tự",
   "New password must be at least 8 characters": "Mật khẩu mới có ít nhất 8 ký tự",
-  // Xác thực email
-  "Email is already verified": "Email này đã được xác thực rồi",
-  "Invalid or already used verification token": "Mã xác thực không đúng hoặc đã được dùng",
-  "Email verification token has expired. Please request a new one.": "Mã xác thực đã hết hạn, ba mẹ bấm gửi lại mã nhé",
+  // Xác thực email (BE đã trả tiếng Việt, chỉ chỉnh giọng cho ba mẹ)
+  "Email đã được xác thực": "Email này đã được xác thực rồi",
+  "Mã xác thực không hợp lệ hoặc đã được sử dụng": "Mã xác thực không đúng hoặc đã được dùng",
+  "Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã.": "Mã xác thực đã hết hạn, ba mẹ bấm gửi lại mã nhé",
   // PIN thoát Kid Mode
   "Current PIN is incorrect": "Mã PIN hiện tại chưa đúng",
   "Account password is incorrect": "Mật khẩu tài khoản chưa đúng",
@@ -106,10 +106,24 @@ export const changePassword = ({ currentPassword, newPassword }) =>
 
 // ---- Xác thực email (BE gửi mã token qua email, người dùng dán vào form) ----
 
-/** POST /auth/send-verification-email { email } — gửi lại mã, mã cũ hết hiệu lực */
-export const sendVerificationEmail = (email) => postAuth("post", "/auth/send-verification-email", { email });
+/**
+ * POST /auth/send-verification-email (cần đăng nhập, không body) — gửi mã tới email của chính tài khoản,
+ * mã cũ hết hiệu lực → data: { retryAfterSeconds }.
+ * Gửi lại trong vòng 60 giây từ mã gần nhất → 429; lỗi ném ra kèm `retryAfterSeconds` để đếm ngược.
+ */
+export const sendVerificationEmail = async () => {
+  try {
+    const { data } = await api.post("/auth/send-verification-email");
+    return data.data;
+  } catch (error) {
+    const authError = toAuthError(error);
+    const retryAfterSeconds = error.response?.data?.errors?.[0]?.retryAfterSeconds;
+    if (error.response?.status === 429 && retryAfterSeconds) authError.retryAfterSeconds = retryAfterSeconds;
+    throw authError;
+  }
+};
 
-/** POST /auth/verify-email { token } → data: { id, username, email, emailVerifiedAt } */
+/** POST /auth/verify-email { token } (cần đăng nhập; mã phải thuộc tài khoản đang đăng nhập) → data: { id, username, email, emailVerifiedAt } */
 export const verifyEmail = async (token) => (await postAuth("post", "/auth/verify-email", { token })).data;
 
 // ---- Mã PIN thoát Kid Mode (users.kid_exit_pin_hash) — 4–6 chữ số ----
