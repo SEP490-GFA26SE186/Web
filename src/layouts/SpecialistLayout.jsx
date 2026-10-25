@@ -48,7 +48,7 @@ function SpecialistLayout() {
   return (
     <AppShell
       homeTo={R.DASHBOARD}
-      brand={{ subtitle: "Chuyên gia sư phạm", badge: { label: "CG", className: "bg-primary-dark text-white" } }}
+      brand={{ subtitle: "Chuyên gia sư phạm" }}
       sections={sections}
       extraTitles={{ "/specialist/workspace": "Lượt duyệt" }}
       user={data && { name: data.specialist.name, subtitle: "Chuyên gia sư phạm" }}
