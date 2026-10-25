@@ -64,15 +64,16 @@ const PIN_MAX = 6;
 // Cổng Ba Mẹ: nhập mã PIN để thoát chế độ trẻ em (POST /auth/kid-mode/exit — BE kiểm PIN, trả token phụ huynh)
 export function ParentGateDialog({ onClose, onUnlock }) {
   const [pin, setPin] = useState("");
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
   const verify = useExitKidMode();
 
   const submit = (value = pin) => {
     if (verify.isPending || value.length < PIN_MIN) return;
     verify.mutate(value, {
       onSuccess: (result) => onUnlock(result.tokens),
-      onError: () => {
-        setError(true);
+      // BE trả lời chi tiết: "Còn N lần thử" (401) hoặc "thử lại sau 15 phút" (429)
+      onError: (err) => {
+        setError(err?.response?.data?.message || "Mã PIN chưa đúng, thử lại nhé");
         setPin("");
       },
     });
@@ -81,7 +82,7 @@ export function ParentGateDialog({ onClose, onUnlock }) {
   const press = (d) => {
     if (verify.isPending || pin.length >= PIN_MAX) return;
     const next = pin + d;
-    setError(false);
+    setError("");
     setPin(next);
     if (next.length === PIN_MAX) submit(next); // đủ 6 số thì tự gửi
   };
@@ -127,7 +128,7 @@ export function ParentGateDialog({ onClose, onUnlock }) {
         ))}
       </div>
       <p className="-mt-2 mb-3 h-5 text-sm font-semibold text-danger">
-        {error ? "Mã PIN chưa đúng, thử lại nhé" : ""}
+        {error || ""}
       </p>
 
       <div className="grid w-full max-w-64 grid-cols-3 gap-3">
