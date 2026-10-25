@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Bot, Check, FileText, Loader2, ShieldCheck, ShoppingCart, Store, Type, Volume2 } from "lucide-react";
+import { ArrowLeft, Bot, Check, ChevronRight, FileText, Loader2, ShieldCheck, ShoppingCart, Star, Store, Type, Volume2 } from "lucide-react";
 import CaselTag from "../../../components/parent/library/CaselTag";
 import { coverOf } from "../../../components/parent/library/storyMeta";
 import StoryCover from "../../../components/parent/StoryCover";
@@ -81,13 +81,32 @@ function ListingDetailPage() {
           <span className="flex items-center gap-1">
             <FileText size={14} /> {l.totalPages} trang • {l.checkpointCount} điểm dừng
           </span>
-          <Link to={ROUTES.PARENT.marketplaceSeller(l.seller.id)} className="flex items-center gap-1 font-semibold text-primary-dark hover:underline">
-            <Store size={14} /> {l.seller.displayName}
-          </Link>
           <span className="flex items-center gap-1">
             <ShoppingCart size={14} /> {formatNumber(l.purchaseCount)} lượt mua
           </span>
         </p>
+        <Link
+          to={ROUTES.PARENT.marketplaceSeller(l.seller.id)}
+          className="group flex items-center gap-3 rounded-2xl border border-outline bg-surface/60 p-4 transition hover:border-primary/50 hover:bg-primary-tint/40"
+        >
+          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-primary-tint text-primary-dark">
+            <Store size={22} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-semibold text-navy/55">Người bán</span>
+            <span className="block truncate font-display text-lg font-bold">{l.seller.displayName}</span>
+            <span className="flex flex-wrap items-center gap-x-3 text-xs text-navy/60">
+              <span className="flex items-center gap-1">
+                <Star size={12} className="fill-amber-400 text-amber-400" />
+                {l.seller.ratingAvg == null ? "Chưa có đánh giá" : `${Number(l.seller.ratingAvg).toFixed(1)} / 5`}
+              </span>
+              <span>{formatNumber(l.seller.totalSales ?? 0)} lượt bán</span>
+            </span>
+          </span>
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-4 py-2 text-sm font-bold text-primary-dark shadow-low transition group-hover:bg-primary group-hover:text-white">
+            Xem hồ sơ <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+          </span>
+        </Link>
         {l.preview && (
           <blockquote className="rounded-card bg-surface p-4 text-navy/80">
             <p className="mb-1 text-xs font-bold tracking-wide text-navy/50 uppercase">Trang 1</p>
