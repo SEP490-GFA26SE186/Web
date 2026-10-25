@@ -127,7 +127,7 @@ function BillingPage() {
                       ? "Đang dùng"
                       : plan.priceVnd === 0
                         ? "Chuyển về gói này"
-                        : "Thanh toán qua payOS"}
+                        : "Thanh toán"}
                 </button>
                 {renewable && sub?.periodEnd && (
                   <p className="-mt-2 text-center text-xs text-navy/55">
@@ -140,7 +140,7 @@ function BillingPage() {
         </div>
       )}
       <p className="text-xs text-navy/50">
-        Thanh toán bằng chuyển khoản / quét mã VietQR qua payOS. Gói trả trước, gia hạn thủ công: gia hạn gói đang dùng thì cộng thêm thời hạn vào ngày hết hạn hiện tại. Đổi sang gói khác giữa kỳ: kỳ mới bắt đầu ngay, credit còn lại được giữ.
+        Thanh toán bằng chuyển khoản ngân hàng hoặc quét mã VietQR. Gói trả trước, gia hạn thủ công: gia hạn gói đang dùng thì cộng thêm thời hạn vào ngày hết hạn hiện tại. Đổi sang gói khác giữa kỳ: kỳ mới bắt đầu ngay, credit còn lại được giữ.
       </p>
       <PaymentHistory />
       <CreditHistory />

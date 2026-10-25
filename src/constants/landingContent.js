@@ -211,7 +211,7 @@ export const FAQS = [
   },
   {
     q: "Credit là gì, có mất phí không?",
-    a: "Credit dùng cho các lần AI viết truyện. Gói Miễn phí cấp credit mỗi tháng; gói Gia đình cấp nhiều hơn và mở tính năng bán truyện. Truyện tự viết không tốn credit. Thanh toán qua payOS (chuyển khoản / VietQR).",
+    a: "Credit dùng cho các lần AI viết truyện. Gói Miễn phí cấp credit mỗi tháng; gói Gia đình cấp nhiều hơn và mở tính năng bán truyện. Truyện tự viết không tốn credit. Thanh toán bằng chuyển khoản ngân hàng hoặc quét mã VietQR.",
   },
   {
     q: "Điểm EQ của con được tính thế nào?",

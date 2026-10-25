@@ -18,7 +18,7 @@ const SECTIONS = [
         "Nhân vật gia đình: tên gọi và mô tả bằng chữ (ngoại hình, tính cách). Chúng tôi không yêu cầu và không lưu ảnh, giọng nói hay dữ liệu khuôn mặt của bé.",
         "Nội dung truyện: tình huống ba mẹ kể, các trang truyện, câu hỏi và các chỉnh sửa.",
         "Hoạt động đọc của bé: lượt đọc, trang đang đọc, câu trả lời ở các điểm dừng — dùng để tính Báo cáo EQ.",
-        "Giao dịch: gói đã mua, đơn hàng, trạng thái thanh toán do payOS gửi về (kể cả thông tin tài khoản người chuyển khoản, chỉ dùng khi cần hoàn tiền).",
+        "Giao dịch: gói đã mua, đơn hàng, trạng thái thanh toán do đối tác thanh toán gửi về (kể cả thông tin tài khoản người chuyển khoản, chỉ dùng khi cần hoàn tiền).",
         "Người bán: biệt danh công khai, giới thiệu, tài khoản ngân hàng nhận tiền — số tài khoản được mã hoá (AES-256-GCM) khi lưu và chỉ hiện dạng che.",
         "Báo cáo vi phạm, đánh giá truyện, và nhật ký thao tác của kiểm duyệt viên / quản trị viên.",
       ],
@@ -57,7 +57,7 @@ const SECTIONS = [
       [
         "Anthropic (Claude): viết chữ truyện — chỉ nhận nội dung đã thay tên bằng mã.",
         "Cloudinary: lưu file giọng đọc ở chế độ có xác thực; đường dẫn được ký, không công khai.",
-        "payOS: thanh toán qua chuyển khoản / VietQR và chi hộ doanh thu cho người bán.",
+        "Đối tác thanh toán (payOS): xử lý thanh toán bằng chuyển khoản / VietQR.",
         "Brevo: gửi email xác thực tài khoản và mã khôi phục mật khẩu.",
       ],
       "Các dịch vụ này chỉ nhận phần dữ liệu cần cho việc của họ.",

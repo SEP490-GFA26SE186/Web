@@ -19,7 +19,7 @@ const SECTIONS = [
         "Credit dùng cho các lần AI viết truyện; số credit cho mỗi lần do hệ thống công bố trước khi bắt đầu. Lần viết lỗi được hoàn credit.",
         "Mỗi gói cấp credit theo từng tháng. Credit chưa dùng hết hạn khi sang tháng mới, không quy đổi thành tiền và không mua lẻ.",
         "Gói trả trước, gia hạn thủ công; đổi gói giữa kỳ thì kỳ mới bắt đầu ngay và credit còn lại được giữ một lần.",
-        "Thanh toán qua payOS (chuyển khoản / VietQR). Truyện tự viết không tốn credit.",
+        "Thanh toán bằng chuyển khoản ngân hàng hoặc quét mã VietQR. Truyện tự viết không tốn credit.",
       ],
     ],
   },

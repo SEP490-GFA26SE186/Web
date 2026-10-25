@@ -129,7 +129,7 @@ function ListingDetailPage() {
         ) : (
           <button type="button" onClick={buy} disabled={checkout.isPending} className="btn-primary w-full px-8 py-3.5 text-lg sm:w-auto">
             {checkout.isPending ? <Loader2 size={20} className="animate-spin" /> : <ShoppingCart size={20} />}
-            {free ? "Nhận miễn phí" : `Mua ${formatListingPrice(l.priceVnd)} qua payOS`}
+            {free ? "Nhận miễn phí" : `Mua ${formatListingPrice(l.priceVnd)}`}
           </button>
         )}
         {!l.isMine && (
