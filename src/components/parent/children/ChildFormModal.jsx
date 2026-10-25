@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import DateInput from "../../common/DateInput";
 import Modal from "../../common/Modal";
+import AppearanceHints from "../AppearanceHints";
 import { isoToViDate, parseViDate, toIsoDate } from "../../../utils/date";
 
 const today = toIsoDate(new Date());
@@ -119,6 +120,7 @@ function ChildFormModal({ open, onClose, child, onSubmit, isPending, error: serv
             className={`${inputClass} resize-none`}
           />
           <span className="mt-1 block text-xs text-navy/50">AI dùng mô tả này để vẽ bé thành nhân vật chính trong truyện</span>
+          <AppearanceHints value={form.appearance} />
         </label>
         {message && <p className="text-sm font-semibold text-red-600">{message}</p>}
       </form>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { BookOpen, Loader2, Pencil, Plus, Trash2, UsersRound } from "lucide-react";
+import AppearanceHints from "../../components/parent/AppearanceHints";
 import CharacterPortrait from "../../components/parent/CharacterPortrait";
 import Modal from "../../components/common/Modal";
 import { ROUTES } from "../../constants/routes";
@@ -66,6 +67,7 @@ function CharacterModal({ character, onClose }) {
         <label className="block">
           <span className="mb-1 block text-sm font-semibold">Mô tả</span>
           <textarea required minLength={3} maxLength={1000} rows={4} value={appearance} onChange={(e) => setAppearance(e.target.value)} placeholder="Mô tả ngoại hình và tính cách của nhân vật…" className={`${fieldClass} resize-none`} />
+          <AppearanceHints value={appearance} />
         </label>
         {renamed && character.storiesCount > 0 && (
           <p className="rounded-2xl bg-primary-tint px-4 py-2.5 text-sm text-primary-dark">

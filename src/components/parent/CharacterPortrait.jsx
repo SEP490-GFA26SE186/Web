@@ -41,8 +41,11 @@ function CharacterPortrait({ character, size = "full" }) {
         {drawing ? (
           <p className="text-xs font-semibold text-primary-dark">AI đang vẽ chân dung… (khoảng 30 giây)</p>
         ) : failed ? (
-          <p className="flex items-center gap-1 text-xs font-semibold text-danger">
-            <AlertTriangle size={13} /> Vẽ chưa được, credit đã hoàn lại
+          <p className="flex items-start gap-1 text-xs font-semibold text-danger">
+            <AlertTriangle size={13} className="mt-px shrink-0" />
+            {character.portraitFailure === "blocked"
+              ? "Bộ lọc ảnh không nhận mô tả này (credit đã hoàn). Ba mẹ sửa mô tả — bỏ tên nhân vật hoạt hình, vũ khí, trang phục hở — rồi vẽ lại."
+              : "Vẽ chưa được do lỗi tạm thời, credit đã hoàn lại. Ba mẹ bấm vẽ lại nhé."}
           </p>
         ) : (
           <p className="text-xs text-navy/55">{character.portraitImageUrl ? "Tranh trong truyện vẽ theo chân dung này" : "Chưa có chân dung AI"}</p>
