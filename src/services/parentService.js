@@ -15,6 +15,9 @@ const call = async (request) => {
  */
 export const getSubscription = async () => (await call(api.get("/subscriptions/me"))).data;
 
+/** GET /subscriptions/me/credit-history?page&limit → { entries[{ id, createdAt, entryType, amount, balanceAfter, context }], pagination } */
+export const getCreditHistory = async (params) => (await call(api.get("/subscriptions/me/credit-history", { params }))).data;
+
 /**
  * Truyện riêng đã tạo xong nhưng ba mẹ chưa xem lại (stories.status = ready, reviewed_at = null).
  * Bắt buộc xem lại trước khi đưa lên giá sách của bé.
