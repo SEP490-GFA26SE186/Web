@@ -55,7 +55,7 @@ function PlanModal({ plan, onClose }) {
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="mb-1 block text-sm font-semibold">Mã gói</span>
-              <input required value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} placeholder="FAMILY_QUARTER" className={fieldClass} />
+              <input required value={form.code} onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))} placeholder="Nhập mã gói (chữ in hoa, không dấu)" className={fieldClass} />
             </label>
             <label className="block">
               <span className="mb-1 block text-sm font-semibold">Thời hạn</span>

@@ -107,7 +107,7 @@ function TopicFormModal({ topic, skills, onClose }) {
       <form id="topic-form" onSubmit={submit} noValidate className="space-y-4">
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Tên chuyện mẫu</span>
-          <input value={form.title} onChange={set("title")} maxLength={200} placeholder="VD: Con hay nổi giận" className={inputClass} />
+          <input value={form.title} onChange={set("title")} maxLength={200} placeholder="Nhập tên chuyện mẫu" className={inputClass} />
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Năng lực CASEL</span>

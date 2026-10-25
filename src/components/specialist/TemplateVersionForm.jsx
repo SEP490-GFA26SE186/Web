@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight, Eye, Loader2, Plus, X } from "lucide-react";
 import Modal from "../common/Modal";
 import { CASEL_URL } from "../../constants/casel";
-import { ANSWER_FORMATS, EMOTIONS, OPTION_ROLES } from "../../constants/story";
+import { ANSWER_FORMATS, EMOTIONS, OPTION_ROLES, SUGGESTED_FORMATS } from "../../constants/story";
 import { useCreateTemplate, usePublishTemplate, useSaveTemplateDraft, useUpdateTemplate } from "../../hooks/usePedagogy";
 import { toast } from "../../stores/toastStore";
 import { Select } from "../ui";
@@ -204,9 +204,19 @@ function TemplateVersionForm({ template, subSkills = [], defaultSubSkillId = "",
   const source = template?.draft ?? template?.latestPublished;
   const [meta, setMeta] = useState({
     subSkillId: template?.subSkill?.id ?? template?.subSkillId ?? defaultSubSkillId,
-    answerFormat: template?.answerFormat ?? "emotion_pick",
+    // Mẫu mới mở từ một kỹ năng con: chọn sẵn dạng gợi ý của năng lực đó
+    answerFormat:
+      template?.answerFormat ??
+      SUGGESTED_FORMATS[subSkills.find((s) => s.id === defaultSubSkillId)?.skill?.caselCode]?.formats[0] ??
+      "emotion_pick",
     title: template?.title ?? "",
   });
+  // Chọn năng lực CASEL trước rồi mới tới kỹ năng con của năng lực đó (40 mục quá dài để chọn một lượt)
+  const skills = [...new Map(subSkills.filter((s) => s.skill).map((s) => [s.skill.id, s.skill])).values()];
+  const [skillId, setSkillId] = useState(() => subSkills.find((s) => s.id === meta.subSkillId)?.skill?.id ?? "");
+  const [formatTouched, setFormatTouched] = useState(false);
+  const selectedSkill = skills.find((k) => k.id === skillId);
+  const suggestion = SUGGESTED_FORMATS[selectedSkill?.caselCode];
   const [createdId, setCreatedId] = useState(null); // tạo xong nhưng lưu nháp lỗi → lần sau không tạo lại
   const [form, setForm] = useState(() => toForm(source));
   const [advanced, setAdvanced] = useState(false);
@@ -320,13 +330,35 @@ function TemplateVersionForm({ template, subSkills = [], defaultSubSkillId = "",
     >
       <div className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Năng lực CASEL">
+            {isNew ? (
+              <Select
+                value={skillId}
+                onChange={(v) => {
+                  setSkillId(v);
+                  // Chưa tự chọn dạng trả lời → đặt sẵn dạng gợi ý đầu tiên của năng lực này
+                  const next = SUGGESTED_FORMATS[skills.find((k) => k.id === v)?.caselCode]?.formats;
+                  if (!formatTouched && next && !next.includes(meta.answerFormat)) setMetaField("answerFormat")({ target: { value: next[0] } });
+                  // Kỹ năng con đang chọn không thuộc năng lực mới → bỏ chọn
+                  if (subSkills.find((s) => s.id === meta.subSkillId)?.skill?.id !== v) setMetaField("subSkillId")({ target: { value: "" } });
+                }}
+                placeholder="Chọn năng lực"
+                options={skills.map((k) => ({ value: k.id, label: k.nameVi }))}
+              />
+            ) : (
+              <p className="rounded-2xl bg-surface px-4 py-2.5 text-sm">{subSkill?.skill?.nameVi ?? "—"}</p>
+            )}
+          </Field>
           <Field label="Kỹ năng con">
             {isNew ? (
               <Select
                 value={meta.subSkillId}
                 onChange={(v) => setMetaField("subSkillId")({ target: { value: v } })}
-                placeholder="Chọn kỹ năng con"
-                options={subSkills.map((s) => ({ value: s.id, label: s.nameVi }))}
+                placeholder={skillId ? "Chọn kỹ năng con" : "Chọn năng lực trước"}
+                disabled={!skillId}
+                options={subSkills
+                  .filter((s) => s.skill?.id === skillId)
+                  .map((s) => ({ value: s.id, label: s.isActive === false ? `${s.nameVi} (đã tắt)` : s.nameVi }))}
               />
             ) : (
               <p className="rounded-2xl bg-surface px-4 py-2.5 text-sm">{subSkill?.nameVi ?? "—"}</p>
@@ -336,14 +368,31 @@ function TemplateVersionForm({ template, subSkills = [], defaultSubSkillId = "",
             {isNew ? (
               <Select
                 value={meta.answerFormat}
-                onChange={(v) => setMetaField("answerFormat")({ target: { value: v } })}
-                options={Object.entries(ANSWER_FORMATS).map(([value, label]) => ({ value, label }))}
+                onChange={(v) => {
+                  setFormatTouched(true);
+                  setMetaField("answerFormat")({ target: { value: v } });
+                }}
+                options={Object.entries(ANSWER_FORMATS).map(([value, label]) => ({
+                  value,
+                  label: suggestion?.formats.includes(value) ? `${label} · gợi ý` : label,
+                }))}
               />
             ) : (
               <p className="rounded-2xl bg-surface px-4 py-2.5 text-sm">{ANSWER_FORMATS[format]}</p>
             )}
           </Field>
         </div>
+        {isNew && suggestion && (
+          <p
+            className={`-mt-1 rounded-2xl px-4 py-2.5 text-xs ${
+              suggestion.formats.includes(meta.answerFormat) ? "bg-secondary-tint text-secondary-dark" : "bg-amber-100 text-amber-900"
+            }`}
+          >
+            <b>Gợi ý cho {selectedSkill.nameVi}:</b> {suggestion.formats.map((f) => ANSWER_FORMATS[f]).join(" hoặc ")} — vì {suggestion.why}.
+            {!suggestion.formats.includes(meta.answerFormat) &&
+              ` “${ANSWER_FORMATS[meta.answerFormat]}” ít hợp với năng lực này; vẫn dùng được nếu câu hỏi đo đúng kỹ năng con đã chọn.`}
+          </p>
+        )}
         {subSkill?.descriptionVi && <p className="-mt-2 text-xs text-navy/55">{subSkill.descriptionVi}</p>}
 
         <Field label="Tên mẫu" hint={meta.title.trim() ? undefined : "Để trống: tự lấy từ ô ①"}>
@@ -351,7 +400,7 @@ function TemplateVersionForm({ template, subSkills = [], defaultSubSkillId = "",
             value={meta.title}
             onChange={setMetaField("title")}
             maxLength={200}
-            placeholder={autoTitle(form.questionFrame) || "VD: Gọi tên cảm xúc của bạn khi bị giành đồ"}
+            placeholder={autoTitle(form.questionFrame) || "Nhập tên mẫu câu hỏi"}
             className={inputClass}
           />
         </Field>
@@ -362,7 +411,7 @@ function TemplateVersionForm({ template, subSkills = [], defaultSubSkillId = "",
             onChange={set("questionFrame")}
             rows={2}
             className={`${inputClass} resize-none`}
-            placeholder="VD: Hỏi bé nhân vật chính đang cảm thấy thế nào ngay sau khoảnh khắc khó."
+            placeholder="Mô tả câu hỏi cần hỏi bé…"
           />
           {format === "emotion_pick" && (
             <label className="flex items-center gap-2 text-sm font-semibold">

@@ -124,7 +124,7 @@ function FlagModal({ item, onClose }) {
             rows={4}
             maxLength={REASON_MAX}
             autoFocus
-            placeholder="VD: Đáp án cảm xúc không khớp với trang trước; phương án Xây dựng chưa rõ ràng..."
+            placeholder="Mô tả vấn đề của điểm dừng này…"
             className={`${inputClass} resize-none`}
           />
           <span className="mt-1 block text-right text-xs text-navy/50">

@@ -91,7 +91,7 @@ function SubSkillFormModal({ subSkill, onClose }) {
         </div>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Tên kỹ năng con (tiếng Việt)</span>
-          <input value={form.nameVi} onChange={set("nameVi")} maxLength={200} placeholder="VD: Gọi tên cảm xúc của mình" className={inputClass} />
+          <input value={form.nameVi} onChange={set("nameVi")} maxLength={200} placeholder="Nhập tên kỹ năng con" className={inputClass} />
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Mô tả cho phụ huynh</span>

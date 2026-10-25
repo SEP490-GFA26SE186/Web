@@ -12,6 +12,7 @@ import { ConfirmDialog } from "../../components/ui";
 
 
 function TemplatesPage() {
+  const [skillId, setSkillId] = useState("all");
   const [subSkillId, setSubSkillId] = useState("all");
   const [creating, setCreating] = useState(false);
   const [composing, setComposing] = useState(null); // mẫu đang soạn (ưu tiên bản mới nhất trong danh sách)
@@ -19,12 +20,16 @@ function TemplatesPage() {
   const [deleteError, setDeleteError] = useState("");
 
   const { data: subSkills = [] } = useSubSkills({});
-  const { data: templates = [], isLoading, isFetching, isError, refetch } = useTemplates({ subSkillId });
+  const skills = [...new Map(subSkills.filter((s) => s.skill).map((s) => [s.skill.id, s.skill])).values()];
+  // Chọn kỹ năng con thì lọc theo kỹ năng con (đã nằm trong năng lực); không thì lọc theo năng lực
+  const { data: templates = [], isLoading, isFetching, isError, refetch } = useTemplates(
+    subSkillId !== "all" ? { subSkillId } : { skillId },
+  );
   const update = useUpdateTemplate();
   const remove = useDeleteTemplate();
   const duplicate = useDuplicateTemplate();
   const listRef = useRef(null);
-  const paged = useClientPage(templates, 10, subSkillId);
+  const paged = useClientPage(templates, 10, `${skillId}:${subSkillId}`);
   const goPage = (p) => {
     paged.setPage(p);
     listRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -74,14 +79,31 @@ function TemplatesPage() {
       </div>
 
       <div className="rounded-card bg-white p-4 shadow-low">
-        <div className="lg:w-96">
-          <Select
-            label="Lọc theo kỹ năng con"
-            value={subSkillId}
-            onChange={setSubSkillId}
-            shape="pill"
-            options={[{ value: "all", label: "Mọi kỹ năng con" }, ...subSkills.map((s) => ({ value: s.id, label: s.nameVi }))]}
-          />
+        <div className="flex flex-col gap-3 lg:flex-row">
+          <div className="lg:w-72">
+            <Select
+              label="Lọc theo năng lực CASEL"
+              value={skillId}
+              onChange={(v) => {
+                setSkillId(v);
+                setSubSkillId("all"); // kỹ năng con cũ có thể không thuộc năng lực mới
+              }}
+              shape="pill"
+              options={[{ value: "all", label: "Mọi năng lực" }, ...skills.map((k) => ({ value: k.id, label: k.nameVi }))]}
+            />
+          </div>
+          <div className="lg:w-96">
+            <Select
+              label="Lọc theo kỹ năng con"
+              value={subSkillId}
+              onChange={setSubSkillId}
+              shape="pill"
+              options={[
+                { value: "all", label: skillId === "all" ? "Mọi kỹ năng con" : "Mọi kỹ năng con của năng lực này" },
+                ...subSkills.filter((s) => skillId === "all" || s.skill?.id === skillId).map((s) => ({ value: s.id, label: s.nameVi })),
+              ]}
+            />
+          </div>
         </div>
       </div>
 

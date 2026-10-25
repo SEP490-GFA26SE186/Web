@@ -59,7 +59,7 @@ function AddKeywordsForm() {
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={3}
-        placeholder={"Mỗi dòng một từ hoặc cụm từ, VD:\nđánh nhau"}
+        placeholder="Mỗi dòng một từ hoặc cụm từ"
         className={`${inputClass} resize-y`}
       />
       <p className="text-xs text-navy/50">

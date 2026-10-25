@@ -76,7 +76,7 @@ function StrikeModal({ seller, sellers, source = "report", sourceId, defaultReas
             onChange={(e) => setReason(e.target.value)}
             rows={4}
             maxLength={2000}
-            placeholder="VD: Trang 3 mô tả cảnh đánh nhau chi tiết, gây sợ cho trẻ 5 tuổi."
+            placeholder="Mô tả vi phạm: trang nào, nội dung gì…"
             className="w-full resize-none rounded-2xl border-[1.5px] border-outline px-4 py-2.5 text-sm"
           />
         </label>

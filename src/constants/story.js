@@ -33,6 +33,17 @@ export const ANSWER_FORMATS = {
   role_choice: "Chọn cách xử lý (3 vai)",
 };
 
+// Dạng trả lời gợi ý theo năng lực CASEL (chỉ gợi ý — Specialist vẫn chọn được dạng khác).
+// Câu có chấm phải đo đúng kỹ năng con: nhận diện cảm xúc / hiểu nguyên nhân hợp với hai năng lực "nhận thức",
+// còn các năng lực về hành động đo bằng việc bé chọn cách xử lý.
+export const SUGGESTED_FORMATS = {
+  self_awareness: { formats: ["emotion_pick", "single_correct"], why: "bé nhận ra và gọi tên cảm xúc, suy nghĩ của chính mình" },
+  social_awareness: { formats: ["emotion_pick", "single_correct"], why: "bé nhận ra cảm xúc và hiểu vì sao người khác cảm thấy như vậy" },
+  self_management: { formats: ["role_choice"], why: "bé chọn cách tự điều chỉnh hành động khi gặp tình huống" },
+  relationship_skills: { formats: ["role_choice", "single_correct"], why: "bé chọn cách cư xử với người khác (nhờ giúp, chia sẻ, làm lành…)" },
+  responsible_decision_making: { formats: ["role_choice", "single_correct"], why: "bé cân nhắc và chọn việc nên làm" },
+};
+
 // Vai của phương án giải quyết tình huống (option_role) — do khung quy định, không đổi
 export const OPTION_ROLES = {
   constructive: { label: "Xây dựng", tone: "bg-secondary-tint text-secondary-dark" },
