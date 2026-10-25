@@ -20,6 +20,7 @@ export const ROUTES = {
     marketplaceSeller: (sellerId) => `/parent/marketplace/sellers/${sellerId}`,
     MARKETPLACE_RESULT: "/parent/marketplace/result",
     sellingNew: (storyId) => `/parent/selling/new?storyId=${storyId}`,
+    sellingVersion: (storyId, listingId) => `/parent/selling/new?storyId=${storyId}&versionOf=${listingId}`,
     HELP: "/parent/help",
     SETTINGS: "/parent/settings",
   },

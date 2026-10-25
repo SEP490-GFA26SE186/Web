@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
 import { ROUTES } from "../../../constants/routes";
 import { useStory } from "../../../hooks/useStudio";
 import Switch from "../../../components/common/Switch";
-import { createListing } from "../../../services/sellingService";
+import { createListing, createListingVersion, getMyListings } from "../../../services/sellingService";
 import { toast } from "../../../stores/toastStore";
 
 const field = "w-full rounded-card border-2 border-outline px-4 py-2.5 focus:border-primary focus:outline-none";
@@ -23,19 +23,38 @@ const priceError = (v) => {
 
 // Đăng bán một truyện riêng đã hoàn tất: tên mới, mô tả, giá, tên chung cho từng nhân vật.
 // BE tạo bản sao đã gỡ cá nhân hoá (không chuyện thật, không giọng đọc) và gửi chuyên gia duyệt.
+// `?versionOf=<listingId>`: phiên bản mới của truyện đang bán — điền sẵn từ bản đang bán; bản đang bán vẫn bán
+// cho tới khi phiên bản mới được duyệt.
 function NewListingPage() {
   const [params] = useSearchParams();
   const storyId = params.get("storyId");
+  const versionOf = params.get("versionOf");
+  const { data: story, isLoading } = useStory(storyId);
+  const { data: myListings, isLoading: loadingListings } = useQuery({ queryKey: ["selling", "listings"], queryFn: getMyListings, enabled: !!versionOf });
+  const live = versionOf ? myListings?.find((l) => l.id === versionOf) : null;
+  const { data: liveStory, isLoading: loadingLive } = useStory(live?.publishedStoryId);
+
+  if (isLoading || (versionOf && (loadingListings || (live && loadingLive)))) return <Loader2 size={32} className="animate-spin text-primary" />;
+  if (!story) return <p className="card p-6">Không tìm thấy truyện.</p>;
+  if (versionOf && !live) return <p className="card p-6">Không tìm thấy truyện đang bán.</p>;
+
+  // Bản đang bán → giá trị điền sẵn (tên chung lấy theo token từ bản đăng bán)
+  const initial = live
+    ? {
+        form: { title: live.title, description: live.description ?? "", free: live.priceVnd === 0, price: live.priceVnd ? String(live.priceVnd) : "" },
+        aliases: Object.fromEntries((liveStory?.characters ?? []).map((c) => [c.token, c.name])),
+      }
+    : { form: { title: "", description: "", free: false, price: "" }, aliases: {} };
+  return <ListingForm story={story} storyId={storyId} live={live} initial={initial} />;
+}
+
+function ListingForm({ story, storyId, live, initial }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: story, isLoading } = useStory(storyId);
-  const [form, setForm] = useState({ title: "", description: "", free: false, price: "" });
-  const [aliases, setAliases] = useState({});
+  const [form, setForm] = useState(initial.form);
+  const [aliases, setAliases] = useState(initial.aliases);
   const [errors, setErrors] = useState({});
-  const create = useMutation({ mutationFn: createListing });
-
-  if (isLoading) return <Loader2 size={32} className="animate-spin text-primary" />;
-  if (!story) return <p className="card p-6">Không tìm thấy truyện.</p>;
+  const create = useMutation({ mutationFn: (body) => (live ? createListingVersion(live.id, body) : createListing(body)) });
 
   const submit = (e) => {
     e.preventDefault();
@@ -56,7 +75,7 @@ function NewListingPage() {
       },
       {
         onSuccess: () => {
-          toast.success("Đã gửi truyện cho chuyên gia duyệt");
+          toast.success(live ? "Đã gửi phiên bản mới cho chuyên gia duyệt — bản đang bán vẫn bán bình thường" : "Đã gửi truyện cho chuyên gia duyệt");
           queryClient.invalidateQueries({ queryKey: ["selling"] });
           navigate(ROUTES.PARENT.SELLING);
         },
@@ -76,7 +95,13 @@ function NewListingPage() {
         <ArrowLeft size={16} /> Về truyện
       </Link>
       <div>
-        <h1 className="text-3xl">Đăng bán truyện</h1>
+        <h1 className="text-3xl">{live ? "Cập nhật phiên bản" : "Đăng bán truyện"}</h1>
+        {live && (
+          <p className="mt-2 rounded-2xl bg-secondary-tint px-4 py-2.5 text-sm text-secondary-dark">
+            Phiên bản mới của “{live.title}”. Bản đang bán vẫn bán cho tới khi chuyên gia duyệt bản mới; duyệt xong, người đã mua tự
+            nhận bản mới, đánh giá và lượt mua được giữ nguyên.
+          </p>
+        )}
         <p className="mt-1 flex items-start gap-2 text-sm text-navy/65">
           <ShieldCheck size={18} className="shrink-0 text-secondary" /> Bản đăng bán dùng tên chung thay tên thật, không kèm chuyện thật ở nhà và không kèm giọng đọc của gia đình.
         </p>

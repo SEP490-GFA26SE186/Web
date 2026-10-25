@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, Ban, Clock, ExternalLink, Loader2, Pencil, Store } from "lucide-react";
+import { BadgeCheck, Ban, Clock, ExternalLink, Loader2, Pencil, RefreshCw, Store } from "lucide-react";
 import { coverOf } from "../../../components/parent/library/storyMeta";
 import StoryCover from "../../../components/parent/StoryCover";
 import EarningsPanel from "../../../components/parent/selling/EarningsPanel";
@@ -175,11 +175,21 @@ function SellingPage() {
       {isSeller && (
         <section className="card space-y-3 p-6">
           <h2 className="text-lg">Truyện đã đăng bán</h2>
-          <p className="text-sm text-navy/60">Mở một truyện đã hoàn tất trong “Sáng tác truyện” rồi bấm “Đăng bán”.</p>
+          <p className="text-sm text-navy/60">
+            Mở một truyện đã hoàn tất trong “Sáng tác truyện” rồi bấm “Đăng bán”. Muốn sửa truyện đang bán: sửa truyện gốc, bấm hoàn tất, rồi bấm
+            “Cập nhật phiên bản”.
+          </p>
           {listings.length === 0 && <p className="text-navy/60">Chưa có truyện nào.</p>}
           <ul className="divide-y divide-outline">
             {listings.map((l) => {
-              const s = LISTING_STATUS[l.status] ?? { label: l.status, tone: "bg-surface" };
+              // Chuỗi phiên bản: bản kế tiếp trỏ về bản này qua previousListingId
+              const successor = listings.find((x) => x.previousListingId === l.id && x.status !== "rejected");
+              const predecessor = l.previousListingId ? listings.find((x) => x.id === l.previousListingId) : null;
+              const versionPending = successor && ["submitted", "in_review", "changes_requested"].includes(successor.status);
+              const superseded = l.status === "archived" && successor?.status === "published";
+              const s = superseded
+                ? { label: "Đã thay bằng phiên bản mới", tone: "bg-surface text-navy/60" }
+                : LISTING_STATUS[l.status] ?? { label: l.status, tone: "bg-surface" };
               return (
                 <li key={l.id} className="flex items-start gap-3 py-3">
                   <StoryCover cover={coverOf(l)} title={l.title} size="sm" className="h-16 w-16 shrink-0 rounded-xl" />
@@ -189,9 +199,16 @@ function SellingPage() {
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${s.tone}`}>{s.label}</span>
                       <span className="text-sm text-navy/60">{formatListingPrice(l.priceVnd)}</span>
                     </div>
+                    {predecessor && <p className="text-xs font-semibold text-secondary-dark">Phiên bản mới của “{predecessor.title}”</p>}
                     <NarrationStatus listing={l} />
                     {l.lastDecision?.comment && <p className="text-sm text-navy/70">Chuyên gia: {l.lastDecision.comment}</p>}
+                    {versionPending && <p className="text-xs text-navy/60">Đang có phiên bản mới chờ duyệt — bản này vẫn bán bình thường.</p>}
                   </div>
+                  {l.status === "published" && !versionPending && l.sourceStoryId && (
+                    <Link to={ROUTES.PARENT.sellingVersion(l.sourceStoryId, l.id)} className="btn-ghost shrink-0 px-3 py-1.5 text-sm">
+                      <RefreshCw size={15} /> Cập nhật phiên bản
+                    </Link>
+                  )}
                 </li>
               );
             })}

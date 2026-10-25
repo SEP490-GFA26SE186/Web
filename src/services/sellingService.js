@@ -25,6 +25,9 @@ export const applySeller = (payload) => call(api.post("/sellers/apply", payload)
 /** PUT /sellers/me { displayName?, bio?, expertise? } — sửa hồ sơ khi đang chờ duyệt / đã duyệt */
 export const updateMySeller = (payload) => call(api.put("/sellers/me", payload));
 
+/** POST /listings/:listingId/versions { storyId?, title, description?, priceVnd, aliases } — phiên bản mới của truyện đang bán */
+export const createListingVersion = (listingId, body) => call(api.post(`/listings/${listingId}/versions`, body));
+
 export const getMyListings = async () => (await call(api.get("/listings/mine"))).listings;
 
 /** { storyId, title, description?, priceVnd (0 hoặc 5.000–500.000, bội số 1.000), aliases: [{ token, aliasName }] } → { listing } */

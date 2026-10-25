@@ -134,6 +134,9 @@ function Workspace({ reviewId }) {
             <CaselTag competency={story.topic?.competency} className="bg-secondary-tint" />
             <span className="tag-theme">{formatListingPrice(listing.priceVnd)}</span>
             {listing.hasAiContent && <span className="tag-eq">Có AI hỗ trợ</span>}
+            {listing.previousListingId && (
+              <span className="rounded-full bg-primary-tint px-2.5 py-0.5 text-xs font-bold text-primary-dark">Phiên bản mới — duyệt xong sẽ thay bản đang bán</span>
+            )}
           </div>
           <h1 className="text-2xl">{listing.title}</h1>
           <p className="text-sm text-navy/60">
