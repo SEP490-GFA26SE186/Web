@@ -24,6 +24,18 @@ const DECISIONS = {
 };
 const ROLE_LABELS = { constructive: "Xây dựng", avoidant: "Né tránh", impulsive: "Bốc đồng" };
 
+// Nguồn gốc nội dung (origin): `ai` = AI viết, người bán chưa sửa chữ nào → Specialist soát kỹ hơn.
+const ORIGIN_TAGS = {
+  ai: { label: "AI viết, chưa chỉnh sửa", tone: "bg-amber-100 text-amber-900" },
+  ai_edited: { label: "AI viết, đã chỉnh sửa", tone: "bg-secondary-tint text-secondary-dark" },
+  human: { label: "Người viết", tone: "bg-surface text-navy/60" },
+};
+
+function OriginTag({ origin }) {
+  const tag = ORIGIN_TAGS[origin];
+  return tag ? <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${tag.tone}`}>{tag.label}</span> : null;
+}
+
 /** Chữ dạng token → tên chung người bán đặt (bản đăng bán không có tên thật). */
 const withNames = (text, characters) =>
   (text ?? "").replace(/\{NV\d+\}/g, (t) => characters.find((c) => c.token === t)?.name ?? t);
@@ -32,7 +44,9 @@ function CheckpointBlock({ cp, characters }) {
   const n = (s) => withNames(s, characters);
   return (
     <div className="ml-4 space-y-2 rounded-card border-2 border-dashed border-outline bg-surface p-4 text-sm sm:ml-8">
-      <p className="font-bold text-secondary-dark">Điểm dừng: {CHECKPOINT_TYPES[cp.type]?.label ?? cp.type}</p>
+      <p className="flex flex-wrap items-center gap-2 font-bold text-secondary-dark">
+        Điểm dừng: {CHECKPOINT_TYPES[cp.type]?.label ?? cp.type} <OriginTag origin={cp.origin} />
+      </p>
       <p>
         <b>Câu hỏi:</b> {n(cp.question)}
       </p>
@@ -85,6 +99,10 @@ function Workspace({ reviewId }) {
   const checklistPassed = REVIEW_CHECKLIST.filter((i) => checks[i.code]).length;
   const canApprove = pagesViewed === pagesTotal && checklistPassed === REVIEW_CHECKLIST.length;
   const cpAfter = new Map(story.checkpoints.map((c) => [c.afterPageId, c]));
+  const aiUnedited = {
+    pages: story.pages.filter((p) => p.origin === "ai").length,
+    checkpoints: story.checkpoints.filter((c) => c.origin === "ai").length,
+  };
   const decided = !!review.decidedAt;
   const canAct = review.claimedByMe && !decided;
   const isFollowup = review.reviewType !== "submission";
@@ -136,6 +154,13 @@ function Workspace({ reviewId }) {
         )}
       </header>
 
+      {aiUnedited.pages + aiUnedited.checkpoints > 0 && (
+        <p role="status" className="rounded-2xl border border-amber-300 bg-amber-100 px-4 py-3 text-sm text-amber-900">
+          <b>Nội dung AI chưa chỉnh sửa:</b> {aiUnedited.pages}/{pagesTotal} trang, {aiUnedited.checkpoints}/{story.checkpoints.length} điểm dừng
+          do AI viết và người bán chưa sửa chữ nào — hãy đọc kỹ hơn những phần này.
+        </p>
+      )}
+
       <p className="text-sm font-semibold text-navy/70" aria-live="polite">
         Đã xem {pagesViewed}/{pagesTotal} trang • Checklist đạt {checklistPassed}/{REVIEW_CHECKLIST.length}
       </p>
@@ -147,7 +172,9 @@ function Workspace({ reviewId }) {
           <Fragment key={page.id}>
             <article className={`card space-y-3 p-5 ${seen ? "border-secondary/40" : ""}`}>
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-lg">Trang {page.pageOrder}</h2>
+                <h2 className="flex flex-wrap items-center gap-2 text-lg">
+                  Trang {page.pageOrder} <OriginTag origin={page.origin} />
+                </h2>
                 {seen ? (
                   <span className="inline-flex items-center gap-1 text-sm font-bold text-secondary-dark">
                     <CheckCircle2 size={16} /> Đã xem
