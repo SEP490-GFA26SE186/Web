@@ -121,23 +121,23 @@ function RegisterPage() {
             )}
 
             <Field id="fullName" label="Họ và tên" icon={UserRound} error={errors.fullName}>
-              <input id="fullName" autoComplete="name" autoFocus value={form.fullName} onChange={set("fullName")} placeholder="Nguyễn Lan Hương" maxLength={150} {...aria("fullName")} className={inputClass(errors.fullName)} />
+              <input id="fullName" autoComplete="name" autoFocus value={form.fullName} onChange={set("fullName")} placeholder="Nhập họ và tên" maxLength={150} {...aria("fullName")} className={inputClass(errors.fullName)} />
             </Field>
 
             <Field id="username" label="Tên đăng nhập *" icon={AtSign} error={errors.username} hint="Chữ không dấu, số và dấu _">
-              <input id="username" autoComplete="username" value={form.username} onChange={set("username")} placeholder="me_lanhuong" maxLength={50} {...aria("username")} className={inputClass(errors.username)} />
+              <input id="username" autoComplete="username" value={form.username} onChange={set("username")} placeholder="Nhập tên đăng nhập" maxLength={50} {...aria("username")} className={inputClass(errors.username)} />
             </Field>
 
             <Field id="email" label="Email *" icon={Mail} error={errors.email}>
-              <input id="email" type="email" autoComplete="email" value={form.email} onChange={set("email")} placeholder="ba_me@email.com" {...aria("email")} className={inputClass(errors.email)} />
+              <input id="email" type="email" autoComplete="email" value={form.email} onChange={set("email")} placeholder="Nhập email" {...aria("email")} className={inputClass(errors.email)} />
             </Field>
 
             <Field id="phone" label="Số điện thoại" icon={Phone} error={errors.phone}>
-              <input id="phone" type="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} placeholder="0901234567" maxLength={20} {...aria("phone")} className={inputClass(errors.phone)} />
+              <input id="phone" type="tel" autoComplete="tel" value={form.phone} onChange={set("phone")} placeholder="Nhập số điện thoại" maxLength={20} {...aria("phone")} className={inputClass(errors.phone)} />
             </Field>
 
             <Field id="password" label="Mật khẩu *" icon={Lock} error={errors.password} hint={`Ít nhất ${MIN_REGISTER_PASSWORD} ký tự`}>
-              <input id="password" type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.password} onChange={set("password")} placeholder="••••••••" {...aria("password")} className={`${inputClass(errors.password)} pr-11`} />
+              <input id="password" type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.password} onChange={set("password")} placeholder="Nhập mật khẩu" {...aria("password")} className={`${inputClass(errors.password)} pr-11`} />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
@@ -150,7 +150,7 @@ function RegisterPage() {
             </Field>
 
             <Field id="confirmPassword" label="Nhập lại mật khẩu *" icon={Lock} error={errors.confirmPassword}>
-              <input id="confirmPassword" type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.confirmPassword} onChange={set("confirmPassword")} placeholder="••••••••" {...aria("confirmPassword")} className={inputClass(errors.confirmPassword)} />
+              <input id="confirmPassword" type={showPassword ? "text" : "password"} autoComplete="new-password" value={form.confirmPassword} onChange={set("confirmPassword")} placeholder="Nhập lại mật khẩu" {...aria("confirmPassword")} className={inputClass(errors.confirmPassword)} />
             </Field>
 
             <button

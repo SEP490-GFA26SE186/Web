@@ -23,6 +23,7 @@ import {
   useStoryEditor,
   useStoryImages,
 } from "../../../hooks/useStudio";
+import useAuthStore from "../../../stores/authStore";
 import { toast } from "../../../stores/toastStore";
 import { Button, ConfirmDialog, Select } from "../../../components/ui";
 
@@ -147,6 +148,7 @@ function StoryEditorPage() {
   const pricing = useAiPricing();
   const images = useStoryImages(storyId);
   const editor = useStoryEditor(storyId);
+  const creditBalance = useAuthStore((s) => s.user?.wallet?.creditBalance);
   const [gaps, setGaps] = useState({});
   const [addingAfter, setAddingAfter] = useState(null);
   const voice = narrationState(story);
@@ -178,6 +180,12 @@ function StoryEditorPage() {
   const warnings = warningsByPath(story.keywordWarnings);
   const checkpointAfter = new Map(story.checkpoints.map((c) => [c.afterPageId, c]));
   const sceneById = new Map((story.scenes ?? []).map((sc) => [sc.id, sc]));
+  // Truyện bật tranh mà còn cảnh chưa vẽ (không có cảnh nào đang vẽ): thường do hết credit giữa chừng
+  const scenesDrawing = (story.scenes ?? []).some((s) => ["queued", "generating"].includes(s.imageStatus));
+  const missingScenes =
+    story.useAiImage && !scenesDrawing ? (story.scenes ?? []).filter((s) => s.description?.trim() && s.imageStatus === "none") : [];
+  const sceneCost = pricing.data?.images?.scene;
+  const lackCredit = sceneCost != null && creditBalance != null && creditBalance < sceneCost;
   const sceneFirstPage = new Map();
   const scenePages = new Map();
   for (const p of story.pages) {
@@ -328,6 +336,45 @@ function StoryEditorPage() {
                 className="btn-primary px-6 py-2.5 whitespace-nowrap"
               >
                 {images.drawAll.isPending && <Loader2 size={18} className="animate-spin" />} Vẽ tranh cho truyện
+              </button>
+            </div>
+          )}
+          {missingScenes.length > 0 && (
+            <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-amber-300 bg-amber-100 p-5 text-amber-900">
+              <div className="flex min-w-0 gap-3">
+                <AlertTriangle size={20} className="mt-0.5 shrink-0" />
+                <div className="text-sm">
+                  <p className="font-bold">
+                    {missingScenes.length}/{story.scenes.length} cảnh chưa có tranh
+                  </p>
+                  <p>
+                    {sceneCost != null && `Vẽ tiếp cần ${missingScenes.length * sceneCost} credit, ba mẹ đang có ${creditBalance ?? "…"} credit. `}
+                    {lackCredit ? (
+                      <>
+                        Thường là do hết credit lúc vẽ.{" "}
+                        <Link to={ROUTES.PARENT.BILLING} className="font-bold underline">
+                          Nâng gói
+                        </Link>{" "}
+                        rồi quay lại vẽ tiếp.
+                      </>
+                    ) : (
+                      "Bé vẫn đọc được truyện, cảnh chưa có tranh sẽ hiện nền màu."
+                    )}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  images.drawAll.mutate(undefined, {
+                    onSuccess: () => toast.success("Đang vẽ tiếp tranh cho truyện"),
+                    onError: (e) => toast.error(e.message),
+                  })
+                }
+                disabled={busy || images.drawAll.isPending || lackCredit}
+                className="btn-primary px-6 py-2.5 whitespace-nowrap disabled:opacity-60"
+              >
+                {images.drawAll.isPending && <Loader2 size={18} className="animate-spin" />} Vẽ tiếp {missingScenes.length} cảnh
               </button>
             </div>
           )}

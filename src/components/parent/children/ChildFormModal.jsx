@@ -78,7 +78,7 @@ function ChildFormModal({ open, onClose, child, onSubmit, isPending, error: serv
       <form id="child-form" onSubmit={submit} className="space-y-4">
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Tên gọi ở nhà</span>
-          <input value={form.name} onChange={set("name")} maxLength={100} placeholder="Ví dụ: Bé Bi" className={inputClass} />
+          <input value={form.name} onChange={set("name")} maxLength={100} placeholder="Nhập tên hoặc biệt danh của bé" className={inputClass} />
         </label>
         <div>
           <label htmlFor="child-birth-date" className="mb-1.5 block text-sm font-semibold">
@@ -115,7 +115,7 @@ function ChildFormModal({ open, onClose, child, onSubmit, isPending, error: serv
             onChange={set("appearance")}
             maxLength={500}
             rows={3}
-            placeholder="Ví dụ: tóc ngắn xoăn, má phúng phính, hay mặc áo khủng long xanh"
+            placeholder="Mô tả ngoại hình của bé: tóc, dáng người, trang phục hay mặc…"
             className={`${inputClass} resize-none`}
           />
           <span className="mt-1 block text-xs text-navy/50">AI dùng mô tả này để vẽ bé thành nhân vật chính trong truyện</span>

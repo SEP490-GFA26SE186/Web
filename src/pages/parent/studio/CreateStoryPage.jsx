@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, BookMarked, House, Loader2, PenLine, Plus, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, BookMarked, House, Image as ImageIcon, Loader2, PenLine, Plus, Sparkles } from "lucide-react";
 import Modal from "../../../components/common/Modal";
 import Switch from "../../../components/common/Switch";
 import CaselTag from "../../../components/parent/library/CaselTag";
@@ -68,7 +68,7 @@ function NewCharacterModal({ open, onClose, onCreated }) {
       <form id="character-form" onSubmit={submit} className="space-y-4">
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Tên gọi</span>
-          <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className={fieldClass} placeholder="VD: Bà nội" />
+          <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className={fieldClass} placeholder="Nhập tên nhân vật" />
         </label>
         <label className="block">
           <span className="mb-1.5 block text-sm font-semibold">Ngoại hình</span>
@@ -77,7 +77,7 @@ function NewCharacterModal({ open, onClose, onCreated }) {
             onChange={(e) => setForm((f) => ({ ...f, appearance: e.target.value }))}
             rows={3}
             className={fieldClass}
-            placeholder="VD: Tóc bạc búi gọn, đeo kính, hay mặc áo bà ba nâu"
+            placeholder="Mô tả ngoại hình của nhân vật: tóc, dáng người, trang phục…"
           />
         </label>
         {create.error && <p className="text-sm font-semibold text-danger">{create.error.message}</p>}
@@ -179,6 +179,13 @@ function CreateStoryPage() {
     (c) => selected.includes(c.id) && !c.portraitImageUrl && c.portraitStatus === "none",
   ).length;
   const imagesMax = isAi && useAiImage && imageCosts ? imageCosts.maxScenes * imageCosts.scene + missingPortraits * imageCosts.characterPortrait : 0;
+  // Với credit còn lại sau khi viết chữ: BE vẽ chân dung còn thiếu trước, rồi mới tới từng cảnh.
+  const imagePlan = (() => {
+    if (!imagesMax || afterCost == null || notEnough) return null;
+    const portraitCost = missingPortraits * imageCosts.characterPortrait;
+    const scenes = afterCost < portraitCost ? 0 : Math.min(imageCosts.maxScenes, Math.floor((afterCost - portraitCost) / imageCosts.scene));
+    return { scenes, full: afterCost >= imagesMax, none: scenes === 0 };
+  })();
 
   // topicId lấy từ URL có thể là chuyện mẫu đã tắt → chỉ coi là đã chọn khi có trong danh sách
   const chosenTopicId = (topics.data ?? []).some((t) => t.id === topicId) ? topicId : null;
@@ -300,13 +307,50 @@ function CreateStoryPage() {
         )}
         . Nếu AI viết lỗi, credit được hoàn lại.
         {imagesMax > 0 && (
-          <span className="mt-1 block">
-            Tranh dùng thêm <span className="font-bold text-navy">tối đa {imagesMax} credit</span>, trừ dần khi vẽ từng cảnh
-            {afterCost != null && afterCost < imagesMax ? " — không đủ thì truyện vẫn viết, tranh vẽ được đến đâu hay đến đó" : ""}.
+          <span className={`mt-1 block ${imagePlan && !imagePlan.full ? "font-semibold text-amber-700" : ""}`}>
+            Tranh dùng thêm <span className="font-bold">tối đa {imagesMax} credit</span>
+            {imagePlan?.none
+              ? " — sau khi viết chữ không còn đủ credit, truyện sẽ không có tranh."
+              : imagePlan && !imagePlan.full
+                ? ` — chỉ đủ vẽ ${imagePlan.scenes}/${imageCosts.maxScenes} cảnh.`
+                : ", trừ dần khi vẽ từng cảnh."}
           </span>
         )}
       </p>
     );
+
+  // Khung cảnh báo ngay dưới công tắc tranh: phụ huynh thấy trước sẽ được bao nhiêu tranh với credit hiện có.
+  const imageNotice =
+    isAi && useAiImage && imagePlan ? (
+      <div
+        role={imagePlan.full ? "status" : "alert"}
+        className={`flex gap-3 rounded-2xl border px-4 py-3 text-sm ${
+          imagePlan.full ? "border-secondary/30 bg-secondary-tint text-secondary-dark" : "border-amber-300 bg-amber-100 text-amber-900"
+        }`}
+      >
+        {imagePlan.full ? <ImageIcon size={18} className="mt-0.5 shrink-0" /> : <AlertTriangle size={18} className="mt-0.5 shrink-0" />}
+        <div className="space-y-1">
+          <p className="font-bold">
+            {imagePlan.full
+              ? `Đủ credit vẽ cả ${imageCosts.maxScenes} cảnh`
+              : imagePlan.none
+                ? "Truyện sẽ không có tranh"
+                : `Chỉ đủ credit vẽ ${imagePlan.scenes}/${imageCosts.maxScenes} cảnh`}
+          </p>
+          <p>
+            Tranh tốn thêm tối đa <b>{imagesMax} credit</b> ({imageCosts.maxScenes} cảnh × {imageCosts.scene}
+            {missingPortraits ? ` + ${missingPortraits} chân dung × ${imageCosts.characterPortrait}` : ""}). Sau khi AI viết chữ, ba mẹ còn{" "}
+            <b>{afterCost} credit</b>.
+          </p>
+          {!imagePlan.full && (
+            <p>
+              Truyện vẫn được viết đầy đủ{imagePlan.none ? ", chỉ là không có tranh" : ", các cảnh còn lại không có tranh"}. Ba mẹ có thể chọn truyện
+              ngắn hơn, tắt tranh, hoặc <Link to={ROUTES.PARENT.BILLING} className="font-bold underline">nâng gói</Link> rồi vẽ thêm trong trang sửa truyện.
+            </p>
+          )}
+        </div>
+      </div>
+    ) : null;
 
   const topicSection = (
     <Section
@@ -350,10 +394,9 @@ function CreateStoryPage() {
           rows={5}
           disabled={analyze.isPending}
           className={fieldClass}
-          placeholder="VD: Bin đang xếp lego thì em Na làm đổ, Bin hét lên và đẩy em ngã."
+          placeholder="Kể lại chuyện đã xảy ra: ở đâu, có ai, chuyện gì diễn ra và bé đã phản ứng thế nào…"
         />
         <span className="mt-1 flex justify-between gap-3 text-xs text-navy/55">
-          <span>Ba mẹ cứ dùng tên thật — hệ thống đổi tên thành ký hiệu trước khi gửi cho AI.</span>
           <span className={situationLength > 0 && situationLength < SITUATION_MIN ? "font-semibold text-danger" : ""}>
             {situationLength}/{SITUATION_MAX}
           </span>
@@ -406,6 +449,7 @@ function CreateStoryPage() {
       </dl>
 
       <div className="text-sm text-navy/65">{costNote}</div>
+      {imageNotice}
 
       <div className="flex flex-wrap items-center gap-2">
         <Button size="lg" icon={Sparkles} loading={submitting} onClick={() => createFamily(true)} disabled={busy || notEnough}>
@@ -569,7 +613,7 @@ function CreateStoryPage() {
               <Section step={isAi ? 4 : 3} title="Thông tin truyện">
                 <label className="block">
                   <span className="mb-1.5 block text-sm font-semibold">Tên truyện</span>
-                  <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} className={fieldClass} placeholder="VD: Bin và chú khủng long xanh" />
+                  <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} className={fieldClass} placeholder="Nhập tên truyện" />
                 </label>
                 <div className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4">
                   <div>
@@ -593,6 +637,7 @@ function CreateStoryPage() {
                   </div>
                   <Switch checked={isAi && useAiImage} onChange={setUseAiImage} label="Tranh minh họa bằng AI" disabled={!isAi} />
                 </div>
+                {imageNotice}
               </Section>
 
               <div className="card flex flex-wrap items-center justify-between gap-3 p-5">

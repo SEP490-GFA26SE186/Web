@@ -38,7 +38,7 @@ function RefundForm({ item, onDone }) {
         onChange={(e) => setReason(e.target.value)}
         rows={2}
         maxLength={2000}
-        placeholder="Lý do hoàn tiền (VD: mua nhầm gói, truyện không như mô tả...)"
+        placeholder="Nhập lý do hoàn tiền"
         aria-label="Lý do hoàn tiền"
         className="w-full resize-none rounded-card border-2 border-outline p-3 text-sm"
       />

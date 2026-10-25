@@ -133,7 +133,7 @@ function ForgotPasswordDialog({ defaultIdentity = "", onClose }) {
               setEmail(e.target.value);
               setError("");
             }}
-            placeholder="ba_me@email.com"
+            placeholder="Nhập email đã đăng ký"
             className={inputClass}
           />
         </label>

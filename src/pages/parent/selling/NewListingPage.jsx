@@ -85,7 +85,7 @@ function NewListingPage() {
       <form onSubmit={submit} className="card space-y-4 p-6">
         <label className="block">
           <span className="mb-1 block text-sm font-semibold">Tên truyện trên Chợ (không dùng tên thật)</span>
-          <input required minLength={3} maxLength={200} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="VD: Bé và cơn giận" className={field} aria-invalid={!!errors["listing.title"]} />
+          <input required minLength={3} maxLength={200} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Nhập tên truyện khi đăng bán" className={field} aria-invalid={!!errors["listing.title"]} />
           {errors["listing.title"] && <span className="mt-1 block text-sm text-danger">{errors["listing.title"]}</span>}
         </label>
         <label className="block">
@@ -112,7 +112,7 @@ function NewListingPage() {
               step={PRICE_STEP}
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
-              placeholder="VD: 29000"
+              placeholder="Nhập giá bán (đồng)"
               aria-invalid={!!priceErr}
               aria-describedby="listing-price-help"
               className={field}
@@ -138,7 +138,7 @@ function NewListingPage() {
                   maxLength={100}
                   value={aliases[c.token] ?? ""}
                   onChange={(e) => setAliases({ ...aliases, [c.token]: e.target.value })}
-                  placeholder="VD: Bống"
+                  placeholder="Nhập tên thay thế"
                   aria-label={`Tên chung cho ${c.name}`}
                   aria-invalid={!!err}
                   className={`${field} min-w-40 flex-1`}

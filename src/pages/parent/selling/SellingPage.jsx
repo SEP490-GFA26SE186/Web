@@ -29,7 +29,7 @@ function ApplyForm({ onDone }) {
     <form onSubmit={submit} className="space-y-3">
       <label className="block">
         <span className="mb-1 block text-sm font-semibold">Biệt danh công khai</span>
-        <input required minLength={2} maxLength={100} value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} placeholder="VD: Mẹ Mít kể chuyện" className={field} />
+        <input required minLength={2} maxLength={100} value={form.displayName} onChange={(e) => setForm({ ...form, displayName: e.target.value })} placeholder="Nhập tên hiển thị trên chợ truyện" className={field} />
       </label>
       <label className="block">
         <span className="mb-1 block text-sm font-semibold">Giới thiệu (không bắt buộc)</span>
@@ -37,7 +37,7 @@ function ApplyForm({ onDone }) {
       </label>
       <label className="block">
         <span className="mb-1 block text-sm font-semibold">Chuyên môn / kinh nghiệm (không bắt buộc)</span>
-        <input maxLength={1000} value={form.expertise} onChange={(e) => setForm({ ...form, expertise: e.target.value })} placeholder="VD: giáo viên mầm non 5 năm" className={field} />
+        <input maxLength={1000} value={form.expertise} onChange={(e) => setForm({ ...form, expertise: e.target.value })} placeholder="Kinh nghiệm hoặc chuyên môn của ba mẹ (không bắt buộc)" className={field} />
       </label>
       <button type="submit" disabled={apply.isPending} className="btn-primary">
         {apply.isPending && <Loader2 size={16} className="animate-spin" />} Gửi hồ sơ

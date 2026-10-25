@@ -60,12 +60,12 @@ function CharacterModal({ character, onClose }) {
       <form id="character-form" onSubmit={submit} className="space-y-3">
         <label className="block">
           <span className="mb-1 block text-sm font-semibold">Tên gọi trong truyện</span>
-          <input required maxLength={100} value={name} onChange={(e) => setName(e.target.value)} disabled={isChild} placeholder="VD: Bà nội, Mèo Mướp, Anh Tí" className={`${fieldClass} disabled:bg-surface`} />
+          <input required maxLength={100} value={name} onChange={(e) => setName(e.target.value)} disabled={isChild} placeholder="Nhập tên nhân vật" className={`${fieldClass} disabled:bg-surface`} />
           {isChild && <span className="mt-1 block text-xs text-navy/50">Nhân vật này là bé — đổi tên ở trang “Bé nhà mình”.</span>}
         </label>
         <label className="block">
           <span className="mb-1 block text-sm font-semibold">Mô tả</span>
-          <textarea required minLength={3} maxLength={1000} rows={4} value={appearance} onChange={(e) => setAppearance(e.target.value)} placeholder="VD: tóc bạc, đeo kính, rất hiền, hay kể chuyện cổ tích" className={`${fieldClass} resize-none`} />
+          <textarea required minLength={3} maxLength={1000} rows={4} value={appearance} onChange={(e) => setAppearance(e.target.value)} placeholder="Mô tả ngoại hình và tính cách của nhân vật…" className={`${fieldClass} resize-none`} />
         </label>
         {renamed && character.storiesCount > 0 && (
           <p className="rounded-2xl bg-primary-tint px-4 py-2.5 text-sm text-primary-dark">
@@ -129,7 +129,6 @@ function FamilyCharactersPage() {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="font-display text-lg font-bold">{c.name}</p>
-                {c.child && <span className="rounded-full bg-secondary-tint px-2 py-0.5 text-xs font-bold text-secondary-dark">Là bé {c.child.name}</span>}
               </div>
               <div className="flex gap-1">
                 <button type="button" onClick={() => setEditing(c)} className="rounded-full p-2 text-navy/60 hover:bg-surface" aria-label={`Sửa ${c.name}`}>

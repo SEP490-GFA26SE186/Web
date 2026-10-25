@@ -117,7 +117,7 @@ function LoginPage() {
                   autoFocus
                   value={form.identity}
                   onChange={set("identity")}
-                  placeholder="ba_me@email.com"
+                  placeholder="Nhập email hoặc tên đăng nhập"
                   aria-invalid={!!errors.identity}
                   aria-describedby={errors.identity ? "identity-error" : undefined}
                   className={`${inputClass(errors.identity)} pr-4`}
@@ -143,7 +143,7 @@ function LoginPage() {
                   autoComplete="current-password"
                   value={form.password}
                   onChange={set("password")}
-                  placeholder="••••••••••••"
+                  placeholder="Nhập mật khẩu"
                   aria-invalid={!!errors.password}
                   aria-describedby={errors.password ? "password-error" : undefined}
                   className={`${inputClass(errors.password)} pr-11`}

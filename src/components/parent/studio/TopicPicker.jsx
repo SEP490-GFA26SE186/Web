@@ -96,7 +96,7 @@ function TopicPicker({ topics, value, onChange, childAge, childName, allowNone =
               type="search"
               value={query}
               onChange={(e) => withCollapse(setQuery)(e.target.value)}
-              placeholder="Tìm chuyện mẫu, VD: nổi giận, chia sẻ, bóng tối…"
+              placeholder="Tìm chuyện mẫu theo tên…"
               className="h-11 w-full rounded-full border-[1.5px] border-outline bg-white pr-10 pl-11 text-sm outline-none transition placeholder:text-navy/40 hover:border-navy/20 focus:border-secondary focus:ring-[3px] focus:ring-secondary/15"
             />
             {query && (

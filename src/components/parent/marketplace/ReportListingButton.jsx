@@ -75,7 +75,7 @@ function ReportListingButton({ listingId }) {
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
             maxLength={2000}
-            placeholder="Mô tả thêm (không bắt buộc), VD: trang 3 có cảnh làm bé sợ"
+            placeholder="Mô tả thêm vấn đề (không bắt buộc)"
             aria-label="Mô tả thêm"
             className="w-full resize-none rounded-2xl border-[1.5px] border-outline px-4 py-2.5 text-sm"
           />
