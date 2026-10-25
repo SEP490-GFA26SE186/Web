@@ -64,6 +64,7 @@ const SellingPage = lazy(() => import("../pages/parent/selling/SellingPage"));
 const WithdrawalsPage = lazy(() => import("../pages/admin/WithdrawalsPage"));
 const ListingDetailPage = lazy(() => import("../pages/parent/marketplace/ListingDetailPage"));
 const PurchaseResultPage = lazy(() => import("../pages/parent/marketplace/PurchaseResultPage"));
+const SellerProfilePage = lazy(() => import("../pages/parent/marketplace/SellerProfilePage"));
 const NewListingPage = lazy(() => import("../pages/parent/selling/NewListingPage"));
 const BillingResultPage = lazy(() => import("../pages/parent/billing/BillingResultPage"));
 const KidReaderIndex = lazy(() =>
@@ -110,6 +111,7 @@ function AppRoutes() {
           <Route path="help" element={<HelpPage />} />
           <Route path="marketplace" element={<MarketplacePage />} />
           <Route path="marketplace/result" element={<PurchaseResultPage />} />
+          <Route path="marketplace/sellers/:sellerId" element={<SellerProfilePage />} />
           <Route path="marketplace/:listingId" element={<ListingDetailPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="children" element={<ChildrenPage />} />

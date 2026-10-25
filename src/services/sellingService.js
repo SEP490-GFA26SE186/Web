@@ -22,6 +22,8 @@ const call = async (request) => {
 /** → { seller: { status: pending|approved|rejected|suspended, displayName, … } | null, planCanSell } */
 export const getMySeller = () => call(api.get("/sellers/me"));
 export const applySeller = (payload) => call(api.post("/sellers/apply", payload));
+/** PUT /sellers/me { displayName?, bio?, expertise? } — sửa hồ sơ khi đang chờ duyệt / đã duyệt */
+export const updateMySeller = (payload) => call(api.put("/sellers/me", payload));
 
 export const getMyListings = async () => (await call(api.get("/listings/mine"))).listings;
 

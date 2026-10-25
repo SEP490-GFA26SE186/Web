@@ -1,29 +1,37 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BadgeCheck, Ban, Clock, Loader2, Store } from "lucide-react";
+import { BadgeCheck, Ban, Clock, ExternalLink, Loader2, Pencil, Store } from "lucide-react";
 import { coverOf } from "../../../components/parent/library/storyMeta";
 import StoryCover from "../../../components/parent/StoryCover";
 import EarningsPanel from "../../../components/parent/selling/EarningsPanel";
 import StrikesPanel from "../../../components/parent/selling/StrikesPanel";
 import { LISTING_STATUS } from "../../../constants/moderation";
 import { ROUTES } from "../../../constants/routes";
-import { applySeller, getMyListings, getMySeller, retryNarration } from "../../../services/sellingService";
+import { applySeller, getMyListings, getMySeller, retryNarration, updateMySeller } from "../../../services/sellingService";
 import { toast } from "../../../stores/toastStore";
 import { formatListingPrice } from "../../../utils/format";
 
 
 const field = "w-full rounded-card border-2 border-outline px-4 py-2.5 focus:border-primary focus:outline-none";
 
-function ApplyForm({ onDone }) {
-  const [form, setForm] = useState({ displayName: "", bio: "", expertise: "" });
-  const apply = useMutation({ mutationFn: applySeller });
+// Nộp hồ sơ bán (chưa có / bị từ chối) hoặc sửa hồ sơ (`seller` đang chờ duyệt / đã duyệt).
+function ApplyForm({ seller, onDone, onCancel }) {
+  const editing = !!seller;
+  const [form, setForm] = useState({ displayName: seller?.displayName ?? "", bio: seller?.bio ?? "", expertise: seller?.expertise ?? "" });
+  const apply = useMutation({ mutationFn: editing ? updateMySeller : applySeller });
   const submit = (e) => {
     e.preventDefault();
-    apply.mutate(
-      { displayName: form.displayName, bio: form.bio || undefined, expertise: form.expertise || undefined },
-      { onSuccess: () => { toast.success("Đã gửi hồ sơ, chuyên gia sẽ duyệt sớm"); onDone(); }, onError: (err) => toast.error(err.message) },
-    );
+    const body = editing
+      ? { displayName: form.displayName, bio: form.bio, expertise: form.expertise } // chuỗi rỗng = xoá
+      : { displayName: form.displayName, bio: form.bio || undefined, expertise: form.expertise || undefined };
+    apply.mutate(body, {
+      onSuccess: () => {
+        toast.success(editing ? "Đã cập nhật hồ sơ bán" : "Đã gửi hồ sơ, chuyên gia sẽ duyệt sớm");
+        onDone();
+      },
+      onError: (err) => toast.error(err.message),
+    });
   };
   return (
     <form onSubmit={submit} className="space-y-3">
@@ -39,9 +47,16 @@ function ApplyForm({ onDone }) {
         <span className="mb-1 block text-sm font-semibold">Chuyên môn / kinh nghiệm (không bắt buộc)</span>
         <input maxLength={1000} value={form.expertise} onChange={(e) => setForm({ ...form, expertise: e.target.value })} placeholder="Kinh nghiệm hoặc chuyên môn của ba mẹ (không bắt buộc)" className={field} />
       </label>
-      <button type="submit" disabled={apply.isPending} className="btn-primary">
-        {apply.isPending && <Loader2 size={16} className="animate-spin" />} Gửi hồ sơ
-      </button>
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" disabled={apply.isPending} className="btn-primary">
+          {apply.isPending && <Loader2 size={16} className="animate-spin" />} {editing ? "Lưu hồ sơ" : "Gửi hồ sơ"}
+        </button>
+        {onCancel && (
+          <button type="button" onClick={onCancel} className="btn-ghost">
+            Huỷ
+          </button>
+        )}
+      </div>
     </form>
   );
 }
@@ -79,6 +94,11 @@ function SellingPage() {
   const { data: me, isLoading } = useQuery({ queryKey: ["selling", "me"], queryFn: getMySeller });
   const { data: listings = [] } = useQuery({ queryKey: ["selling", "listings"], queryFn: getMyListings, refetchInterval: (q) => (q.state.data?.some((l) => l.narration && !l.narration.complete && !l.narration.failed && !l.narration.missing) ? 10_000 : false), enabled: ["approved", "suspended"].includes(me?.seller?.status) });
   const status = me?.seller?.status;
+  const [editingProfile, setEditingProfile] = useState(false);
+  const refreshMe = () => {
+    setEditingProfile(false);
+    queryClient.invalidateQueries({ queryKey: ["selling", "me"] });
+  };
   const isSeller = status === "approved" || status === "suspended";
 
   if (isLoading) return <Loader2 size={32} className="animate-spin text-primary" />;
@@ -99,10 +119,27 @@ function SellingPage() {
             </Link>{" "}
             để mở tính năng này.
           </p>
+        ) : editingProfile && (status === "approved" || status === "pending") ? (
+          <>
+            <h2 className="flex items-center gap-2 text-lg">
+              <Pencil size={18} className="text-primary" /> Sửa hồ sơ bán
+            </h2>
+            <ApplyForm seller={me.seller} onCancel={() => setEditingProfile(false)} onDone={refreshMe} />
+          </>
         ) : status === "approved" ? (
-          <p className="flex items-center gap-2 font-bold text-secondary-dark">
-            <BadgeCheck size={20} /> Ba mẹ là người bán: {me.seller.displayName}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="flex items-center gap-2 font-bold text-secondary-dark">
+              <BadgeCheck size={20} /> Ba mẹ là người bán: {me.seller.displayName}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Link to={ROUTES.PARENT.marketplaceSeller(me.seller.userId)} className="btn-ghost px-4 py-2 text-sm">
+                <ExternalLink size={16} /> Xem trang công khai
+              </Link>
+              <button type="button" onClick={() => setEditingProfile(true)} className="btn-ghost px-4 py-2 text-sm">
+                <Pencil size={16} /> Sửa hồ sơ
+              </button>
+            </div>
+          </div>
         ) : status === "suspended" ? (
           <div className="space-y-1">
             <p className="flex items-center gap-2 font-bold text-danger">
@@ -113,9 +150,14 @@ function SellingPage() {
             </p>
           </div>
         ) : status === "pending" ? (
-          <p className="flex items-center gap-2 font-semibold text-primary-dark">
-            <Clock size={20} /> Hồ sơ “{me.seller.displayName}” đang chờ chuyên gia duyệt.
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="flex items-center gap-2 font-semibold text-primary-dark">
+              <Clock size={20} /> Hồ sơ “{me.seller.displayName}” đang chờ chuyên gia duyệt.
+            </p>
+            <button type="button" onClick={() => setEditingProfile(true)} className="btn-ghost px-4 py-2 text-sm">
+              <Pencil size={16} /> Sửa hồ sơ
+            </button>
+          </div>
         ) : (
           <>
             <h2 className="flex items-center gap-2 text-lg">

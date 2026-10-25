@@ -24,6 +24,9 @@ export const getListings = (params) =>
 export const getListing = async (listingId) => (await call(api.get(`/market/listings/${listingId}`))).listing;
 
 
+/** Hồ sơ công khai người bán → { seller{ id, displayName, bio, expertise, totalSales, ratingAvg, ratingCount, listingCount, sellingSince }, items } */
+export const getSellerProfile = (sellerId) => call(api.get(`/market/sellers/${sellerId}`));
+
 /** POST /market/checkout { listingId } → { order, checkoutUrl } (null với truyện miễn phí) */
 export const checkoutListing = (listingId) => call(api.post("/market/checkout", { listingId }));
 

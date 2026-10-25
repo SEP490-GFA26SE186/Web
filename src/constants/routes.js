@@ -17,6 +17,7 @@ export const ROUTES = {
     BILLING: "/parent/billing",
     SELLING: "/parent/selling",
     marketplaceListing: (listingId) => `/parent/marketplace/${listingId}`,
+    marketplaceSeller: (sellerId) => `/parent/marketplace/sellers/${sellerId}`,
     MARKETPLACE_RESULT: "/parent/marketplace/result",
     sellingNew: (storyId) => `/parent/selling/new?storyId=${storyId}`,
     HELP: "/parent/help",

@@ -81,9 +81,9 @@ function ListingDetailPage() {
           <span className="flex items-center gap-1">
             <FileText size={14} /> {l.totalPages} trang • {l.checkpointCount} điểm dừng
           </span>
-          <span className="flex items-center gap-1">
+          <Link to={ROUTES.PARENT.marketplaceSeller(l.seller.id)} className="flex items-center gap-1 font-semibold text-primary-dark hover:underline">
             <Store size={14} /> {l.seller.displayName}
-          </span>
+          </Link>
           <span className="flex items-center gap-1">
             <ShoppingCart size={14} /> {formatNumber(l.purchaseCount)} lượt mua
           </span>
