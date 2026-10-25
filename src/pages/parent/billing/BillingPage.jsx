@@ -18,6 +18,16 @@ function BillingPage() {
   const checkout = useCheckoutPlan();
   const currentCode = sub?.plan?.code;
 
+  // Giống BE (addMonths): cộng tháng theo lịch, giữ ngày (31/01 + 1 tháng → 28/02 hoặc 29/02)
+  const extendDate = (date, months) => {
+    const d = new Date(date);
+    const day = d.getUTCDate();
+    d.setUTCDate(1);
+    d.setUTCMonth(d.getUTCMonth() + months);
+    d.setUTCDate(Math.min(day, new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate()));
+    return d;
+  };
+
   const buy = (plan) =>
     checkout.mutate(plan.id, {
       onSuccess: ({ checkoutUrl }) => {
@@ -78,6 +88,8 @@ function BillingPage() {
         <div className="grid gap-5 md:grid-cols-3">
           {plans.map((plan) => {
             const current = plan.code === currentCode;
+            // Gói trả phí đang dùng: mua lại = gia hạn, cộng thêm thời hạn vào ngày hết hạn hiện tại
+            const renewable = current && plan.priceVnd > 0;
             const busy = checkout.isPending && checkout.variables === plan.id;
             const features = [
               `${plan.creditsPerMonth} credit mỗi tháng (${plan.creditsPerMonth} truyện AI)`,
@@ -104,19 +116,30 @@ function BillingPage() {
                 <button
                   type="button"
                   onClick={() => buy(plan)}
-                  disabled={current || checkout.isPending}
+                  disabled={(current && !renewable) || checkout.isPending}
                   className="btn-primary justify-center disabled:opacity-60"
                 >
                   {busy && <Loader2 size={18} className="animate-spin" />}
-                  {current ? "Đang dùng" : plan.priceVnd === 0 ? "Chuyển về gói này" : "Thanh toán qua payOS"}
+                  {renewable
+                    ? `Gia hạn thêm ${plan.durationMonths === 12 ? "1 năm" : "1 tháng"}`
+                    : current
+                      ? "Đang dùng"
+                      : plan.priceVnd === 0
+                        ? "Chuyển về gói này"
+                        : "Thanh toán qua payOS"}
                 </button>
+                {renewable && sub?.periodEnd && (
+                  <p className="-mt-2 text-center text-xs text-navy/55">
+                    Hết hạn mới: {formatDate(extendDate(sub.periodEnd, plan.durationMonths))} — không mất ngày còn lại
+                  </p>
+                )}
               </div>
             );
           })}
         </div>
       )}
       <p className="text-xs text-navy/50">
-        Thanh toán bằng chuyển khoản / quét mã VietQR qua payOS. Gói trả trước, gia hạn thủ công. Đổi gói giữa kỳ: kỳ mới bắt đầu ngay, credit còn lại được giữ.
+        Thanh toán bằng chuyển khoản / quét mã VietQR qua payOS. Gói trả trước, gia hạn thủ công: gia hạn gói đang dùng thì cộng thêm thời hạn vào ngày hết hạn hiện tại. Đổi sang gói khác giữa kỳ: kỳ mới bắt đầu ngay, credit còn lại được giữ.
       </p>
       <PaymentHistory />
     </div>
