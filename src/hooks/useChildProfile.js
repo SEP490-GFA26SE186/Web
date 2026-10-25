@@ -11,6 +11,7 @@ import {
   updateChild,
 } from "../services/childService";
 import useAuthStore from "../stores/authStore";
+import { refreshCreditWhenDrawn } from "./useStudio";
 import useParentStore from "../stores/parentStore";
 
 export const childKeys = {
@@ -26,19 +27,24 @@ export const childKeys = {
 // API children chỉ dành cho phụ huynh đã đăng nhập (Kid Mode demo ở Landing thì không gọi)
 const useIsParent = () => useAuthStore((s) => s.isAuthenticated && s.user?.role === ROLES.PARENT);
 
+const childrenOf = (data) => (Array.isArray(data) ? data : data?.children ?? []);
+const countDrawingChildPortraits = (data) =>
+  childrenOf(data).filter((c) => ["queued", "generating"].includes(c.character?.portraitStatus)).length;
+
 export const useChildren = () => {
   const isParent = useIsParent();
+  const queryClient = useQueryClient();
   return useQuery({
     queryKey: childKeys.list,
-    queryFn: getChildren,
+    queryFn: async () => {
+      const before = countDrawingChildPortraits(queryClient.getQueryData(childKeys.list));
+      const data = await getChildren();
+      refreshCreditWhenDrawn(queryClient, before, countDrawingChildPortraits(data)); // chân dung của bé vẽ xong / lỗi
+      return data;
+    },
     enabled: isParent,
     // Chân dung của bé đang vẽ -> tải lại mỗi 4 s để thẻ nhân vật cập nhật
-    refetchInterval: (query) =>
-      (Array.isArray(query.state.data) ? query.state.data : query.state.data?.children ?? []).some((c) =>
-        ["queued", "generating"].includes(c.character?.portraitStatus),
-      )
-        ? 4000
-        : false,
+    refetchInterval: (query) => (countDrawingChildPortraits(query.state.data) > 0 ? 4000 : false),
   });
 };
 

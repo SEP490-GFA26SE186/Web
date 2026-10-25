@@ -55,6 +55,14 @@ export const refreshCredit = async (queryClient) => {
 };
 export const isGenerating = (generation) => !!generation && ACTIVE.has(generation.status);
 
+/**
+ * Chân dung / tranh cảnh vẽ chạy nền: vẽ lỗi thì worker HOÀN credit sau vài giây. Trang đang hỏi lại tiến độ thấy số
+ * mục đang vẽ giảm (xong hoặc lỗi) → tải lại credit trên topbar, không phải refresh trình duyệt.
+ */
+export const refreshCreditWhenDrawn = (queryClient, drawingBefore, drawingAfter) => {
+  if (drawingAfter < drawingBefore) refreshCredit(queryClient);
+};
+
 /** Giá AI viết truyện theo độ dài (Admin chỉnh ở Cấu hình AI) — dùng để báo trước cho ba mẹ. */
 export const useAiPricing = () =>
   useQuery({ queryKey: ["stories", "ai-pricing"], queryFn: getAiPricing, staleTime: 5 * 60_000 });
@@ -66,13 +74,22 @@ const DRAWING = new Set(["queued", "generating"]);
 export const isDrawingScenes = (story) => !!story?.scenes?.some((s) => DRAWING.has(s.imageStatus));
 
 /** Đang tạo giọng đọc hoặc đang vẽ tranh thì tải lại mỗi 5 s để cập nhật tiến độ. */
-export const useStory = (id) =>
-  useQuery({
+const countDrawingScenes = (story) => story?.scenes?.filter((s) => DRAWING.has(s.imageStatus)).length ?? 0;
+
+export const useStory = (id) => {
+  const queryClient = useQueryClient();
+  return useQuery({
     queryKey: studioKeys.story(id),
-    queryFn: () => getStory(id),
+    queryFn: async () => {
+      const before = countDrawingScenes(queryClient.getQueryData(studioKeys.story(id)));
+      const story = await getStory(id);
+      refreshCreditWhenDrawn(queryClient, before, countDrawingScenes(story));
+      return story;
+    },
     enabled: !!id,
     refetchInterval: (query) => (query.state.data?.narration?.pending > 0 || isDrawingScenes(query.state.data) ? 5000 : false),
   });
+};
 
 /** Vẽ tranh cả truyện / vẽ lại một cảnh: tải lại truyện + credit (đã giữ). */
 export const useStoryImages = (id) => {
@@ -107,12 +124,21 @@ export const useGeneration = (id, { enabled = true } = {}) => {
 };
 
 /** Có chân dung đang chờ / đang vẽ thì tải lại mỗi 4 s. */
-export const useCharacters = () =>
-  useQuery({
+const countDrawingPortraits = (characters) => (Array.isArray(characters) ? characters : []).filter((c) => DRAWING.has(c.portraitStatus)).length;
+
+export const useCharacters = () => {
+  const queryClient = useQueryClient();
+  return useQuery({
     queryKey: studioKeys.characters,
-    queryFn: getCharacters,
+    queryFn: async () => {
+      const before = countDrawingPortraits(queryClient.getQueryData(studioKeys.characters));
+      const characters = await getCharacters();
+      refreshCreditWhenDrawn(queryClient, before, countDrawingPortraits(characters));
+      return characters;
+    },
     refetchInterval: (query) => (query.state.data?.some((c) => DRAWING.has(c.portraitStatus)) ? 4000 : false),
   });
+};
 
 /** Tạo / vẽ lại chân dung AI của nhân vật (giữ credit). */
 export const useGeneratePortrait = () => {
