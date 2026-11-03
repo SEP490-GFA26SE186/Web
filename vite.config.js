@@ -10,4 +10,10 @@ export default defineConfig({
       "/api": { target: "http://localhost:3000", changeOrigin: true },
     },
   },
+  // Vitest: chạy test trong jsdom (có localStorage, DOM, Blob…)
+  test: {
+    environment: "jsdom",
+    include: ["tests/**/*.test.{js,jsx}"],
+    setupFiles: ["tests/setup.js"],
+  },
 });
