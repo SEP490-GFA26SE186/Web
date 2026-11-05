@@ -82,6 +82,11 @@ describe("translateErrorMessage", () => {
     ).toBe("Gói hiện tại chỉ tạo được tối đa 2 hồ sơ bé. Ba mẹ nâng cấp gói để thêm bé nhé");
   });
 
+  it("lỗi validate form hồ sơ bé", () => {
+    expect(translateErrorMessage("Child name is required")).toBe("Ba mẹ nhập tên bé nhé");
+    expect(translateErrorMessage("Appearance description must not exceed 500 characters")).toBe("Mô tả ngoại hình tối đa 500 ký tự");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();
