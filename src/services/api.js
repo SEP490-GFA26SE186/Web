@@ -1,5 +1,6 @@
 import axios from "axios";
 import useAuthStore from "../stores/authStore";
+import { translateErrorMessage } from "./errorMessages";
 
 const baseURL = import.meta.env.VITE_API_URL || "/api/v1";
 
@@ -70,7 +71,8 @@ export const getErrorMessage = (error, fallback = "Có lỗi xảy ra, ba mẹ t
   // Lỗi 5xx là lỗi máy chủ (VD thông báo Prisma) → không hiện chi tiết kỹ thuật cho người dùng
   if (error.response.status >= 500) return fallback;
   const { message, errors } = error.response.data ?? {};
-  return errors?.[0]?.message || message || fallback;
+  // BE còn trả một số message tiếng Anh → dịch trước khi hiện cho người dùng
+  return translateErrorMessage(errors?.[0]?.message || message) || fallback;
 };
 
 export default api;
