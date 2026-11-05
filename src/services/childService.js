@@ -2,13 +2,8 @@ import api, { getErrorMessage } from "./api";
 
 // API hồ sơ bé — BE: /api/v1/children (yêu cầu đăng nhập phụ huynh), schema rev8.
 
-const toChildError = (error) => {
-  const message = getErrorMessage(error);
-  const quota = message.match(/maximum limit of (\d+) child profiles/);
-  if (quota) return new Error(`Gói hiện tại chỉ tạo được tối đa ${quota[1]} hồ sơ bé. Ba mẹ nâng cấp gói để thêm bé nhé`);
-  if (/not found/i.test(message)) return new Error("Không tìm thấy hồ sơ bé");
-  return new Error(message);
-};
+// Lỗi hồ sơ bé (giới hạn số bé theo gói, không tìm thấy…) đã được dịch trong services/errorMessages/children.js
+const toChildError = (error) => new Error(getErrorMessage(error), { cause: error });
 
 const call = async (request) => {
   try {

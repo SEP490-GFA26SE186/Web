@@ -75,6 +75,13 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Kid session has expired")).toBe("Phiên của bé đã kết thúc, nhờ ba mẹ mở lại Kid Mode nhé");
   });
 
+  it("lỗi hồ sơ bé, kể cả giới hạn số bé theo gói", () => {
+    expect(translateErrorMessage("Child profile not found")).toBe("Không tìm thấy hồ sơ bé");
+    expect(
+      translateErrorMessage("You have reached the maximum limit of 2 child profiles for your current plan. Please upgrade to add more children."),
+    ).toBe("Gói hiện tại chỉ tạo được tối đa 2 hồ sơ bé. Ba mẹ nâng cấp gói để thêm bé nhé");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();
