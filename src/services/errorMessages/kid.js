@@ -1,5 +1,6 @@
-// Lỗi mã PIN thoát Kid Mode (auth.service.js, auth.validation.js của BE).
+// Lỗi mã PIN thoát Kid Mode, vào/thoát Kid Mode và phiên của bé (auth.service.js, auth.validation.js, token.service.js của BE).
 const PIN_FORMAT = "Mã PIN gồm 4 đến 6 chữ số";
+const KID_SESSION_ENDED = "Phiên của bé đã kết thúc, nhờ ba mẹ mở lại Kid Mode nhé";
 
 export default {
   messages: {
@@ -13,5 +14,15 @@ export default {
     "New PIN must be between 4 and 6 numeric digits": PIN_FORMAT,
     "Current PIN must be 4 to 6 digits": PIN_FORMAT,
     "Either current PIN or account password is required to change PIN": "Ba mẹ nhập mã PIN hiện tại hoặc mật khẩu tài khoản để đổi PIN nhé",
+
+    // Vào / thoát Kid Mode
+    "You must set a Kid Exit PIN before entering Kid Mode": "Ba mẹ cần đặt mã PIN thoát Kid Mode trước nhé",
+    "Child profile not found or does not belong to this account": "Không tìm thấy hồ sơ bé trong tài khoản này",
+    "No PIN configured for this account": "Tài khoản chưa có mã PIN, ba mẹ đăng nhập lại để đặt PIN nhé",
+    "No active session or user found to exit from Kid Mode": "Phiên Kid Mode đã kết thúc, ba mẹ đăng nhập lại nhé",
+
+    // Phiên của bé (token Kid Mode)
+    "Invalid or already closed kid session": KID_SESSION_ENDED,
+    "Kid session has expired": KID_SESSION_ENDED,
   },
 };

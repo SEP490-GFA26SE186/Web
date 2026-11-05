@@ -70,6 +70,11 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Kid Exit PIN has not been set yet. Please set it first.")).toBe("Tài khoản chưa có mã PIN, ba mẹ đặt PIN trước nhé");
   });
 
+  it("lỗi vào / thoát Kid Mode và phiên của bé", () => {
+    expect(translateErrorMessage("You must set a Kid Exit PIN before entering Kid Mode")).toBe("Ba mẹ cần đặt mã PIN thoát Kid Mode trước nhé");
+    expect(translateErrorMessage("Kid session has expired")).toBe("Phiên của bé đã kết thúc, nhờ ba mẹ mở lại Kid Mode nhé");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();
