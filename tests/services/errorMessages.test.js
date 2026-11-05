@@ -87,6 +87,10 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Appearance description must not exceed 500 characters")).toBe("Mô tả ngoại hình tối đa 500 ký tự");
   });
 
+  it("lỗi validate nhân vật", () => {
+    expect(translateErrorMessage("Generation prompt must not exceed 1000 characters")).toBe("Mô tả để vẽ chân dung tối đa 1000 ký tự");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();

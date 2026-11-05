@@ -10,8 +10,9 @@ import zod from "./zod";
 import auth from "./auth";
 import kid from "./kid";
 import children from "./children";
+import characters from "./characters";
 
-const GROUPS = [system, database, session, access, zod, auth, kid, children];
+const GROUPS = [system, database, session, access, zod, auth, kid, children, characters];
 
 const MESSAGES = Object.assign({}, ...GROUPS.map((group) => group.messages ?? {}));
 const PATTERNS = GROUPS.flatMap((group) => group.patterns ?? []);
