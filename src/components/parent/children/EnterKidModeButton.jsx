@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Rocket } from "lucide-react";
 import { ROUTES } from "../../../constants/routes";
 import { useEnterKidMode } from "../../../hooks/useKid";
+import { getErrorMessage } from "../../../services/api";
 import useKidSessionStore from "../../../stores/kidSessionStore";
 import { toast } from "../../../stores/toastStore";
 
@@ -21,7 +22,8 @@ function EnterKidModeButton({ child, hasPin }) {
         start(session.kidSessionToken, { id: kid.id, name: kid.name, birthDate: kid.birthDate });
         navigate(ROUTES.KID.BOOKSHELF);
       },
-      onError: () => toast.error("Chưa mở được Kid Mode, ba mẹ thử lại nhé."),
+      // Hiện lý do của BE (chưa đặt PIN, không tìm thấy hồ sơ bé…) — đã dịch sang tiếng Việt
+      onError: (err) => toast.error(getErrorMessage(err, "Chưa mở được Kid Mode, ba mẹ thử lại nhé.")),
     });
   };
 

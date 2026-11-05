@@ -10,29 +10,8 @@ export const MIN_REGISTER_PASSWORD = 8;
 /** BE cho đăng nhập bằng email hoặc username */
 export const isValidIdentity = (value) => EMAIL_REGEX.test(value) || USERNAME_REGEX.test(value);
 
-// BE trả message tiếng Anh → dịch các lỗi auth hay gặp cho ba mẹ dễ hiểu
-const VI_MESSAGES = {
-  "Invalid email/username or password": "Email/Tên đăng nhập hoặc mật khẩu chưa đúng",
-  "Your account has been deactivated. Please contact support.": "Tài khoản đã bị khóa, ba mẹ liên hệ hỗ trợ nhé",
-  "Email is already registered": "Email này đã được đăng ký, ba mẹ đăng nhập nhé",
-  "Username is already taken": "Tên đăng nhập đã có người dùng",
-  "Invalid email address": "Email chưa đúng định dạng",
-  "Username must be at least 3 characters": "Tên đăng nhập có ít nhất 3 ký tự",
-  "Username can only contain letters, numbers, and underscores": "Tên đăng nhập chỉ gồm chữ không dấu, số và dấu _",
-  "Password must be at least 8 characters": "Mật khẩu có ít nhất 8 ký tự",
-  "New password must be at least 8 characters": "Mật khẩu mới có ít nhất 8 ký tự",
-  // Xác thực email (BE đã trả tiếng Việt, chỉ chỉnh giọng cho ba mẹ)
-  "Email đã được xác thực": "Email này đã được xác thực rồi",
-  "Mã xác thực không hợp lệ hoặc đã được sử dụng": "Mã xác thực không đúng hoặc đã được dùng",
-  "Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã.": "Mã xác thực đã hết hạn, ba mẹ bấm gửi lại mã nhé",
-  // PIN thoát Kid Mode
-  "Current PIN is incorrect": "Mã PIN hiện tại chưa đúng",
-  "Account password is incorrect": "Mật khẩu tài khoản chưa đúng",
-  "Kid Exit PIN is already set. Use change-pin endpoint to change it.": "Tài khoản đã có mã PIN, ba mẹ dùng chức năng đổi PIN nhé",
-  "Kid Exit PIN has not been set yet. Please set it first.": "Tài khoản chưa có mã PIN, ba mẹ đặt PIN trước nhé",
-};
-
-const toAuthError = (error) => new Error(VI_MESSAGES[getErrorMessage(error)] ?? getErrorMessage(error));
+// getErrorMessage đã dịch lỗi sang tiếng Việt (bảng dịch ở services/errorMessages)
+const toAuthError = (error) => new Error(getErrorMessage(error), { cause: error });
 
 // Các API chỉ trả { message } — gọi và đổi lỗi sang tiếng Việt
 const postAuth = async (method, url, body) => {

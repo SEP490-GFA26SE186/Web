@@ -2,6 +2,7 @@ import { Check, Delete, Loader2, Lock, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useExitKidMode } from "../../hooks/useKid";
+import { getErrorMessage } from "../../services/api";
 
 // Khung hộp thoại to, bo tròn, thân thiện với bé
 function KidDialog({ children, onClose, labelledBy }) {
@@ -71,9 +72,9 @@ export function ParentGateDialog({ onClose, onUnlock }) {
     if (verify.isPending || value.length < PIN_MIN) return;
     verify.mutate(value, {
       onSuccess: (result) => onUnlock(result.tokens),
-      // BE trả lời chi tiết: "Còn N lần thử" (401) hoặc "thử lại sau 15 phút" (429)
+      // BE trả lời chi tiết: "Còn N lần thử" (401) hoặc "thử lại sau 15 phút" (429); lỗi tiếng Anh được getErrorMessage dịch
       onError: (err) => {
-        setError(err?.response?.data?.message || "Mã PIN chưa đúng, thử lại nhé");
+        setError(getErrorMessage(err, "Mã PIN chưa đúng, thử lại nhé"));
         setPin("");
       },
     });

@@ -1,5 +1,6 @@
 import axios from "axios";
 import useAuthStore from "../stores/authStore";
+import { translateErrorMessage } from "./errorMessages";
 
 const baseURL = import.meta.env.VITE_API_URL || "/api/v1";
 
@@ -64,13 +65,28 @@ api.interceptors.response.use(
   },
 );
 
+const NETWORK_ERROR = "Không kết nối được máy chủ, ba mẹ kiểm tra mạng nhé";
+const TIMEOUT_ERROR = "Máy chủ phản hồi lâu quá, ba mẹ thử lại nhé";
+
+// Request không nhận được response → axios chỉ có error.code + message tiếng Anh ("timeout of 10000ms exceeded", "canceled"…)
+const NO_RESPONSE_MESSAGES = {
+  ERR_NETWORK: NETWORK_ERROR,
+  ECONNABORTED: TIMEOUT_ERROR,
+  ETIMEDOUT: TIMEOUT_ERROR,
+  ERR_CANCELED: "Yêu cầu đã bị huỷ, ba mẹ thử lại nhé",
+};
+
 /** Lấy thông báo lỗi từ response BE: { success: false, message, errors?: [{ path, message }] } */
 export const getErrorMessage = (error, fallback = "Có lỗi xảy ra, ba mẹ thử lại sau nhé") => {
-  if (!error.response) return error.message === "Network Error" ? "Không kết nối được máy chủ, ba mẹ kiểm tra mạng nhé" : error.message || fallback;
+  if (!error.response) {
+    if (error.message === "Network Error") return NETWORK_ERROR;
+    return NO_RESPONSE_MESSAGES[error.code] ?? (translateErrorMessage(error.message) || fallback);
+  }
   // Lỗi 5xx là lỗi máy chủ (VD thông báo Prisma) → không hiện chi tiết kỹ thuật cho người dùng
   if (error.response.status >= 500) return fallback;
   const { message, errors } = error.response.data ?? {};
-  return errors?.[0]?.message || message || fallback;
+  // BE còn trả một số message tiếng Anh → dịch trước khi hiện cho người dùng
+  return translateErrorMessage(errors?.[0]?.message || message) || fallback;
 };
 
 export default api;
