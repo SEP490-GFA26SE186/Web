@@ -60,6 +60,12 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Account password is incorrect")).toBe("Mật khẩu tài khoản chưa đúng");
   });
 
+  it("lỗi mã PIN Kid Mode", () => {
+    expect(translateErrorMessage("Current PIN is incorrect")).toBe("Mã PIN hiện tại chưa đúng");
+    expect(translateErrorMessage("PIN must be between 4 and 6 numeric digits")).toBe("Mã PIN gồm 4 đến 6 chữ số");
+    expect(translateErrorMessage("Kid Exit PIN has not been set yet. Please set it first.")).toBe("Tài khoản chưa có mã PIN, ba mẹ đặt PIN trước nhé");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();

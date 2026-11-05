@@ -11,16 +11,12 @@ export const MIN_REGISTER_PASSWORD = 8;
 export const isValidIdentity = (value) => EMAIL_REGEX.test(value) || USERNAME_REGEX.test(value);
 
 // BE trả message tiếng Anh → dịch các lỗi auth hay gặp cho ba mẹ dễ hiểu
-// (lỗi đăng nhập / đăng ký và validate form đã chuyển sang services/errorMessages/auth.js)
+// (lỗi đăng nhập / đăng ký, validate form và mã PIN đã chuyển sang services/errorMessages)
 const VI_MESSAGES = {
   // Xác thực email (BE đã trả tiếng Việt, chỉ chỉnh giọng cho ba mẹ)
   "Email đã được xác thực": "Email này đã được xác thực rồi",
   "Mã xác thực không hợp lệ hoặc đã được sử dụng": "Mã xác thực không đúng hoặc đã được dùng",
   "Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã.": "Mã xác thực đã hết hạn, ba mẹ bấm gửi lại mã nhé",
-  // PIN thoát Kid Mode
-  "Current PIN is incorrect": "Mã PIN hiện tại chưa đúng",
-  "Kid Exit PIN is already set. Use change-pin endpoint to change it.": "Tài khoản đã có mã PIN, ba mẹ dùng chức năng đổi PIN nhé",
-  "Kid Exit PIN has not been set yet. Please set it first.": "Tài khoản chưa có mã PIN, ba mẹ đặt PIN trước nhé",
 };
 
 const toAuthError = (error) => new Error(VI_MESSAGES[getErrorMessage(error)] ?? getErrorMessage(error));

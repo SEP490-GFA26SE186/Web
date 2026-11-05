@@ -8,8 +8,9 @@ import session from "./session";
 import access from "./access";
 import zod from "./zod";
 import auth from "./auth";
+import kid from "./kid";
 
-const GROUPS = [system, database, session, access, zod, auth];
+const GROUPS = [system, database, session, access, zod, auth, kid];
 
 const MESSAGES = Object.assign({}, ...GROUPS.map((group) => group.messages ?? {}));
 const PATTERNS = GROUPS.flatMap((group) => group.patterns ?? []);
