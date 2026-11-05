@@ -24,6 +24,11 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("User not found or deactivated")).toBe("Tài khoản không tồn tại hoặc đã bị khoá");
   });
 
+  it("lỗi phân quyền", () => {
+    expect(translateErrorMessage("Forbidden")).toBe("Bạn không có quyền thực hiện thao tác này");
+    expect(translateErrorMessage("You do not have permission to access this resource")).toBe("Tài khoản của bạn không có quyền vào mục này");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();
