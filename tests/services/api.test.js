@@ -117,6 +117,19 @@ describe("getErrorMessage", () => {
     expect(getErrorMessage(new Error("Network Error"))).toBe("Không kết nối được máy chủ, ba mẹ kiểm tra mạng nhé");
   });
 
+  it("hết thời gian chờ / request bị huỷ → câu tiếng Việt thay cho message của axios", () => {
+    const noResponse = (code, message) => Object.assign(new Error(message), { code });
+    expect(getErrorMessage(noResponse("ECONNABORTED", "timeout of 10000ms exceeded"))).toBe("Máy chủ phản hồi lâu quá, ba mẹ thử lại nhé");
+    expect(getErrorMessage(noResponse("ERR_CANCELED", "canceled"))).toBe("Yêu cầu đã bị huỷ, ba mẹ thử lại nhé");
+  });
+
+  it("message tiếng Anh của BE được dịch, lỗi theo field cũng vậy", () => {
+    expect(getErrorMessage(withResponse(401, { message: "Invalid email/username or password" }))).toBe("Email/Tên đăng nhập hoặc mật khẩu chưa đúng");
+    expect(
+      getErrorMessage(withResponse(400, { message: "Validation failed", errors: [{ path: "name", message: "Child name is required" }] })),
+    ).toBe("Ba mẹ nhập tên bé nhé");
+  });
+
   it("không có gì để hiện → câu mặc định", () => {
     expect(getErrorMessage(withResponse(400, null), "Mặc định")).toBe("Mặc định");
   });
