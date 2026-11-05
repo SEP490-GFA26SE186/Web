@@ -91,6 +91,11 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Generation prompt must not exceed 1000 characters")).toBe("Mô tả để vẽ chân dung tối đa 1000 ký tự");
   });
 
+  it("lỗi giá sách của bé", () => {
+    expect(translateErrorMessage("Child ID is required")).toBe("Ba mẹ chọn bé trước nhé");
+    expect(translateErrorMessage("Child profile not found or access denied")).toBe("Không tìm thấy hồ sơ bé trong tài khoản này");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();
