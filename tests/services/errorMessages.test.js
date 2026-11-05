@@ -100,6 +100,11 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Subscription plan not found")).toBe("Không tìm thấy gói dịch vụ, có thể gói đã ngừng bán");
   });
 
+  it("lỗi quản lý âm thanh giao diện (admin)", () => {
+    expect(translateErrorMessage("UI Audio asset not found")).toBe("Không tìm thấy âm thanh này, có thể đã bị xoá");
+    expect(translateErrorMessage("UI Audio asset with key 'tap_start' and language 'vi' already exists")).toBe('Âm thanh "tap_start" (vi) đã có rồi');
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();
