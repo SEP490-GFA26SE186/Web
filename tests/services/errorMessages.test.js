@@ -96,6 +96,10 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Child profile not found or access denied")).toBe("Không tìm thấy hồ sơ bé trong tài khoản này");
   });
 
+  it("lỗi gói dịch vụ", () => {
+    expect(translateErrorMessage("Subscription plan not found")).toBe("Không tìm thấy gói dịch vụ, có thể gói đã ngừng bán");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();

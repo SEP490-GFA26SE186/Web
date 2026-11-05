@@ -12,8 +12,9 @@ import kid from "./kid";
 import children from "./children";
 import characters from "./characters";
 import bookshelf from "./bookshelf";
+import billing from "./billing";
 
-const GROUPS = [system, database, session, access, zod, auth, kid, children, characters, bookshelf];
+const GROUPS = [system, database, session, access, zod, auth, kid, children, characters, bookshelf, billing];
 
 const MESSAGES = Object.assign({}, ...GROUPS.map((group) => group.messages ?? {}));
 const PATTERNS = GROUPS.flatMap((group) => group.patterns ?? []);
