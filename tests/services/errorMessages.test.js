@@ -7,6 +7,12 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Something brand new")).toBe("Something brand new");
   });
 
+  it("lỗi chung của BE", () => {
+    expect(translateErrorMessage("Route not found")).toBe("Không tìm thấy chức năng này, thử tải lại trang nhé");
+    expect(translateErrorMessage("Validation failed")).toBe("Thông tin gửi lên chưa hợp lệ, kiểm tra lại giúp mình nhé");
+    expect(translateErrorMessage("  Resource not found ")).toBe("Không tìm thấy dữ liệu, có thể đã bị xoá");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();
