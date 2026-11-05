@@ -19,6 +19,11 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Data violates constraint wallets_balance_check")).toBe("Dữ liệu chưa hợp lệ");
   });
 
+  it("lỗi phiên đăng nhập", () => {
+    expect(translateErrorMessage("Refresh token has expired")).toBe("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+    expect(translateErrorMessage("User not found or deactivated")).toBe("Tài khoản không tồn tại hoặc đã bị khoá");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();

@@ -4,8 +4,9 @@
 // Message lạ hoặc BE đã trả tiếng Việt → giữ nguyên.
 import system from "./system";
 import database from "./database";
+import session from "./session";
 
-const GROUPS = [system, database];
+const GROUPS = [system, database, session];
 
 const MESSAGES = Object.assign({}, ...GROUPS.map((group) => group.messages ?? {}));
 const PATTERNS = GROUPS.flatMap((group) => group.patterns ?? []);
