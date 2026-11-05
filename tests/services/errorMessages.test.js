@@ -54,6 +54,12 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("Username is already taken")).toBe("Tên đăng nhập đã có người dùng");
   });
 
+  it("lỗi validate form đăng ký / mật khẩu", () => {
+    expect(translateErrorMessage("Username must be at least 3 characters")).toBe("Tên đăng nhập có ít nhất 3 ký tự");
+    expect(translateErrorMessage("Email or username is required")).toBe("Ba mẹ nhập email hoặc tên đăng nhập nhé");
+    expect(translateErrorMessage("Account password is incorrect")).toBe("Mật khẩu tài khoản chưa đúng");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();

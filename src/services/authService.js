@@ -11,20 +11,14 @@ export const MIN_REGISTER_PASSWORD = 8;
 export const isValidIdentity = (value) => EMAIL_REGEX.test(value) || USERNAME_REGEX.test(value);
 
 // BE trả message tiếng Anh → dịch các lỗi auth hay gặp cho ba mẹ dễ hiểu
-// (lỗi đăng nhập / đăng ký đã chuyển sang services/errorMessages/auth.js)
+// (lỗi đăng nhập / đăng ký và validate form đã chuyển sang services/errorMessages/auth.js)
 const VI_MESSAGES = {
-  "Invalid email address": "Email chưa đúng định dạng",
-  "Username must be at least 3 characters": "Tên đăng nhập có ít nhất 3 ký tự",
-  "Username can only contain letters, numbers, and underscores": "Tên đăng nhập chỉ gồm chữ không dấu, số và dấu _",
-  "Password must be at least 8 characters": "Mật khẩu có ít nhất 8 ký tự",
-  "New password must be at least 8 characters": "Mật khẩu mới có ít nhất 8 ký tự",
   // Xác thực email (BE đã trả tiếng Việt, chỉ chỉnh giọng cho ba mẹ)
   "Email đã được xác thực": "Email này đã được xác thực rồi",
   "Mã xác thực không hợp lệ hoặc đã được sử dụng": "Mã xác thực không đúng hoặc đã được dùng",
   "Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã.": "Mã xác thực đã hết hạn, ba mẹ bấm gửi lại mã nhé",
   // PIN thoát Kid Mode
   "Current PIN is incorrect": "Mã PIN hiện tại chưa đúng",
-  "Account password is incorrect": "Mật khẩu tài khoản chưa đúng",
   "Kid Exit PIN is already set. Use change-pin endpoint to change it.": "Tài khoản đã có mã PIN, ba mẹ dùng chức năng đổi PIN nhé",
   "Kid Exit PIN has not been set yet. Please set it first.": "Tài khoản chưa có mã PIN, ba mẹ đặt PIN trước nhé",
 };
