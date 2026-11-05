@@ -49,6 +49,11 @@ describe("translateErrorMessage", () => {
     });
   });
 
+  it("lỗi đăng nhập / đăng ký", () => {
+    expect(translateErrorMessage("Invalid email/username or password")).toBe("Email/Tên đăng nhập hoặc mật khẩu chưa đúng");
+    expect(translateErrorMessage("Username is already taken")).toBe("Tên đăng nhập đã có người dùng");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();

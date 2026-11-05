@@ -11,11 +11,8 @@ export const MIN_REGISTER_PASSWORD = 8;
 export const isValidIdentity = (value) => EMAIL_REGEX.test(value) || USERNAME_REGEX.test(value);
 
 // BE trả message tiếng Anh → dịch các lỗi auth hay gặp cho ba mẹ dễ hiểu
+// (lỗi đăng nhập / đăng ký đã chuyển sang services/errorMessages/auth.js)
 const VI_MESSAGES = {
-  "Invalid email/username or password": "Email/Tên đăng nhập hoặc mật khẩu chưa đúng",
-  "Your account has been deactivated. Please contact support.": "Tài khoản đã bị khóa, ba mẹ liên hệ hỗ trợ nhé",
-  "Email is already registered": "Email này đã được đăng ký, ba mẹ đăng nhập nhé",
-  "Username is already taken": "Tên đăng nhập đã có người dùng",
   "Invalid email address": "Email chưa đúng định dạng",
   "Username must be at least 3 characters": "Tên đăng nhập có ít nhất 3 ký tự",
   "Username can only contain letters, numbers, and underscores": "Tên đăng nhập chỉ gồm chữ không dấu, số và dấu _",
