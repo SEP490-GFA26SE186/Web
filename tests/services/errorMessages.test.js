@@ -13,6 +13,12 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("  Resource not found ")).toBe("Không tìm thấy dữ liệu, có thể đã bị xoá");
   });
 
+  it("lỗi database, kể cả khi BE gắn tên cột / constraint", () => {
+    expect(translateErrorMessage("Write conflict, please retry")).toBe("Hệ thống đang bận xử lý dữ liệu này, thử lại sau giây lát nhé");
+    expect(translateErrorMessage("Resource already exists: email")).toBe("Dữ liệu này đã tồn tại");
+    expect(translateErrorMessage("Data violates constraint wallets_balance_check")).toBe("Dữ liệu chưa hợp lệ");
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();
