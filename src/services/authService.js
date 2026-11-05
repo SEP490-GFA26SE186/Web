@@ -10,16 +10,8 @@ export const MIN_REGISTER_PASSWORD = 8;
 /** BE cho đăng nhập bằng email hoặc username */
 export const isValidIdentity = (value) => EMAIL_REGEX.test(value) || USERNAME_REGEX.test(value);
 
-// BE trả message tiếng Anh → dịch các lỗi auth hay gặp cho ba mẹ dễ hiểu
-// (lỗi đăng nhập / đăng ký, validate form và mã PIN đã chuyển sang services/errorMessages)
-const VI_MESSAGES = {
-  // Xác thực email (BE đã trả tiếng Việt, chỉ chỉnh giọng cho ba mẹ)
-  "Email đã được xác thực": "Email này đã được xác thực rồi",
-  "Mã xác thực không hợp lệ hoặc đã được sử dụng": "Mã xác thực không đúng hoặc đã được dùng",
-  "Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã.": "Mã xác thực đã hết hạn, ba mẹ bấm gửi lại mã nhé",
-};
-
-const toAuthError = (error) => new Error(VI_MESSAGES[getErrorMessage(error)] ?? getErrorMessage(error));
+// getErrorMessage đã dịch lỗi sang tiếng Việt (bảng dịch ở services/errorMessages)
+const toAuthError = (error) => new Error(getErrorMessage(error), { cause: error });
 
 // Các API chỉ trả { message } — gọi và đổi lỗi sang tiếng Việt
 const postAuth = async (method, url, body) => {

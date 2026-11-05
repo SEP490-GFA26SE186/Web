@@ -20,5 +20,10 @@ export default {
     "Account password is incorrect": "Mật khẩu tài khoản chưa đúng",
     "Full name cannot exceed 150 characters": "Họ tên tối đa 150 ký tự",
     "Phone number cannot exceed 20 characters": "Số điện thoại tối đa 20 ký tự",
+
+    // Xác thực email: BE đã trả tiếng Việt, chỉ chỉnh giọng cho ba mẹ
+    "Email đã được xác thực": "Email này đã được xác thực rồi",
+    "Mã xác thực không hợp lệ hoặc đã được sử dụng": "Mã xác thực không đúng hoặc đã được dùng",
+    "Mã xác thực đã hết hạn. Vui lòng yêu cầu gửi lại mã.": "Mã xác thực đã hết hạn, ba mẹ bấm gửi lại mã nhé",
   },
 };
