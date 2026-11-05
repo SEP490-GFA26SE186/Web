@@ -29,6 +29,26 @@ describe("translateErrorMessage", () => {
     expect(translateErrorMessage("You do not have permission to access this resource")).toBe("Tài khoản của bạn không có quyền vào mục này");
   });
 
+  describe("message mặc định của zod v4", () => {
+    it.each([
+      ["Invalid input: expected string, received undefined", "Còn thiếu thông tin bắt buộc"],
+      ["Invalid input: expected number, received string", "Thông tin nhập vào chưa đúng định dạng"],
+      ['Invalid option: expected one of "short"|"medium"|"long"', "Lựa chọn chưa hợp lệ"],
+      ["Too big: expected string to have <=500 characters", "Nội dung dài quá, tối đa 500 ký tự"],
+      ["Too small: expected string to have >=1 characters", "Không được để trống"],
+      ["Too small: expected string to have >=20 characters", "Cần ít nhất 20 ký tự"],
+      ["Too big: expected array to have <=2 items", "Chọn tối đa 2 mục"],
+      ["Too small: expected number to be >=1", "Giá trị tối thiểu là 1"],
+      ["Too big: expected number to be <=100", "Giá trị tối đa là 100"],
+      ["Too small: expected number to be >0", "Giá trị phải lớn hơn 0"],
+      ["Invalid UUID", "Mã định danh không hợp lệ"],
+      ["Invalid string: must match pattern /^\\d{4,6}$/", "Thông tin chưa đúng định dạng"],
+      ["Unrecognized keys: foo, bar", "Có thông tin không được hỗ trợ"],
+    ])("%s", (message, expected) => {
+      expect(translateErrorMessage(message)).toBe(expected);
+    });
+  });
+
   it("không phải chuỗi → trả lại nguyên giá trị", () => {
     expect(translateErrorMessage(undefined)).toBeUndefined();
     expect(translateErrorMessage(null)).toBeNull();
